@@ -40,6 +40,7 @@
   --color-card-sage: var(--card-sage);
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display-face), ui-serif, Georgia, serif;
+  --font-script: var(--font-script-face), cursive;
 }
 
 * {
@@ -90,6 +91,19 @@ body {
 
 .animate-reveal {
   animation: reveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade {
+  animation: fade 0.4s ease both;
 }
 
 .d1 {
@@ -182,11 +196,6 @@ body {
   height: 100%;
 }
 
-.logo-ink {
-  filter: brightness(0) saturate(100%) invert(27%) sepia(9%) saturate(746%)
-    hue-rotate(346deg) brightness(94%) contrast(88%);
-}
-
 .card-inner-border {
   pointer-events: none;
   position: absolute;
@@ -195,10 +204,44 @@ body {
   border-radius: 0.7rem;
 }
 
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.faq-panel.is-open {
+  grid-template-rows: 1fr;
+}
+
+.faq-panel > div {
+  overflow: hidden;
+}
+
+.faq-answer {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.faq-panel.is-open .faq-answer {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.08s;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-reveal,
+  .animate-fade,
   .card-stage,
   .card-flip,
-  .deck-layer {
+  .deck-layer,
+  .faq-panel,
+  .faq-answer,
+  .faq-mark {
     transition: none !important;
     animation: none !important;
   }

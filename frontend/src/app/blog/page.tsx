@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BlogCard } from "@/components/BlogCard";
 import { blogPosts } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -8,53 +8,34 @@ export const metadata: Metadata = {
     "Статии за тревожност, самопомощ и психотерапия от Росица Неделчева.",
 };
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("bg-BG", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
 export default function BlogPage() {
+  const [featured, ...rest] = blogPosts;
+
   return (
     <div className="bg-paper pt-20">
       <section className="px-5 py-16 md:px-8 md:py-24">
         <div className="mx-auto max-w-6xl">
-          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-mute">
-            Блог
-          </p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-accent">Блог</p>
           <h1 className="mt-5 max-w-xl font-display text-4xl leading-[1.05] tracking-tight md:text-6xl">
             Прозрения и грижа за себе си
           </h1>
+          <p className="mt-5 max-w-md text-[15px] font-light leading-relaxed text-ink-soft">
+            Кратки текстове за тревожността, самопомощта и момента, в който е добре да се потърси подкрепа.
+          </p>
 
-          <div className="mt-16 divide-y divide-line border-y border-line">
-            {blogPosts.map((post) => (
-              <article key={post.slug} className="py-9">
-                <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-                  <div className="max-w-2xl">
-                    <p className="text-[11px] uppercase tracking-[0.16em] text-mute">
-                      {formatDate(post.date)} · {post.readMinutes} мин
-                    </p>
-                    <h2 className="mt-3 font-display text-2xl tracking-tight md:text-3xl">
-                      <Link href={`/blog/${post.slug}`} className="hover:text-accent">
-                        {post.title}
-                      </Link>
-                    </h2>
-                    <p className="mt-3 text-sm font-light leading-relaxed text-ink-soft">
-                      {post.excerpt}
-                    </p>
-                  </div>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink"
-                  >
-                    Прочети →
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+          {featured && (
+            <div className="mt-14 border-t border-line pt-10">
+              <BlogCard post={featured} featured />
+            </div>
+          )}
+
+          {rest.length > 0 && (
+            <div className="mt-14 grid gap-12 border-t border-line pt-10 md:grid-cols-2 md:gap-x-10 md:gap-y-14">
+              {rest.map((post) => (
+                <BlogCard key={post.slug} post={post} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

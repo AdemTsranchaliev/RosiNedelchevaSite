@@ -1,321 +1,229 @@
 import Image from "next/image";
+import Link from "next/link";
 import { CardDraw } from "@/components/CardDraw";
-import {
-  ProductBuyPanel,
-} from "@/components/ProductBuyPanel";
+import { Faq } from "@/components/Faq";
+import { HowToUse } from "@/components/HowToUse";
+import { ProductBuyPanel } from "@/components/ProductBuyPanel";
 import { ProductGallery } from "@/components/ProductGallery";
-import {
-  IconShield,
-  IconSpark,
-  IconTruck,
-  IconUsers,
-  sectionIcons,
-} from "@/components/Icons";
-import {
-  audience,
-  howToUseTips,
-  importantWarnings,
-  introduction,
-  product,
-  sections,
-  site,
-} from "@/lib/content";
+import { sectionIcons } from "@/components/Icons";
+import { about, product, sections, site, siteImages } from "@/lib/content";
 
-const trust = [
-  { icon: IconSpark, title: "6 раздела", text: "Въпроси и техники" },
-  { icon: IconUsers, title: "За двама", text: "Хора и терапевти" },
-  { icon: IconShield, title: "Създадени от специалист", text: "Психолог / ПТ" },
-  { icon: IconTruck, title: "Доставка", text: "1–3 работни дни" },
+const heroFacts = [
+  { lead: "100", text: "карти в 6 раздела" },
+  { lead: "За теб", text: "и за практиката" },
+  { lead: "Спокойно", text: "без грешен начин" },
+];
+
+const forWhom = [
+  { title: "За теб", text: "Да разбереш тревожността и да я управляваш." },
+  { title: "За практиката", text: "Въпроси и техники от терапевтичния процес." },
+];
+
+const trustPoints = [
+  "Картите са от нейната практика",
+  "Работи с тревожност, стрес и взаимоотношения",
+  "Сесии на живо и онлайн",
 ];
 
 export default function HomePage() {
   return (
     <>
-      <section className="relative min-h-[100svh] bg-card-gold text-ink md:grid md:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-        <div className="relative z-10 order-2 flex flex-col justify-center px-5 py-12 md:order-1 md:min-h-[100svh] md:px-10 md:py-24 lg:px-14">
-          <p className="animate-rise text-[11px] font-medium uppercase tracking-[0.3em] text-accent">
-            Росица Неделчева
-          </p>
-          <h1 className="animate-rise d1 mt-5 max-w-[14ch] font-display text-[2.75rem] leading-[1.02] tracking-tight md:text-5xl lg:text-[4.1rem]">
-            {product.title}
-          </h1>
-          <p className="animate-rise d2 mt-6 max-w-sm text-[15px] font-light leading-relaxed text-ink-soft">
-            {product.subtitle}
-          </p>
-          <div className="animate-rise d3 mt-10 flex flex-wrap items-center gap-5">
-            <p className="font-display text-[1.75rem] tracking-tight">
-              {product.price.toFixed(2).replace(".", ",")} лв.
+      <section className="bg-card-gold pt-16 text-ink md:pt-[4.25rem]">
+        <div className="grid lg:min-h-[calc(100svh-4.25rem)] lg:grid-cols-2">
+          <div className="order-2 flex flex-col justify-center px-5 pb-10 pt-1 sm:px-12 sm:py-14 lg:order-1 lg:px-16 lg:py-16 xl:px-20">
+            <p className="animate-rise font-display text-[1.65rem] leading-snug tracking-tight sm:text-[2rem]">
+              А ако има и депресия?
             </p>
-            <a
-              href="#porachai"
-              className="inline-flex h-12 items-center bg-clay px-8 text-[11px] font-medium uppercase tracking-[0.22em] text-paper transition duration-300 hover:bg-ink"
-            >
-              Поръчай
-            </a>
-            <a
-              href="#otvori-karta"
-              className="inline-flex h-12 items-center border border-ink/20 px-7 text-[11px] font-medium uppercase tracking-[0.22em] text-ink transition hover:border-ink/45"
-            >
-              Отвори карта
-            </a>
-          </div>
-        </div>
-
-        <div className="relative order-1 min-h-[58vh] md:order-2 md:min-h-[100svh]">
-          <Image
-            src={product.imageBox}
-            alt="Терапевтични карти Справяне с тревожността"
-            fill
-            priority
-            className="animate-reveal object-cover object-center"
-            sizes="(max-width: 768px) 100vw, 55vw"
-          />
-          <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-20 bg-gradient-to-r from-card-gold to-transparent md:block lg:w-28" />
-        </div>
-      </section>
-
-      <section className="border-b border-line bg-paper px-5 py-8 md:px-8">
-        <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {trust.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="flex items-start gap-4 py-2">
-              <Icon className="mt-0.5 h-10 w-10 shrink-0 text-accent" />
-              <div>
-                <p className="text-sm font-medium text-ink">{title}</p>
-                <p className="mt-0.5 text-sm font-light text-mute">{text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section id="porachai" className="scroll-mt-20 bg-paper px-5 py-16 md:px-8 md:py-24">
-        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-2 lg:gap-16 lg:items-start">
-          <ProductGallery />
-          <div className="lg:sticky lg:top-28">
-            <ProductBuyPanel />
-            <ul className="mt-10 space-y-4 border-t border-line pt-8">
-              {product.highlights.map((item, i) => {
-                const Icon = sectionIcons[i] ?? IconSpark;
-                return (
-                  <li
-                    key={item}
-                    className="flex gap-3 text-[14px] font-light leading-relaxed text-ink-soft"
-                  >
-                    <Icon className="mt-0.5 h-7 w-7 shrink-0 text-accent" />
-                    <span>{item}</span>
-                  </li>
-                );
-              })}
+            <p className="animate-rise d1 mt-4 text-[11px] font-medium uppercase tracking-[0.28em] text-accent sm:mt-5 sm:tracking-[0.32em]">
+              Терапевтични карти
+            </p>
+            <h1 className="animate-rise d1 mt-3 font-display text-[2.65rem] leading-[0.98] tracking-tight sm:mt-5 sm:text-6xl lg:text-[3.6rem] xl:text-[4.1rem]">
+              {product.title}
+            </h1>
+            <p className="animate-rise d2 mt-3 max-w-md text-[15px] font-light leading-relaxed text-ink-soft sm:mt-4">
+              {product.subtitle}
+            </p>
+            <p className="animate-rise d2 mt-3 hidden text-sm tracking-wide sm:block">
+              {site.name}
+              <span className="font-light text-ink-soft"> · {site.tagline}</span>
+            </p>
+            <p className="animate-rise d2 mt-4 text-[13px] font-light tracking-wide text-ink-soft sm:hidden">
+              100 карти в 6 раздела
+            </p>
+            <ul className="animate-rise d2 mt-6 hidden max-w-md grid-cols-3 gap-x-4 border-t border-ink/15 pt-4 sm:grid">
+              {heroFacts.map((fact) => (
+                <li key={fact.lead}>
+                  <p className="font-display text-2xl leading-none tracking-tight lg:text-[1.7rem]">
+                    {fact.lead}
+                  </p>
+                  <p className="mt-1.5 text-[11px] font-light leading-snug text-ink-soft">{fact.text}</p>
+                </li>
+              ))}
             </ul>
+            <div className="animate-rise d3 mt-6 flex flex-col items-start gap-4 sm:mt-7 sm:flex-row sm:items-center">
+              <Link
+                href="/karti"
+                className="inline-flex h-12 w-full items-center justify-center bg-clay px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition duration-300 hover:bg-ink sm:w-auto"
+              >
+                Поръчай
+              </Link>
+              <a
+                href="#otvori-karta"
+                className="inline-flex items-center text-[11px] font-medium uppercase tracking-[0.2em] text-ink underline decoration-accent/60 underline-offset-[6px] transition hover:decoration-ink sm:h-12 sm:justify-center sm:border sm:border-ink/25 sm:px-8 sm:no-underline sm:decoration-transparent"
+              >
+                Отвори карта
+              </a>
+            </div>
+          </div>
+
+          <div className="order-1 flex items-center bg-card-gold lg:order-2">
+            <div className="relative aspect-[3/2] w-full bg-card-gold">
+              <Image
+                src={product.imageBox}
+                alt="Терапевтични карти Справяне с тревожността"
+                fill
+                priority
+                className="animate-reveal object-cover object-center [-webkit-mask-image:linear-gradient(to_bottom,#000_52%,transparent)] [mask-image:linear-gradient(to_bottom,#000_52%,transparent)] lg:[-webkit-mask-image:none] lg:[mask-image:none]"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="relative h-[42vh] min-h-[280px] overflow-hidden md:h-[52vh]">
-        <Image
-          src={product.imageLifestyle}
-          alt="Росица Неделчева"
-          fill
-          className="object-cover object-[center_28%]"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-clay/40" />
-        <div className="absolute inset-0 flex items-end px-5 pb-10 md:px-8 md:pb-14">
-          <p className="mx-auto w-full max-w-6xl font-display text-3xl text-paper md:text-5xl">
-            Създадени от практикуващ психолог
-          </p>
+      <section id="porachai" className="scroll-mt-20 border-t border-line bg-paper">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-10 md:px-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16 lg:py-20">
+          <ProductGallery />
+          <ProductBuyPanel />
         </div>
       </section>
 
-      <section className="bg-paper px-5 py-20 md:px-8 md:py-28">
-        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
-          <div className="relative aspect-[3/4] overflow-hidden bg-paper-2">
+      <section className="bg-paper">
+        <div className="grid lg:min-h-[640px] lg:grid-cols-2">
+          <div className="relative h-72 sm:h-[28rem] lg:h-auto lg:min-h-[640px]">
             <Image
-              src={product.imageCalm}
+              src={siteImages.portrait}
               alt="Росица Неделчева"
               fill
               className="object-cover object-[center_18%]"
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-mute">
-              За картите
+          <div className="flex flex-col justify-center bg-card-gold px-5 py-10 sm:px-10 sm:py-14 lg:px-16 lg:py-20">
+            <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-accent">
+              За автора
             </p>
-            <h2 className="mt-4 font-display text-3xl leading-[1.1] tracking-tight md:text-[2.75rem]">
-              Въпросите от терапевтичния процес — на твоя ритъм
+            <h2 className="mt-4 font-display text-4xl leading-[1.05] tracking-tight md:text-5xl">
+              {site.name}
             </h2>
-            <div className="mt-8 space-y-5 text-[15px] font-light leading-[1.8] text-ink-soft">
-              {introduction.map((p) => (
-                <p key={p.slice(0, 28)}>{p}</p>
+            <p className="mt-3 text-sm font-medium tracking-wide text-ink-soft">
+              {site.tagline}
+            </p>
+            <blockquote className="mt-8 max-w-md font-display text-2xl leading-snug tracking-tight md:text-[1.7rem]">
+              {about.belief}
+            </blockquote>
+            <ul className="mt-8 space-y-2 text-sm font-light text-ink-soft">
+              {trustPoints.map((point) => (
+                <li key={point}>{point}</li>
               ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-line bg-paper-2 px-5 py-20 md:px-8 md:py-24">
-        <div className="mx-auto max-w-6xl">
-          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-mute">
-            За кого
-          </p>
-          <div className="mt-12 grid gap-8 md:grid-cols-2">
-            {audience.map((item, i) => {
-              const Icon = i === 0 ? IconSpark : IconUsers;
-              return (
-                <div
-                  key={item.title}
-                  className="border border-line bg-paper p-7 md:p-9"
-                >
-                  <Icon className="h-11 w-11 text-accent" />
-                  <h3 className="mt-5 font-display text-2xl tracking-tight md:text-[1.75rem]">
-                    {item.title}
-                  </h3>
-                  <p className="mt-4 text-[15px] font-light leading-relaxed text-ink-soft">
+            </ul>
+            <div className="mt-8 grid gap-6 sm:grid-cols-2">
+              {forWhom.map((item) => (
+                <div key={item.title}>
+                  <h3 className="font-display text-xl tracking-tight">{item.title}</h3>
+                  <p className="mt-1 text-sm font-light leading-relaxed text-ink-soft">
                     {item.text}
                   </p>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+            <Link
+              href="/za-men"
+              className="mt-10 inline-flex text-[11px] font-medium uppercase tracking-[0.2em] text-ink underline decoration-accent/60 underline-offset-[6px] transition hover:decoration-ink"
+            >
+              Повече за мен
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="bg-paper px-5 py-20 md:px-8 md:py-28">
+      <section id="razdeli" className="scroll-mt-20 overflow-hidden bg-paper px-5 py-12 md:px-8 md:py-24">
         <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-md">
-              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-mute">
-                Съдържание
-              </p>
-              <h2 className="mt-4 font-display text-3xl tracking-tight md:text-5xl">
-                Шест раздела
-              </h2>
-            </div>
-            <p className="max-w-sm text-sm font-light leading-relaxed text-ink-soft md:text-right">
-              Избери темата, от която имаш нужда. Няма правилен или грешен начин.
-            </p>
+          <div className="flex items-end justify-between gap-6">
+            <h2 className="font-display text-3xl tracking-tight md:text-5xl">
+              Шест раздела
+            </h2>
+            <a
+              href="#otvori-karta"
+              className="hidden shrink-0 text-[11px] font-medium uppercase tracking-[0.2em] text-ink underline decoration-accent/60 underline-offset-[6px] sm:inline-flex"
+            >
+              Отвори карта
+            </a>
           </div>
 
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="-mx-5 mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6">
             {sections.map((section, index) => {
               const Icon = sectionIcons[index];
               return (
-                <article
+                <Link
                   key={section.id}
-                  className="group border border-ink/10 p-6 transition duration-300 hover:border-accent/50 md:p-7"
+                  href="/karti"
+                  className="relative aspect-[2/3] w-[58vw] max-w-[210px] shrink-0 snap-center transition duration-300 hover:-translate-y-1 sm:w-auto sm:max-w-none"
                   style={{ backgroundColor: section.color }}
+                  aria-label={`${section.name} — детайл за картите`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <Icon className="h-12 w-12 text-ink transition group-hover:text-accent" />
+                  <div className="pointer-events-none absolute inset-2.5 rounded-[0.85rem] border border-ink/30" />
+                  <div className="relative flex h-full flex-col items-center justify-between px-3 py-6 text-center sm:px-4 sm:py-7">
+                    <Icon className="h-10 w-10 text-ink sm:h-11 sm:w-11" />
+                    <h3 className="font-display text-[1.05rem] leading-snug tracking-tight sm:text-[1.15rem]">
+                      {section.name}
+                    </h3>
+                    <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ink/45">
+                      {section.id}
+                    </p>
                   </div>
-                  <p className="mt-6 font-display text-sm text-mute">
-                    {String(section.id).padStart(2, "0")}
-                  </p>
-                  <h3 className="mt-2 font-display text-xl leading-snug tracking-tight">
-                    {section.name}
-                  </h3>
-                  <p className="mt-3 text-sm font-light leading-relaxed text-ink-soft">
-                    {section.summary}
-                  </p>
-                </article>
+                </Link>
               );
             })}
           </div>
-
-          <div className="mt-10 grid gap-3 border border-line bg-paper-2/70 p-6 sm:grid-cols-2 md:p-8">
-            {howToUseTips.map((tip) => (
-              <p key={tip.when} className="text-sm font-light text-ink-soft">
-                <span className="text-ink">{tip.when}</span>
-                <span className="text-mute"> — {tip.use}</span>
-              </p>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <a
-              href="#otvori-karta"
-              className="inline-flex h-12 items-center bg-clay px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink"
-            >
-              Опитай — отвори карта
-            </a>
-          </div>
         </div>
       </section>
+
+      <HowToUse />
 
       <CardDraw />
 
-      <section className="relative overflow-hidden">
-        <div className="grid md:grid-cols-2">
-          <div className="relative min-h-[320px] md:min-h-[420px]">
-            <Image
-              src={product.imageBox}
-              alt="Кутия на картите"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
+      <section className="bg-clay px-5 py-12 text-paper md:px-8 md:py-20">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 sm:flex-row sm:items-end">
+          <div>
+            <h2 className="font-display text-3xl tracking-tight md:text-4xl">
+              {product.title}
+            </h2>
+            <Link
+              href="/karti"
+              className="mt-4 inline-flex text-[11px] font-medium uppercase tracking-[0.2em] text-paper/80 underline decoration-paper/30 underline-offset-[6px] transition hover:text-paper hover:decoration-paper"
+            >
+              Подробно за картите
+            </Link>
           </div>
-          <div className="relative min-h-[320px] md:min-h-[420px]">
-            <Image
-              src={product.imageCards}
-              alt="Преглед на разделите"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-line bg-paper px-5 py-16 md:px-8 md:py-20">
-        <div className="mx-auto max-w-2xl">
-          <div className="flex items-center gap-3">
-            <IconShield className="h-8 w-8 text-accent" />
-            <h2 className="font-display text-2xl tracking-tight md:text-3xl">Важно</h2>
-          </div>
-          <p className="mt-4 text-sm font-light leading-relaxed text-ink-soft">
-            Картите не заместват психотерапия или медицинска помощ. Потърси
-            специалист, ако:
-          </p>
-          <ul className="mt-6 columns-1 gap-8 sm:columns-2">
-            {importantWarnings.map((item) => (
-              <li
-                key={item}
-                className="mb-3 break-inside-avoid text-sm font-light leading-relaxed text-mute"
-              >
-                — {item.replace(/;$/, "")}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-6 text-sm font-light leading-relaxed text-ink-soft">
-            При силна болка в гърдите, тежък задух или припадък — потърси
-            незабавна медицинска помощ.
-          </p>
-        </div>
-      </section>
-
-      <section className="bg-card-gold px-5 py-16 text-ink md:px-8 md:py-24">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 md:flex-row md:items-center">
-          <h2 className="max-w-md font-display text-3xl tracking-tight md:text-4xl">
-            Готови за следващата стъпка?
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            <a
-              href="#porachai"
-              className="inline-flex h-12 items-center bg-clay px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink"
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Link
+              href="/karti"
+              className="inline-flex h-12 items-center justify-center bg-paper px-8 text-[11px] font-medium uppercase tracking-[0.16em] text-ink transition hover:bg-card-gold sm:tracking-[0.2em]"
             >
               Поръчай
-            </a>
+            </Link>
             <a
               href={site.phoneHref}
-              className="inline-flex h-12 items-center border border-ink/20 px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-ink transition hover:border-ink/45"
+              className="inline-flex h-12 items-center justify-center border border-paper/40 px-8 text-[11px] font-medium uppercase tracking-[0.16em] text-paper transition hover:border-paper sm:tracking-[0.2em]"
             >
               {site.phone}
             </a>
           </div>
         </div>
       </section>
+
+      <Faq />
     </>
   );
 }

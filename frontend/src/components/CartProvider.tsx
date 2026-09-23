@@ -4,13 +4,14 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 import { product } from "@/lib/content";
 
-type CartItem = {
+export type CartItem = {
   id: string;
   title: string;
   price: number;
@@ -18,11 +19,14 @@ type CartItem = {
   image: string;
 };
 
+const STORAGE_KEY = "rosi-cart-v1";
+
 type CartContextValue = {
   items: CartItem[];
   count: number;
   total: number;
   isOpen: boolean;
+  ready: boolean;
   openCart: () => void;
   closeCart: () => void;
   addItem: (quantity?: number) => void;
@@ -36,6 +40,25 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as CartItem[];
+        if (Array.isArray(parsed)) setItems(parsed);
+      }
+    } catch {
+      /* ignore a broken cart */
+    }
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }, [items, ready]);
 
   const addItem = useCallback((quantity = 1) => {
     setItems((prev) => {
@@ -63,9 +86,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const setQuantity = useCallback((id: string, quantity: number) => {
     setItems((prev) =>
       prev
-        .map((item) =>
-          item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item,
-        )
+        .map((item) => (item.id === id ? { ...item, quantity } : item))
         .filter((item) => item.quantity > 0),
     );
   }, []);
@@ -87,6 +108,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       count,
       total,
       isOpen,
+      ready,
       openCart: () => setIsOpen(true),
       closeCart: () => setIsOpen(false),
       addItem,
@@ -94,7 +116,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       clear,
     };
-  }, [items, isOpen, addItem, setQuantity, removeItem, clear]);
+  }, [items, isOpen, ready, addItem, setQuantity, removeItem, clear]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

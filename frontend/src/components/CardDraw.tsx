@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
+import { Monogram } from "./BrandMark";
 import {
   getSectionCover,
   getSectionMeta,
@@ -127,7 +129,7 @@ export function CardDraw() {
   return (
     <section
       id="otvori-karta"
-      className="scroll-mt-20 bg-paper-2 px-5 py-20 text-ink md:px-8 md:py-28"
+      className="scroll-mt-20 bg-paper-2 px-5 py-12 text-ink md:px-8 md:py-28"
     >
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-xl text-center">
@@ -137,12 +139,9 @@ export function CardDraw() {
           <h2 className="mt-4 font-display text-3xl tracking-tight md:text-5xl">
             Отвори карта
           </h2>
-          <p className="mt-4 text-[15px] font-light leading-relaxed text-ink-soft">
-            Първо виждаш раздела. После отваряш случайна карта от него.
-          </p>
         </div>
 
-        <div className="mt-14 flex flex-col items-center">
+        <div className="mt-8 flex flex-col items-center sm:mt-14">
           <div className="perspective-card relative aspect-[2/3] w-full max-w-[300px] sm:max-w-[320px]">
             <div
               className={`deck-layer deck-layer-2 ${busy ? "is-busy" : ""}`}
@@ -223,12 +222,12 @@ export function CardDraw() {
             {hint}
           </p>
 
-          <a
-            href="#porachai"
+          <Link
+            href="/karti"
             className="mt-10 inline-flex h-11 items-center border border-ink/20 px-6 text-[11px] font-medium uppercase tracking-[0.18em] text-ink-soft transition hover:border-ink/45 hover:text-ink"
           >
             Към поръчката
-          </a>
+          </Link>
         </div>
       </div>
     </section>
@@ -262,7 +261,7 @@ function IdleFace() {
   return (
     <div className="card-shell relative flex h-full flex-col items-center justify-center overflow-hidden bg-card-gold text-center">
       <div className="card-inner-border" />
-      <p className="relative font-display text-5xl text-accent">RN</p>
+      <Monogram className="relative h-24 w-24" />
       <p className="relative mt-5 px-6 font-display text-xl leading-snug tracking-tight text-ink">
         Справяне с тревожността
       </p>

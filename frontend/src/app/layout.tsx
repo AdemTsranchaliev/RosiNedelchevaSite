@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Great_Vibes, Manrope } from "next/font/google";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CartProvider } from "@/components/CartProvider";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
+import { SiteShell } from "@/components/SiteShell";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -16,6 +15,12 @@ const body = Manrope({
   variable: "--font-body",
   subsets: ["latin", "cyrillic"],
   weight: ["300", "400", "500", "600"],
+});
+
+const script = Great_Vibes({
+  variable: "--font-script-face",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -35,13 +40,12 @@ export default function RootLayout({
   return (
     <html
       lang="bg"
-      className={`${display.variable} ${body.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+      className={`${display.variable} ${body.variable} ${script.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans text-ink">
         <CartProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <SiteShell>{children}</SiteShell>
           <CartDrawer />
         </CartProvider>
       </body>
