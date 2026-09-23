@@ -28,7 +28,7 @@ export function Header() {
   }, []);
 
   const overHero = isHome && !scrolled && !open;
-  const light = overHero;
+  const light = false;
 
   return (
     <header
@@ -79,7 +79,7 @@ export function Header() {
             {count > 0 && (
               <span
                 className={`ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] ${
-                  light ? "bg-paper text-ink" : "bg-ink text-paper"
+                  light ? "bg-paper text-ink" : "bg-clay text-paper"
                 }`}
               >
                 {count}

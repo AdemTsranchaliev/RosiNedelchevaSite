@@ -51,7 +51,7 @@ export function ProductBuyPanel() {
         <button
           type="button"
           onClick={() => addItem(quantity)}
-          className="h-12 flex-1 bg-ink text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition duration-300 hover:bg-ink-soft"
+          className="h-12 flex-1 bg-clay text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition duration-300 hover:bg-ink"
         >
           Добави в количката
         </button>

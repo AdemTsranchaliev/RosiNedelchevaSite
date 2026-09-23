@@ -103,7 +103,7 @@ export default function ContactPage() {
                 </label>
                 <button
                   type="button"
-                  className="mt-2 h-11 bg-ink px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink-soft"
+                  className="mt-2 h-11 bg-clay px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink"
                 >
                   Изпрати
                 </button>

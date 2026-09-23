@@ -12,7 +12,7 @@ export function Footer() {
               src={siteImages.logoFooter}
               alt={site.name}
               fill
-              className="object-contain object-left"
+              className="logo-ink object-contain object-left"
               sizes="112px"
             />
           </div>

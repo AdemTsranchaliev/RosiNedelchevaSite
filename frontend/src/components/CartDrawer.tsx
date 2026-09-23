@@ -18,7 +18,7 @@ export function CartDrawer() {
     <div className="fixed inset-0 z-[80]">
       <button
         type="button"
-        className="absolute inset-0 bg-ink/40"
+        className="absolute inset-0 bg-clay/45"
         aria-label="Затвори"
         onClick={closeCart}
       />
@@ -96,7 +96,7 @@ export function CartDrawer() {
           <Link
             href="/kontakti"
             onClick={closeCart}
-            className="mt-5 flex h-12 w-full items-center justify-center bg-ink text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink-soft"
+            className="mt-5 flex h-12 w-full items-center justify-center bg-clay text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink"
           >
             Към поръчка
           </Link>

@@ -56,7 +56,7 @@ export default function AboutPage() {
           className="object-cover object-[center_30%]"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-deep/40" />
+        <div className="absolute inset-0 bg-clay/40" />
       </section>
 
       <section className="border-y border-line bg-paper-2 px-5 py-16 md:px-8 md:py-24">
@@ -111,7 +111,7 @@ export default function AboutPage() {
           </div>
           <Link
             href="/kontakti"
-            className="inline-flex h-11 items-center bg-ink px-7 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink-soft"
+            className="inline-flex h-11 items-center bg-clay px-7 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink"
           >
             Контакти
           </Link>

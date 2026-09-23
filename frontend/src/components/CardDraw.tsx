@@ -127,17 +127,17 @@ export function CardDraw() {
   return (
     <section
       id="otvori-karta"
-      className="scroll-mt-20 bg-deep px-5 py-20 text-paper md:px-8 md:py-28"
+      className="scroll-mt-20 bg-paper-2 px-5 py-20 text-ink md:px-8 md:py-28"
     >
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-xl text-center">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent-soft">
+          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent">
             Опитай
           </p>
           <h2 className="mt-4 font-display text-3xl tracking-tight md:text-5xl">
             Отвори карта
           </h2>
-          <p className="mt-4 text-[15px] font-light leading-relaxed text-paper/65">
+          <p className="mt-4 text-[15px] font-light leading-relaxed text-ink-soft">
             Първо виждаш раздела. После отваряш случайна карта от него.
           </p>
         </div>
@@ -192,8 +192,8 @@ export function CardDraw() {
           </div>
 
           {meta && phase !== "idle" && phase !== "lifting" && (
-            <p className="mt-5 text-center text-sm font-light text-paper/60">
-              <span className="text-accent-soft">Раздел {meta.id}</span>
+            <p className="mt-5 text-center text-sm font-light text-ink-soft">
+              <span className="text-accent">Раздел {meta.id}</span>
               {" · "}
               {meta.name}
             </p>
@@ -204,7 +204,7 @@ export function CardDraw() {
               type="button"
               onClick={() => void onPrimaryClick()}
               disabled={busy}
-              className="inline-flex h-12 min-w-[180px] items-center justify-center bg-paper px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-ink transition hover:bg-accent-soft disabled:cursor-wait disabled:opacity-55"
+              className="inline-flex h-12 min-w-[180px] items-center justify-center bg-clay px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink disabled:cursor-wait disabled:opacity-55"
             >
               {primaryLabel}
             </button>
@@ -212,20 +212,20 @@ export function CardDraw() {
               <button
                 type="button"
                 onClick={resetToIdle}
-                className="inline-flex h-12 items-center justify-center border border-paper/20 px-5 text-[11px] font-medium uppercase tracking-[0.16em] text-paper/70 transition hover:border-paper/45 hover:text-paper"
+                className="inline-flex h-12 items-center justify-center border border-ink/20 px-5 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-soft transition hover:border-ink/45 hover:text-ink"
               >
                 В начало
               </button>
             )}
           </div>
 
-          <p className="mt-4 text-center text-[11px] font-light text-paper/35">
+          <p className="mt-4 text-center text-[11px] font-light text-mute">
             {hint}
           </p>
 
           <a
             href="#porachai"
-            className="mt-10 inline-flex h-11 items-center border border-paper/20 px-6 text-[11px] font-medium uppercase tracking-[0.18em] text-paper/70 transition hover:border-paper/50 hover:text-paper"
+            className="mt-10 inline-flex h-11 items-center border border-ink/20 px-6 text-[11px] font-medium uppercase tracking-[0.18em] text-ink-soft transition hover:border-ink/45 hover:text-ink"
           >
             Към поръчката
           </a>
@@ -260,21 +260,13 @@ function PhotoFace({
 
 function IdleFace() {
   return (
-    <div className="card-shell relative flex h-full flex-col items-center justify-center overflow-hidden bg-[#171e1a] text-center">
-      <Image
-        src="/images/cards/section-4-front.jpg"
-        alt=""
-        fill
-        className="object-cover opacity-20 blur-[2px]"
-        sizes="320px"
-      />
-      <div className="absolute inset-0 bg-deep/60" />
+    <div className="card-shell relative flex h-full flex-col items-center justify-center overflow-hidden bg-card-gold text-center">
       <div className="card-inner-border" />
-      <p className="relative font-display text-5xl text-accent-soft">RN</p>
-      <p className="relative mt-5 px-6 font-display text-xl leading-snug tracking-tight text-paper">
+      <p className="relative font-display text-5xl text-accent">RN</p>
+      <p className="relative mt-5 px-6 font-display text-xl leading-snug tracking-tight text-ink">
         Справяне с тревожността
       </p>
-      <p className="relative mt-4 text-[10px] font-medium uppercase tracking-[0.22em] text-paper/40">
+      <p className="relative mt-4 text-[10px] font-medium uppercase tracking-[0.22em] text-ink-soft">
         Отвори карта
       </p>
     </div>

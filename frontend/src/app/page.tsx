@@ -31,15 +31,15 @@ const trust = [
 export default function HomePage() {
   return (
     <>
-      <section className="relative min-h-[100svh] bg-deep text-paper md:grid md:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+      <section className="relative min-h-[100svh] bg-card-gold text-ink md:grid md:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
         <div className="relative z-10 order-2 flex flex-col justify-center px-5 py-12 md:order-1 md:min-h-[100svh] md:px-10 md:py-24 lg:px-14">
-          <p className="animate-rise text-[11px] font-medium uppercase tracking-[0.3em] text-accent-soft">
+          <p className="animate-rise text-[11px] font-medium uppercase tracking-[0.3em] text-accent">
             Росица Неделчева
           </p>
           <h1 className="animate-rise d1 mt-5 max-w-[14ch] font-display text-[2.75rem] leading-[1.02] tracking-tight md:text-5xl lg:text-[4.1rem]">
             {product.title}
           </h1>
-          <p className="animate-rise d2 mt-6 max-w-sm text-[15px] font-light leading-relaxed text-paper/65">
+          <p className="animate-rise d2 mt-6 max-w-sm text-[15px] font-light leading-relaxed text-ink-soft">
             {product.subtitle}
           </p>
           <div className="animate-rise d3 mt-10 flex flex-wrap items-center gap-5">
@@ -48,13 +48,13 @@ export default function HomePage() {
             </p>
             <a
               href="#porachai"
-              className="inline-flex h-12 items-center bg-paper px-8 text-[11px] font-medium uppercase tracking-[0.22em] text-ink transition duration-300 hover:bg-accent-soft"
+              className="inline-flex h-12 items-center bg-clay px-8 text-[11px] font-medium uppercase tracking-[0.22em] text-paper transition duration-300 hover:bg-ink"
             >
               Поръчай
             </a>
             <a
               href="#otvori-karta"
-              className="inline-flex h-12 items-center border border-paper/25 px-7 text-[11px] font-medium uppercase tracking-[0.22em] text-paper/80 transition hover:border-paper/50 hover:text-paper"
+              className="inline-flex h-12 items-center border border-ink/20 px-7 text-[11px] font-medium uppercase tracking-[0.22em] text-ink transition hover:border-ink/45"
             >
               Отвори карта
             </a>
@@ -70,7 +70,7 @@ export default function HomePage() {
             className="animate-reveal object-cover object-center"
             sizes="(max-width: 768px) 100vw, 55vw"
           />
-          <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-20 bg-gradient-to-r from-deep to-transparent md:block lg:w-28" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-20 bg-gradient-to-r from-card-gold to-transparent md:block lg:w-28" />
         </div>
       </section>
 
@@ -119,7 +119,7 @@ export default function HomePage() {
           className="object-cover object-[center_28%]"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-deep/40" />
+        <div className="absolute inset-0 bg-clay/40" />
         <div className="absolute inset-0 flex items-end px-5 pb-10 md:px-8 md:pb-14">
           <p className="mx-auto w-full max-w-6xl font-display text-3xl text-paper md:text-5xl">
             Създадени от практикуващ психолог
@@ -203,15 +203,11 @@ export default function HomePage() {
               return (
                 <article
                   key={section.id}
-                  className="group border border-line bg-paper p-6 transition duration-300 hover:border-accent/40 md:p-7"
+                  className="group border border-ink/10 p-6 transition duration-300 hover:border-accent/50 md:p-7"
+                  style={{ backgroundColor: section.color }}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <Icon className="h-12 w-12 text-ink transition group-hover:text-accent" />
-                    <span
-                      className="h-3 w-3 shrink-0 rounded-full"
-                      style={{ backgroundColor: section.color }}
-                      aria-hidden
-                    />
                   </div>
                   <p className="mt-6 font-display text-sm text-mute">
                     {String(section.id).padStart(2, "0")}
@@ -239,7 +235,7 @@ export default function HomePage() {
           <div className="mt-10 text-center">
             <a
               href="#otvori-karta"
-              className="inline-flex h-12 items-center bg-ink px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink-soft"
+              className="inline-flex h-12 items-center bg-clay px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink"
             >
               Опитай — отвори карта
             </a>
@@ -299,7 +295,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-deep px-5 py-16 text-paper md:px-8 md:py-24">
+      <section className="bg-card-gold px-5 py-16 text-ink md:px-8 md:py-24">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 md:flex-row md:items-center">
           <h2 className="max-w-md font-display text-3xl tracking-tight md:text-4xl">
             Готови за следващата стъпка?
@@ -307,13 +303,13 @@ export default function HomePage() {
           <div className="flex flex-wrap gap-3">
             <a
               href="#porachai"
-              className="inline-flex h-12 items-center bg-paper px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-ink transition hover:bg-accent-soft"
+              className="inline-flex h-12 items-center bg-clay px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink"
             >
               Поръчай
             </a>
             <a
               href={site.phoneHref}
-              className="inline-flex h-12 items-center border border-paper/20 px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-paper/75 transition hover:border-paper/50 hover:text-paper"
+              className="inline-flex h-12 items-center border border-ink/20 px-8 text-[11px] font-medium uppercase tracking-[0.2em] text-ink transition hover:border-ink/45"
             >
               {site.phone}
             </a>
