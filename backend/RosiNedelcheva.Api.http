@@ -1,0 +1,45 @@
+@RosiNedelcheva.Api_HostAddress = http://localhost:5080
+
+### Get all products
+GET {{RosiNedelcheva.Api_HostAddress}}/api/products
+Accept: application/json
+
+###
+
+### Get product by id
+GET {{RosiNedelcheva.Api_HostAddress}}/api/products/1
+Accept: application/json
+
+###
+
+### Create product
+POST {{RosiNedelcheva.Api_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "name": "Нов продукт",
+  "description": "Описание на продукта",
+  "price": 19.99,
+  "stock": 20,
+  "imageUrl": null
+}
+
+###
+
+### Update product
+PUT {{RosiNedelcheva.Api_HostAddress}}/api/products/1
+Content-Type: application/json
+
+{
+  "name": "Обновен продукт",
+  "description": "Ново описание",
+  "price": 24.99,
+  "stock": 15,
+  "imageUrl": null,
+  "isActive": true
+}
+
+###
+
+### Delete product
+DELETE {{RosiNedelcheva.Api_HostAddress}}/api/products/1
