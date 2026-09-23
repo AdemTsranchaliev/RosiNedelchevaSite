@@ -34,7 +34,7 @@ jobs:
 
       - name: Build static site
         working-directory: frontend
-        run: npm run build
+        run: npx next build --webpack
         env:
           GITHUB_PAGES: "true"
 
