@@ -1,3 +1,4 @@
+import { publicPath } from "@/lib/public-path";
 import { sections } from "./content";
 
 /** Корица на раздел (лице при първо теглене) */
@@ -21,9 +22,9 @@ export type DeckCard = {
  * Раздели 1, 2 и 4 — по корица + 1 карта.
  */
 export const sectionCovers: SectionCover[] = [
-  { sectionId: 1, frontImage: "/images/cards/section-1-front.jpg" },
-  { sectionId: 2, frontImage: "/images/cards/section-2-front.jpg" },
-  { sectionId: 4, frontImage: "/images/cards/section-4-front.jpg" },
+  { sectionId: 1, frontImage: publicPath("/images/cards/section-1-front.jpg") },
+  { sectionId: 2, frontImage: publicPath("/images/cards/section-2-front.jpg") },
+  { sectionId: 4, frontImage: publicPath("/images/cards/section-4-front.jpg") },
 ];
 
 export const deckCards: DeckCard[] = [
@@ -36,7 +37,7 @@ export const deckCards: DeckCard[] = [
       "Вместо да бъде само източник на дискомфорт, тревожността понякога може да носи важна информация за нашите нужди, страхове или вътрешни конфликти.",
     invitation:
       "Покана за наблюдение: Каква нужда, страх или послание е възможно да се опитва да ти покаже?",
-    backImage: "/images/cards/section-1-card-1.jpg",
+    backImage: publicPath("/images/cards/section-1-card-1.jpg"),
   },
   {
     id: "2-1",
@@ -46,7 +47,7 @@ export const deckCards: DeckCard[] = [
       "Сравненията могат да засилят чувството за недостатъчност и напрежение.",
     invitation:
       "Покана за наблюдение: Какво се случва с теб след подобни сравнения?",
-    backImage: "/images/cards/section-2-card-1.jpg",
+    backImage: publicPath("/images/cards/section-2-card-1.jpg"),
   },
   {
     id: "4-1",
@@ -55,7 +56,7 @@ export const deckCards: DeckCard[] = [
       "Какво би избрал/а, ако тревожността не взимаше решенията вместо теб?",
     insight: "Понякога тревожността започва да определя поведението ни.",
     invitation: "Покана за наблюдение: Какво всъщност искаш ти?",
-    backImage: "/images/cards/section-4-card-1.jpg",
+    backImage: publicPath("/images/cards/section-4-card-1.jpg"),
   },
 ];
 

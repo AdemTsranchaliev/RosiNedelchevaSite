@@ -1,3 +1,5 @@
+import { publicPath } from "@/lib/public-path";
+
 export const site = {
   name: "Росица Неделчева",
   brand: "RN",
@@ -61,11 +63,11 @@ export const product = {
     { lead: "Кутия", detail: "целият комплект" },
     { lead: "Език", detail: "български" },
   ],
-  imageBox: "/images/product-box.jpg",
-  imageCards: "/images/cards-overview.jpg",
-  imageLifestyle: "/images/site/rosi-wide.jpg",
-  imageSpread: "/images/cards-overview.jpg",
-  imageCalm: "/images/site/rosi-portrait.jpg",
+  imageBox: publicPath("/images/product-box.jpg"),
+  imageCards: publicPath("/images/cards-overview.jpg"),
+  imageLifestyle: publicPath("/images/site/rosi-wide.jpg"),
+  imageSpread: publicPath("/images/cards-overview.jpg"),
+  imageCalm: publicPath("/images/site/rosi-portrait.jpg"),
 };
 
 export function formatPrice(value: number) {
@@ -73,16 +75,16 @@ export function formatPrice(value: number) {
 }
 
 export const siteImages = {
-  portrait: "/images/site/rosi-portrait.jpg",
-  portraitAlt: "/images/site/rosi-portrait-2.jpg",
-  wide: "/images/site/rosi-wide.jpg",
+  portrait: publicPath("/images/site/rosi-portrait.jpg"),
+  portraitAlt: publicPath("/images/site/rosi-portrait-2.jpg"),
+  wide: publicPath("/images/site/rosi-wide.jpg"),
 };
 
 export const siteIcons = {
-  writing: "/images/icons/writing.svg",
-  speaking: "/images/icons/speaking.svg",
-  reading: "/images/icons/reading.svg",
-  listening: "/images/icons/listening.svg",
+  writing: publicPath("/images/icons/writing.svg"),
+  speaking: publicPath("/images/icons/speaking.svg"),
+  reading: publicPath("/images/icons/reading.svg"),
+  listening: publicPath("/images/icons/listening.svg"),
 };
 
 export const introduction = [
@@ -218,22 +220,22 @@ export const about = {
     {
       title: "Индивидуални сесии",
       text: "Работим заедно по теми като стрес, тревожност, личностно развитие, житейски трудности и взаимоотношения — на живо и онлайн.",
-      icon: "/images/icons/writing.svg",
+      icon: publicPath("/images/icons/writing.svg"),
     },
     {
       title: "Лекции и уъркшопи",
       text: "Събития, насочени към психичното здраве, емоционалната интелигентност и личностното развитие.",
-      icon: "/images/icons/speaking.svg",
+      icon: publicPath("/images/icons/speaking.svg"),
     },
     {
       title: "Групова терапия",
       text: "Чрез споделяне и взаимна обратна връзка се развиват осъзнавания, усещане за принадлежност и междуличностни умения.",
-      icon: "/images/icons/reading.svg",
+      icon: publicPath("/images/icons/reading.svg"),
     },
     {
       title: "Ритрийти",
       text: "Интензивни преживелищни програми, които съчетават терапия, природа и личностно израстване.",
-      icon: "/images/icons/listening.svg",
+      icon: publicPath("/images/icons/listening.svg"),
     },
   ],
   topics: ["Бърнаут", "Депресии", "Емоционално хранене", "Женска и мъжка енергия"],
@@ -263,7 +265,7 @@ export const blogPosts: BlogPost[] = [
       "Тревожността не е само „мислене твърде много“. Как се проявява в тялото, емоциите и поведението.",
     date: "2026-03-12",
     readMinutes: 5,
-    image: "/images/site/rosi-wide.jpg",
+    image: publicPath("/images/site/rosi-wide.jpg"),
     imageAlt: "Росица Неделчева до купчина книги в кабинета",
     imagePosition: "center 40%",
     content: [
@@ -277,7 +279,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "/images/cards-overview.jpg",
+        src: publicPath("/images/cards-overview.jpg"),
         alt: "Шестте раздела на терапевтичните карти",
         caption: "Шестте раздела — от разпознаване до моментна регулация.",
         fit: "contain",
@@ -295,7 +297,7 @@ export const blogPosts: BlogPost[] = [
       "Когато тревожността ни насочва към това, което не е наред, ресурсите ни връщат към опората.",
     date: "2026-02-20",
     readMinutes: 4,
-    image: "/images/site/rosi-portrait-2.jpg",
+    image: publicPath("/images/site/rosi-portrait-2.jpg"),
     imageAlt: "Портрет на Росица Неделчева",
     imagePosition: "center 20%",
     content: [
@@ -320,7 +322,7 @@ export const blogPosts: BlogPost[] = [
       "Самопомощта е ценна, но не замества терапията. Признаци, при които си струва да се обърнем към специалист.",
     date: "2026-01-18",
     readMinutes: 6,
-    image: "/images/site/rosi-portrait.jpg",
+    image: publicPath("/images/site/rosi-portrait.jpg"),
     imageAlt: "Росица Неделчева",
     imagePosition: "center 18%",
     content: [
