@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { API_URL } from "@/lib/api";
 import { demoMode } from "@/lib/demo";
+import { mediaSrc } from "@/lib/public-path";
 import { api, readToken } from "@/lib/session";
+
+export { mediaSrc };
 
 export type ProductSpec = { lead: string; detail: string };
 
@@ -59,13 +62,19 @@ export function normalizeProduct(product: Partial<ShopProduct> & { id: number; n
   };
 }
 
-export function mediaSrc(url: string) {
-  if (url.startsWith("http") || url.startsWith("/images")) return url;
-  return `${API_URL}${url}`;
+function readFile(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Файлът не се прочете."));
+    reader.readAsDataURL(file);
+  });
 }
 
 export async function uploadMedia(file: File) {
-  if (demoMode) return { url: "/images/product-box.jpg", kind: "image" as const };
+  if (demoMode) {
+    return { url: await readFile(file), kind: file.type.startsWith("video/") ? ("video" as const) : ("image" as const) };
+  }
   const headers = new Headers();
   const token = readToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);

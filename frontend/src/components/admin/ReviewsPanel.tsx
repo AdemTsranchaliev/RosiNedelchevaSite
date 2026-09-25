@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { API_URL } from "@/lib/api";
+import { mediaSrc } from "@/lib/public-path";
 import { api } from "@/lib/session";
 
 export type ProductReview = {
@@ -26,11 +26,6 @@ const statusLabel: Record<string, string> = {
 };
 
 type Filter = "all" | "pending" | "published" | "hidden";
-
-function mediaSrc(url: string) {
-  if (url.startsWith("http") || url.startsWith("/images")) return url;
-  return `${API_URL}${url}`;
-}
 
 function stamp(iso: string) {
   const date = new Date(iso);

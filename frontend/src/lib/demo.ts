@@ -1,3 +1,5 @@
+import { publicPath } from "@/lib/public-path";
+
 export const demoMode = process.env.NEXT_PUBLIC_DEMO === "true";
 
 type Order = {
@@ -87,8 +89,8 @@ const products = [
     description: "Терапевтични карти за самопомощ, самоосъзнаване и вътрешна устойчивост.",
     details: "Създадени са от практиката на Росица Неделчева. Помагат тревожността да се разбира постепенно.",
     price: 79,
-    imageUrl: "/images/product-box.jpg",
-    images: ["/images/product-box.jpg", "/images/cards-overview.jpg", "/images/site/rosi-portrait.jpg", "/images/site/rosi-wide.jpg"],
+    imageUrl: publicPath("/images/product-box.jpg"),
+    images: [publicPath("/images/product-box.jpg"), publicPath("/images/cards-overview.jpg"), publicPath("/images/site/rosi-portrait.jpg"), publicPath("/images/site/rosi-wide.jpg")],
     videoUrl: null,
     highlights: ["100 карти", "6 раздела с въпроси, насоки и техники", "За хора с тревожност и за психолози/терапевти", "Създадени от практикуващ психолог и психотерапевт"],
     specs: [
@@ -113,7 +115,7 @@ const reviews: Review[] = [
     city: "София",
     rating: 5,
     body: "Ползвам ги вечер, когато мислите се завъртят. Въпросите са тихи и конкретни.",
-    images: [],
+    images: [publicPath("/images/cards/section-1-card-1.jpg"), publicPath("/images/cards-overview.jpg")],
     status: "published",
     createdAt: iso(6),
   },
@@ -127,7 +129,7 @@ const reviews: Review[] = [
     city: "Пловдив",
     rating: 5,
     body: "Взех ги и за кабинета. Клиентите се задържат по-лесно върху една карта, вместо върху целия разговор.",
-    images: [],
+    images: [publicPath("/images/cards/section-2-card-1.jpg")],
     status: "published",
     createdAt: iso(11),
   },
@@ -141,7 +143,7 @@ const reviews: Review[] = [
     city: "Варна",
     rating: 4,
     body: "Хареса ми, че няма правилен отговор. Чакам одобрение на още едно ревю със снимка.",
-    images: [],
+    images: [publicPath("/images/product-box.jpg")],
     status: "pending",
     createdAt: iso(2),
   },
@@ -164,7 +166,7 @@ const store = {
       excerpt: "Тревожността не е само „мислене твърде много“.",
       date: "2026-03-12",
       readMinutes: 5,
-      image: "/images/site/rosi-wide.jpg",
+      image: publicPath("/images/site/rosi-wide.jpg"),
       imageAlt: "Росица Неделчева до купчина книги в кабинета",
       body: "Тревожността е естествена човешка реакция.",
       isPublished: true,
@@ -176,7 +178,7 @@ const store = {
       excerpt: "Когато тревожността ни насочва към това, което не е наред, ресурсите ни връщат към опората.",
       date: "2026-02-20",
       readMinutes: 4,
-      image: "/images/site/rosi-portrait-2.jpg",
+      image: publicPath("/images/site/rosi-portrait-2.jpg"),
       imageAlt: "Портрет на Росица Неделчева",
       body: "Ресурсите не означават, че трудността изчезва.",
       isPublished: true,
@@ -281,7 +283,16 @@ function publishedReviews(productId: number) {
   };
 }
 
-export function demoCall(path: string, init: RequestInit = {}): unknown {
+function readFile(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Снимката не се прочете."));
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function demoCall(path: string, init: RequestInit = {}): Promise<unknown> {
   const method = (init.method ?? "GET").toUpperCase();
   const url = new URL(path, "http://demo.local");
   const route = url.pathname.replace(/\/$/, "");
@@ -468,7 +479,29 @@ export function demoCall(path: string, init: RequestInit = {}): unknown {
     return { productName: "Справяне с тревожността", authorName: "Мария", city: "София", used: false };
   }
   if (route === "/api/reviews" && method === "POST") {
-    return { id: nextId(store.reviews), status: "pending" };
+    const form = init.body instanceof FormData ? init.body : null;
+    const images: string[] = [];
+    if (form) {
+      for (const photo of form.getAll("photos")) {
+        if (photo instanceof File && photo.size > 0) images.push(await readFile(photo));
+      }
+    }
+    const review: Review = {
+      id: nextId(store.reviews),
+      productId: 1,
+      orderId: 0,
+      orderNumber: "RN-DEMO",
+      email: "klient@example.com",
+      authorName: String(form?.get("authorName") ?? body.authorName ?? "Клиент"),
+      city: "София",
+      rating: Number(form?.get("rating") ?? body.rating ?? 5),
+      body: String(form?.get("body") ?? body.body ?? ""),
+      images,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    };
+    store.reviews.unshift(review);
+    return { id: review.id, status: review.status };
   }
   const reviewMatch = route.match(/^\/api\/reviews\/(\d+)$/);
   if (reviewMatch) {

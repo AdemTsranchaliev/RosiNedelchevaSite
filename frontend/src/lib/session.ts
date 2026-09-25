@@ -34,7 +34,7 @@ export function isAdmin(user: SessionUser | null) {
 }
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
-  if (demoMode) return demoCall(path, init) as T;
+  if (demoMode) return (await demoCall(path, init)) as T;
 
   const headers = new Headers(init.headers);
   if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {

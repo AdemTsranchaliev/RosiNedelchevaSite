@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { API_URL } from "@/lib/api";
+import { mediaSrc } from "@/lib/public-path";
 import { api } from "@/lib/session";
 
 export type PublicReview = {
@@ -20,11 +20,6 @@ export type ReviewSummary = {
   count: number;
   reviews: PublicReview[];
 };
-
-function mediaSrc(url: string) {
-  if (url.startsWith("http") || url.startsWith("/images")) return url;
-  return `${API_URL}${url}`;
-}
 
 export function Stars({ rating, className = "h-4 w-4" }: { rating: number; className?: string }) {
   return (
