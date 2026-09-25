@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { site } from "@/lib/content";
+import { api } from "@/lib/session";
 
 const topics = ["Картите", "Сесия", "Събитие", "Друго"] as const;
 
@@ -29,11 +30,23 @@ export function ContactForm() {
       return;
     }
 
-    const body = [`Име: ${name}`, `Имейл: ${email}`, `Тема: ${topic}`, "", message].join("\n");
-    const href = `${site.emailHref}?subject=${encodeURIComponent(`Запитване — ${topic}`)}&body=${encodeURIComponent(body)}`;
-    window.location.href = href;
-    setError("");
-    setOpened(true);
+    const form = event.currentTarget;
+    api("/api/messages", {
+      method: "POST",
+      body: JSON.stringify({ name, email, topic, message }),
+    })
+      .then(() => {
+        setError("");
+        setOpened(true);
+        form.reset();
+      })
+      .catch(() => {
+        const body = [`Име: ${name}`, `Имейл: ${email}`, `Тема: ${topic}`, "", message].join("\n");
+        const href = `${site.emailHref}?subject=${encodeURIComponent(`Запитване — ${topic}`)}&body=${encodeURIComponent(body)}`;
+        window.location.href = href;
+        setError("");
+        setOpened(true);
+      });
   }
 
   return (
@@ -126,7 +139,7 @@ export function ContactForm() {
       ) : null}
       {opened ? (
         <p role="status" className="mt-4 text-sm font-light leading-relaxed text-ink-soft">
-          Пощата ви се отваря със съобщението. Ако прозорецът не се появи, пишете на {site.email}.
+          Съобщението е получено. Ако нещо не мине, пишете на {site.email}.
         </p>
       ) : null}
     </form>

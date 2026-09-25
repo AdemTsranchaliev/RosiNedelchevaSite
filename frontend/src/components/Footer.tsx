@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Monogram } from "@/components/BrandMark";
+import { NewsletterForm } from "@/components/NewsletterForm";
 import { footerNav, legalLinks, site, socials } from "@/lib/content";
 
 function SocialIcon({ id }: { id: string }) {
@@ -27,8 +28,9 @@ function SocialIcon({ id }: { id: string }) {
 
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-paper">
-      <div className="mx-auto grid max-w-6xl gap-12 px-5 py-14 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.35fr)_repeat(3,minmax(0,0.75fr))] lg:gap-10 lg:py-16 md:px-8">
+    <footer className="bg-paper">
+      <NewsletterForm />
+      <div className="mx-auto grid max-w-6xl gap-12 border-t border-line px-5 py-14 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.35fr)_repeat(3,minmax(0,0.75fr))] lg:gap-10 lg:py-16 md:px-8">
         <div>
           <Link href="/" className="inline-flex items-center gap-3" aria-label={`${site.name} — начало`}>
             <Monogram className="h-12 w-12" />

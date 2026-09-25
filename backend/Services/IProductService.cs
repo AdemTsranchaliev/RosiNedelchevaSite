@@ -5,6 +5,7 @@ namespace RosiNedelcheva.Api.Services;
 public interface IProductService
 {
     Task<IEnumerable<Product>> GetAllAsync();
+    Task<IEnumerable<Product>> GetManagedAsync();
     Task<Product?> GetByIdAsync(int id);
     Task<Product> CreateAsync(Product product);
     Task<Product?> UpdateAsync(int id, Product product);

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { isAdmin } from "@/lib/session";
+import { useAuth } from "./AuthProvider";
 import { BrandMark } from "./BrandMark";
 import { useCart } from "./CartProvider";
 
@@ -54,6 +56,9 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { count, openCart } = useCart();
+  const { user, ready } = useAuth();
+  const accountHref = isAdmin(user) ? "/admin" : "/profil";
+  const accountLabel = isAdmin(user) ? "Админ" : "Профил";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -77,7 +82,7 @@ export function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 border-b border-line bg-paper/95 backdrop-blur-md transition-shadow duration-300 ${
+      className={`site-header fixed inset-x-0 top-0 z-50 border-b border-line bg-paper/95 backdrop-blur-md transition-shadow duration-300 ${
         scrolled || open ? "shadow-[0_10px_30px_-24px_rgba(78,69,62,0.7)]" : ""
       }`}
     >
@@ -94,6 +99,11 @@ export function Header() {
                 active={isActive(pathname, link.href)}
               />
             ))}
+            {ready && user ? (
+              <NavLink href={accountHref} label={accountLabel} active={isActive(pathname, accountHref)} />
+            ) : (
+              <NavLink href="/vhod" label="Логин" active={isActive(pathname, "/vhod")} />
+            )}
           </nav>
 
           <button
@@ -155,21 +165,23 @@ export function Header() {
       {open && (
         <div id="site-menu" className="animate-fade border-t border-line bg-paper md:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col px-5 py-4" aria-label="Мобилно">
-            {links.map((link) => {
-              const active = isActive(pathname, link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={active ? "page" : undefined}
-                  className={`border-b border-line py-4 text-[13px] font-medium uppercase tracking-[0.18em] last:border-b-0 ${
-                    active ? "text-ink" : "text-ink-soft"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
+            {[...links, ready && user ? { href: accountHref, label: accountLabel } : { href: "/vhod", label: "Логин" }].map(
+              (link) => {
+                const active = isActive(pathname, link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    aria-current={active ? "page" : undefined}
+                    className={`border-b border-line py-4 text-[13px] font-medium uppercase tracking-[0.18em] last:border-b-0 ${
+                      active ? "text-ink" : "text-ink-soft"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              },
+            )}
           </nav>
         </div>
       )}

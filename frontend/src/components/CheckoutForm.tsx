@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { formatPrice, product } from "@/lib/content";
 import { nextOrderNumber, saveOrder, type OrderCustomer } from "@/lib/order";
+import { api } from "@/lib/session";
 import { useCart } from "./CartProvider";
 
 const fieldClass =
@@ -18,8 +19,15 @@ export function CheckoutForm() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [placed, setPlaced] = useState(false);
+  const [promo, setPromo] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [payable, setPayable] = useState<number | null>(null);
+  const [promoNote, setPromoNote] = useState("");
+  const [delivery, setDelivery] = useState<"address" | "office">("address");
+  const [payment, setPayment] = useState<"card" | "cod">("card");
+  const [offices, setOffices] = useState<{ code: string; name: string }[]>([]);
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (items.length === 0 || sending) return;
 
@@ -32,9 +40,15 @@ export function CheckoutForm() {
       address: String(data.get("address") ?? "").trim(),
       note: String(data.get("note") ?? "").trim(),
     };
+    const officeCode = String(data.get("office") ?? "");
+    const office = offices.find((item) => item.code === officeCode);
 
-    if (!customer.name || !customer.phone || !customer.email || !customer.city || !customer.address) {
+    if (!customer.name || !customer.phone || !customer.email || !customer.city || (delivery === "address" && !customer.address)) {
       setError("Попълнете име, телефон, имейл, град и адрес.");
+      return;
+    }
+    if (delivery === "office" && !office) {
+      setError("Изберете офис на Еконт.");
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) {
@@ -46,10 +60,43 @@ export function CheckoutForm() {
       return;
     }
 
+    const number = nextOrderNumber();
     setSending(true);
+    setError("");
+    try {
+      await api("/api/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          number,
+          customerName: customer.name,
+          phone: customer.phone,
+          email: customer.email,
+          city: customer.city,
+          note: customer.note,
+          paymentMethod: payment,
+          deliveryType: delivery,
+          officeCode: office?.code ?? null,
+          officeName: office?.name ?? null,
+          address: delivery === "office" ? office?.name ?? customer.address : customer.address,
+          total: payable ?? total,
+          promoCode: promo.trim() || null,
+          items: items.map((item) => ({
+            productId: item.id === product.id ? 1 : 0,
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+        }),
+      });
+    } catch (cause) {
+      setSending(false);
+      setError(cause instanceof Error ? cause.message : "Поръчката не се записа. Опитайте отново.");
+      return;
+    }
+
     setPlaced(true);
     saveOrder({
-      number: nextOrderNumber(),
+      number,
       createdAt: new Date().toISOString(),
       items,
       total,
@@ -57,6 +104,26 @@ export function CheckoutForm() {
     });
     clear();
     router.push("/porachka/uspeh");
+  }
+
+  async function loadOffices(city: string) {
+    if (delivery !== "office" || city.trim().length < 2) return;
+    try {
+      const list = await api<{ code: string; name: string }[]>(`/api/courier/offices?city=${encodeURIComponent(city.trim())}`);
+      setOffices(list);
+    } catch {
+      setOffices([]);
+    }
+  }
+
+  async function applyPromo() {
+    const quote = await api<{ ok: boolean; message: string; percent: number; total: number }>("/api/promo/quote", {
+      method: "POST",
+      body: JSON.stringify({ subtotal: total, code: promo }),
+    });
+    setPromoNote(quote.message);
+    setDiscount(quote.ok ? quote.percent : 0);
+    setPayable(quote.ok ? quote.total : total);
   }
 
   if (!ready || placed) {
@@ -137,14 +204,26 @@ export function CheckoutForm() {
           <fieldset className="mt-10">
             <legend className="font-display text-2xl tracking-tight">Адрес</legend>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <Field label="Град" name="city" autoComplete="address-level2" placeholder="София" />
-              <Field
-                label="Адрес"
-                name="address"
-                autoComplete="street-address"
-                placeholder="Улица, номер, вход"
-                className="sm:col-span-2"
-              />
+              <Field label="Град" name="city" autoComplete="address-level2" placeholder="София" onBlur={(event) => loadOffices(event.target.value)} />
+              {delivery === "address" ? (
+                <Field
+                  label="Адрес"
+                  name="address"
+                  autoComplete="street-address"
+                  placeholder="Улица, номер, вход"
+                  className="sm:col-span-2"
+                />
+              ) : (
+                <label className="block sm:col-span-2">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">Офис на Еконт</span>
+                  <select name="office" className={fieldClass} defaultValue="">
+                    <option value="">Изберете офис</option>
+                    {offices.map((office) => (
+                      <option key={office.code} value={office.code}>{office.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="block sm:col-span-2">
                 <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">
                   Бележка
@@ -159,13 +238,16 @@ export function CheckoutForm() {
             </div>
           </fieldset>
 
-          <div className="mt-8 border border-line bg-paper-2/60 px-4 py-4">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">Доставка</p>
-            <p className="mt-2 text-sm font-light leading-relaxed text-ink">
-              България · 1–3 работни дни
-            </p>
-            <p className="mt-1 text-[12px] font-light text-ink-soft">{product.priceNote}</p>
-          </div>
+          <fieldset className="mt-10">
+            <legend className="font-display text-2xl tracking-tight">Доставка и плащане</legend>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <Choice name="delivery" checked={delivery === "address"} onChange={() => setDelivery("address")} title="До адрес" />
+              <Choice name="delivery" checked={delivery === "office"} onChange={() => setDelivery("office")} title="До офис на Еконт" />
+              <Choice name="payment" checked={payment === "card"} onChange={() => setPayment("card")} title="С карта" />
+              <Choice name="payment" checked={payment === "cod"} onChange={() => setPayment("cod")} title="Наложен платеж" />
+            </div>
+            <p className="mt-3 text-[12px] font-light text-ink-soft">{product.priceNote}</p>
+          </fieldset>
 
           <button
             type="submit"
@@ -182,9 +264,23 @@ export function CheckoutForm() {
             <div className="mt-6">
               <SummaryItems />
             </div>
+            <div className="mt-6 flex gap-2">
+              <input
+                value={promo}
+                onChange={(event) => setPromo(event.target.value.toUpperCase())}
+                placeholder="Промокод"
+                className="h-11 min-w-0 flex-1 border border-line bg-paper px-3 text-sm uppercase outline-none"
+              />
+              <button type="button" onClick={applyPromo} className="h-11 bg-clay px-4 text-[11px] uppercase tracking-[0.14em] text-paper">
+                Приложи
+              </button>
+            </div>
+            {promoNote ? <p className="mt-2 text-sm text-ink-soft">{promoNote}</p> : null}
             <div className="mt-6 flex items-baseline justify-between border-t border-ink/10 pt-4">
-              <span className="text-[11px] uppercase tracking-[0.16em] text-mute">Общо</span>
-              <span className="font-display text-3xl leading-none">{formatPrice(total)}</span>
+              <span className="text-[11px] uppercase tracking-[0.16em] text-mute">
+                {discount > 0 ? `Общо −${discount}%` : "Общо"}
+              </span>
+              <span className="font-display text-3xl leading-none">{formatPrice(payable ?? total)}</span>
             </div>
             <p className="mt-2 text-[12px] font-light text-ink-soft">{product.priceNote}</p>
           </div>
@@ -217,6 +313,15 @@ function SummaryItems() {
   );
 }
 
+function Choice({ name, checked, onChange, title }: { name: string; checked: boolean; onChange: () => void; title: string }) {
+  return (
+    <label className={`flex cursor-pointer items-center gap-3 border px-4 py-3 text-sm ${checked ? "border-clay bg-paper-2" : "border-line"}`}>
+      <input type="radio" name={name} checked={checked} onChange={onChange} />
+      {title}
+    </label>
+  );
+}
+
 function Field({
   label,
   name,
@@ -224,6 +329,7 @@ function Field({
   autoComplete,
   placeholder,
   className = "",
+  onBlur,
 }: {
   label: string;
   name: string;
@@ -231,6 +337,7 @@ function Field({
   autoComplete?: string;
   placeholder?: string;
   className?: string;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
 }) {
   return (
     <label className={`block ${className}`}>
@@ -240,6 +347,7 @@ function Field({
         name={name}
         autoComplete={autoComplete}
         placeholder={placeholder}
+        onBlur={onBlur}
         className={fieldClass}
       />
     </label>

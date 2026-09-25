@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Faq } from "@/components/Faq";
 import { ProductBuyPanel } from "@/components/ProductBuyPanel";
+import { ProductReviews } from "@/components/ProductReviews";
 import { ProductGallery } from "@/components/ProductGallery";
 import { sectionIcons } from "@/components/Icons";
 import {
@@ -161,6 +162,7 @@ export default function ProductPage() {
         </div>
       </section>
 
+      <ProductReviews />
       <Faq />
     </div>
   );

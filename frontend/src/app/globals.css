@@ -51,6 +51,14 @@ html {
   scroll-behavior: smooth;
 }
 
+html[data-banner="on"] .site-header {
+  top: 2.5rem;
+}
+
+html[data-banner="on"] main {
+  padding-top: 2.5rem;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -104,6 +112,70 @@ body {
 
 .animate-fade {
   animation: fade 0.4s ease both;
+}
+
+.rn-admin {
+  background: #e6e0d6;
+  color: #241f1c;
+}
+
+.rn-admin h1 {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: #1a1614;
+}
+
+.rn-admin .bg-white {
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(36, 31, 28, 0.05);
+}
+
+.rn-admin .bg-slate-50 {
+  background-color: #f4efe8;
+}
+
+.rn-admin .bg-slate-100 {
+  background-color: #ebe4da;
+}
+
+.rn-admin .bg-slate-900 {
+  background-color: #241f1c;
+}
+
+.rn-admin .bg-\[\#1f6f73\] {
+  background-color: #3f3732;
+}
+
+.rn-admin .text-slate-950,
+.rn-admin .text-slate-900 {
+  color: #1a1614;
+}
+
+.rn-admin .text-slate-700,
+.rn-admin .text-slate-800 {
+  color: #3a332e;
+}
+
+.rn-admin .text-slate-600,
+.rn-admin .text-slate-500,
+.rn-admin .text-slate-400 {
+  color: #5e554e;
+}
+
+.rn-admin .text-\[\#1f6f73\] {
+  color: #6b5340;
+}
+
+.rn-admin .ring-slate-200,
+.rn-admin .ring-slate-300 {
+  --tw-ring-color: rgba(36, 31, 28, 0.16);
+}
+
+.rn-admin .border-slate-100,
+.rn-admin .border-slate-200,
+.rn-admin .divide-slate-100 > :not(:last-child) {
+  border-color: rgba(36, 31, 28, 0.12);
 }
 
 .d1 {

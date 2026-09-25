@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RosiNedelcheva.Api.Models;
 using RosiNedelcheva.Api.Services;
@@ -22,6 +23,14 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpGet("manage")]
+    public async Task<ActionResult<IEnumerable<Product>>> Manage()
+    {
+        var products = await _productService.GetManagedAsync();
+        return Ok(products);
+    }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Product>> GetById(int id)
     {
@@ -34,6 +43,7 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<Product>> Create([FromBody] Product product)
     {
@@ -41,6 +51,7 @@ public class ProductsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     public async Task<ActionResult<Product>> Update(int id, [FromBody] Product product)
     {
@@ -53,6 +64,7 @@ public class ProductsController : ControllerBase
         return Ok(updated);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

@@ -36,8 +36,19 @@ npm run dev
 |--------|----------|----------|
 | GET | `/api/products` | Всички продукти |
 | GET | `/api/products/{id}` | Продукт по id |
-| POST | `/api/products` | Създаване |
-| PUT | `/api/products/{id}` | Обновяване |
-| DELETE | `/api/products/{id}` | Изтриване (soft delete) |
+| POST | `/api/products` | Създаване (админ) |
+| PUT | `/api/products/{id}` | Обновяване (админ) |
+| DELETE | `/api/products/{id}` | Скриване (админ) |
+| POST | `/api/auth/login` | Общ вход за клиенти и админ |
+| POST | `/api/auth/register` | Регистрация на клиент |
+| GET | `/api/orders` | Поръчки (админ) |
+| GET | `/api/messages` | Съобщения (админ) |
+| GET | `/api/blog/manage` | Статии (админ) |
+| GET | `/api/users` | Потребители (админ) |
 
-Засега продуктите са в паметта (`ProductService`). По-късно може да се добави база данни (EF Core).
+Входът е на `/vhod`. Администраторът се отваря на `/admin`, клиентът — на `/profil`.
+
+Локален админ (само при първо стартиране, после се пази в `backend/data/store.json`):
+
+- имейл: `admin@ertherapybg.com`
+- парола: `RosiAdmin2026!`

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { IconFlower, IconHandsHeart, IconLeaf, IconSun, IconTruck } from "@/components/Icons";
+import { ReviewSummaryLine } from "@/components/ProductReviews";
 import { formatPrice, product } from "@/lib/content";
 import { useCart } from "./CartProvider";
 
@@ -38,6 +39,7 @@ export function ProductBuyPanel({
         <div className="mt-5">
           <p className="font-display text-4xl leading-none tracking-tight">{formatPrice(product.price)}</p>
           <p className="mt-2 text-xs font-light text-ink-soft">{product.priceNote}</p>
+          <ReviewSummaryLine />
         </div>
       ) : null}
       <ul className="mt-7 space-y-4">

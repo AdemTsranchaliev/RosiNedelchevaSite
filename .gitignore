@@ -1,3 +1,7 @@
+# Local shop data (users, orders, password hashes)
+backend/data/
+backend/wwwroot/uploads/
+
 # Logs
 logs
 *.log
