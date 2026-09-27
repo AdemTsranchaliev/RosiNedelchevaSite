@@ -15,8 +15,8 @@ const heroFacts = [
 ];
 
 const forWhom = [
-  { title: "За теб", text: "Да разбереш тревожността и да я управляваш." },
-  { title: "За практиката", text: "Въпроси и техники от терапевтичния процес." },
+  { title: "За теб", text: "Да разбереш тревожността и да я управляваш.", color: "#e4d9d0" },
+  { title: "За практиката", text: "Въпроси и техники от терапевтичния процес.", color: "#d9d4c6" },
 ];
 
 const trustPoints = [
@@ -108,48 +108,75 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-paper">
-        <div className="grid lg:min-h-[640px] lg:grid-cols-2">
-          <div className="relative h-72 sm:h-[28rem] lg:h-auto lg:min-h-[640px]">
+      <section className="overflow-hidden bg-card-gold">
+        <div className="grid md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+          <div className="relative h-[30rem] sm:h-[36rem] md:h-auto md:min-h-[42rem]">
             <Image
               src={siteImages.portrait}
               alt="Росица Неделчева"
               fill
-              className="object-cover object-[center_18%]"
-              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover object-[center_14%]"
+              sizes="(max-width: 768px) 100vw, 48vw"
             />
+            <figure className="absolute right-4 bottom-5 z-10 w-[9.25rem] -rotate-3 shadow-[0_18px_36px_-20px_rgba(78,69,62,0.65)] ring-[6px] ring-card-gold sm:w-40 md:-right-16 md:bottom-16 md:w-[12.5rem] md:-rotate-2">
+              <div className="relative aspect-[3/4] bg-ink">
+                <Image
+                  src={siteImages.portraitAlt}
+                  alt=""
+                  fill
+                  className="object-cover object-[center_18%]"
+                  sizes="200px"
+                />
+              </div>
+            </figure>
           </div>
-          <div className="flex flex-col justify-center bg-card-gold px-5 py-10 sm:px-10 sm:py-14 lg:px-16 lg:py-20">
+          <div className="flex flex-col justify-center px-5 py-12 sm:px-10 md:py-16 md:pr-8 md:pl-20 lg:py-20 lg:pr-16 lg:pl-28">
             <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-accent">
               За автора
             </p>
-            <h2 className="mt-4 font-display text-4xl leading-[1.05] tracking-tight md:text-5xl">
-              {site.name}
-            </h2>
-            <p className="mt-3 text-sm font-medium tracking-wide text-ink-soft">
-              {site.tagline}
-            </p>
-            <blockquote className="mt-8 max-w-md font-display text-2xl leading-snug tracking-tight md:text-[1.7rem]">
-              {about.belief}
-            </blockquote>
-            <ul className="mt-8 space-y-2 text-sm font-light text-ink-soft">
-              {trustPoints.map((point) => (
-                <li key={point}>{point}</li>
+            <div className="relative mt-3 max-w-xl">
+              <span
+                className="pointer-events-none absolute -top-6 -left-1 font-display text-[4.5rem] leading-none text-ink/15 select-none sm:text-[5.5rem] md:-left-8"
+                aria-hidden
+              >
+                „
+              </span>
+              <blockquote className="relative pt-6 font-display text-[1.7rem] leading-[1.2] tracking-tight sm:text-[2rem] lg:text-[2.2rem]">
+                {about.belief}
+              </blockquote>
+            </div>
+            <ul className="mt-8 grid max-w-sm grid-cols-3 gap-4 border-t border-ink/15 pt-6">
+              {["Тяло", "Ум", "Душа"].map((word) => (
+                <li key={word} className="font-display text-[1.65rem] leading-none tracking-tight sm:text-3xl">
+                  {word}
+                </li>
               ))}
             </ul>
-            <div className="mt-8 grid gap-6 sm:grid-cols-2">
+            <p className="mt-3 max-w-md text-sm font-light leading-relaxed text-ink-soft">{about.triad}</p>
+            <div className="mt-7 flex items-center gap-4">
+              <span className="h-px w-8 shrink-0 bg-accent" aria-hidden />
+              <div>
+                <h2 className="font-display text-2xl leading-none tracking-tight">{site.name}</h2>
+                <p className="mt-1.5 text-[13px] font-light tracking-wide text-ink-soft">{site.tagline}</p>
+              </div>
+            </div>
+            <p className="mt-4 max-w-md text-sm font-light leading-relaxed text-ink-soft">
+              {trustPoints.join(". ")}.
+            </p>
+            <div className="mt-8 grid max-w-lg gap-3 lg:grid-cols-2">
               {forWhom.map((item) => (
-                <div key={item.title}>
-                  <h3 className="font-display text-xl tracking-tight">{item.title}</h3>
-                  <p className="mt-1 text-sm font-light leading-relaxed text-ink-soft">
-                    {item.text}
-                  </p>
+                <div key={item.title} className="relative px-5 py-5" style={{ backgroundColor: item.color }}>
+                  <div className="pointer-events-none absolute inset-2 rounded-[0.7rem] border border-ink/25" />
+                  <div className="relative">
+                    <h3 className="font-display text-xl tracking-tight">{item.title}</h3>
+                    <p className="mt-1.5 text-sm font-light leading-relaxed">{item.text}</p>
+                  </div>
                 </div>
               ))}
             </div>
             <Link
               href="/za-men"
-              className="mt-10 inline-flex text-[11px] font-medium uppercase tracking-[0.2em] text-ink underline decoration-accent/60 underline-offset-[6px] transition hover:decoration-ink"
+              className="mt-8 inline-flex text-[11px] font-medium uppercase tracking-[0.2em] text-ink underline decoration-accent/60 underline-offset-[6px] transition hover:decoration-ink"
             >
               Повече за мен
             </Link>
