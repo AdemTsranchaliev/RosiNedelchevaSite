@@ -142,7 +142,7 @@ export function CardDraw() {
         </div>
 
         <div className="mt-8 flex flex-col items-center sm:mt-14">
-          <div className="perspective-card relative aspect-[2/3] w-full max-w-[300px] sm:max-w-[320px]">
+          <div className="deck-stack relative w-full max-w-[336px]">
             <div
               className={`deck-layer deck-layer-2 ${busy ? "is-busy" : ""}`}
               aria-hidden
@@ -152,42 +152,44 @@ export function CardDraw() {
               aria-hidden
             />
 
-            <button
-              type="button"
-              onClick={onCardClick}
-              disabled={busy || phase === "content"}
-              aria-label={primaryLabel}
-              className={`card-stage relative h-full w-full text-left ${
-                phase === "lifting" ? "is-lifting" : ""
-              } ${phase === "content" ? "cursor-default" : ""}`}
-            >
-              <div
-                className={`card-flip h-full w-full ${showBack ? "is-flipped" : ""}`}
+            <div className="perspective-card relative aspect-[2/3] w-full">
+              <button
+                type="button"
+                onClick={onCardClick}
+                disabled={busy || phase === "content"}
+                aria-label={primaryLabel}
+                className={`card-stage relative h-full w-full text-left ${
+                  phase === "lifting" ? "is-lifting" : ""
+                } ${phase === "content" ? "cursor-default" : ""}`}
               >
-                <div className="card-face card-front">
-                  {cover && (phase === "section" || showBack) ? (
-                    <PhotoFace
-                      src={cover}
-                      alt={
-                        meta
-                          ? `Раздел ${meta.id} — ${meta.name}`
-                          : "Корица на раздел"
-                      }
-                      priority
-                    />
-                  ) : (
-                    <IdleFace />
-                  )}
+                <div
+                  className={`card-flip h-full w-full ${showBack ? "is-flipped" : ""}`}
+                >
+                  <div className="card-face card-front">
+                    {cover && (phase === "section" || showBack) ? (
+                      <PhotoFace
+                        src={cover}
+                        alt={
+                          meta
+                            ? `Раздел ${meta.id} — ${meta.name}`
+                            : "Корица на раздел"
+                        }
+                        priority
+                      />
+                    ) : (
+                      <IdleFace />
+                    )}
+                  </div>
+                  <div className="card-face card-back">
+                    {card ? (
+                      <PhotoFace src={card.backImage} alt="Карта от раздела" />
+                    ) : (
+                      <div className="h-full bg-paper-2" />
+                    )}
+                  </div>
                 </div>
-                <div className="card-face card-back">
-                  {card ? (
-                    <PhotoFace src={card.backImage} alt="Карта от раздела" />
-                  ) : (
-                    <div className="h-full bg-paper-2" />
-                  )}
-                </div>
-              </div>
-            </button>
+              </button>
+            </div>
           </div>
 
           {meta && phase !== "idle" && phase !== "lifting" && (

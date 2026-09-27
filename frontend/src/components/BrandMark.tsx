@@ -58,11 +58,13 @@ export function BrandMark() {
       aria-label="Росица Неделчева — начало"
     >
       <Monogram className="h-11 w-11 shrink-0" />
-      <span className="hidden flex-col leading-tight sm:flex">
-        <span className="font-display text-sm tracking-[0.16em] uppercase text-ink">
+      <span className="hidden min-w-0 flex-col leading-tight sm:flex">
+        <span className="whitespace-nowrap font-display text-[13px] tracking-[0.14em] uppercase text-ink xl:text-sm xl:tracking-[0.16em]">
           {site.name}
         </span>
-        <span className="text-[11px] text-mute">{site.tagline}</span>
+        <span className="mt-0.5 whitespace-nowrap text-[11px] font-light text-mute lg:hidden xl:block">
+          {site.tagline}
+        </span>
       </span>
     </Link>
   );

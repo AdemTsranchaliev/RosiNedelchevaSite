@@ -191,15 +191,30 @@ body {
   animation-delay: 0.44s;
 }
 
-/* Card draw / flip */
+/* Card draw / flip.
+   Back cards sit outside the 3D context, inside the stack padding,
+   so a perspective/overflow clip cannot slice their corners. */
+.deck-stack {
+  --deck-pad-top: 3rem;
+  --deck-pad-right: 1.5rem;
+  --deck-pad-bottom: 1.75rem;
+  --deck-pad-left: 0.35rem;
+  padding: var(--deck-pad-top) var(--deck-pad-right) var(--deck-pad-bottom) var(--deck-pad-left);
+  overflow: visible;
+}
+
 .perspective-card {
   perspective: 1600px;
-  perspective-origin: 50% 45%;
+  perspective-origin: center;
+  overflow: visible;
 }
 
 .deck-layer {
   position: absolute;
-  inset: 0;
+  top: var(--deck-pad-top);
+  right: var(--deck-pad-right);
+  bottom: var(--deck-pad-bottom);
+  left: var(--deck-pad-left);
   border-radius: 1.15rem;
   border: 1px solid rgba(78, 69, 62, 0.14);
   transition:
@@ -209,18 +224,18 @@ body {
 
 .deck-layer-1 {
   background: #e6d3c8;
-  transform: translate(6px, 7px);
+  transform: translate(8px, 9px);
   opacity: 0.95;
 }
 
 .deck-layer-2 {
   background: #d9d4c6;
-  transform: translate(12px, 14px);
+  transform: translate(15px, 17px);
   opacity: 0.9;
 }
 
 .deck-layer-1.is-busy {
-  transform: translate(10px, 14px);
+  transform: translate(11px, 16px);
   opacity: 0.55;
 }
 
@@ -242,7 +257,6 @@ body {
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.72s cubic-bezier(0.4, 0.05, 0.2, 1);
-  will-change: transform;
 }
 
 .card-flip.is-flipped {
@@ -257,6 +271,11 @@ body {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   box-shadow: 0 28px 50px -28px rgba(78, 69, 62, 0.35);
+}
+
+.card-front {
+  transform: rotateY(0deg);
+  background: var(--card-gold);
 }
 
 .card-back {
