@@ -95,9 +95,9 @@ export function ProductGallery() {
 
   return (
     <div className="min-w-0">
-      <div className="relative min-w-0">
+      <div className="relative min-w-0 ring-1 ring-ink/10">
         <div
-          className="w-full cursor-grab overflow-hidden bg-white active:cursor-grabbing"
+          className="w-full cursor-grab overflow-hidden bg-paper-2 active:cursor-grabbing"
           style={{ touchAction: "pan-y" }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -157,10 +157,8 @@ export function ProductGallery() {
             type="button"
             role="tab"
             onClick={() => setActive(index)}
-            className={`relative aspect-[3/2] overflow-hidden bg-white transition duration-300 ${
-              index === active
-                ? "opacity-100 ring-1 ring-ink ring-inset"
-                : "opacity-55 hover:opacity-100"
+            className={`relative aspect-[3/2] overflow-hidden bg-paper-2 ring-1 transition duration-300 ${
+              index === active ? "opacity-100 ring-ink" : "opacity-75 ring-transparent hover:opacity-100"
             }`}
             aria-label={`Снимка ${index + 1}`}
             aria-selected={index === active}

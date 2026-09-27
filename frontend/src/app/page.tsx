@@ -92,9 +92,19 @@ export default function HomePage() {
       </section>
 
       <section id="porachai" className="scroll-mt-20 border-t border-line bg-paper">
-        <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-10 md:px-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16 lg:py-20">
-          <ProductGallery />
-          <ProductBuyPanel />
+        <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 md:py-16 lg:py-24">
+          <div className="grid items-center gap-8 md:grid-cols-[minmax(0,1.12fr)_minmax(17.5rem,22rem)] md:gap-10 lg:gap-16">
+            <ProductGallery />
+            <ProductBuyPanel showPrice />
+          </div>
+          <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-7 border-t border-line pt-8 sm:grid-cols-4 md:mt-12">
+            {product.specs.map((spec) => (
+              <div key={spec.detail}>
+                <dt className="font-display text-3xl leading-none tracking-tight md:text-4xl">{spec.lead}</dt>
+                <dd className="mt-2 text-sm font-light text-ink-soft">{spec.detail}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 

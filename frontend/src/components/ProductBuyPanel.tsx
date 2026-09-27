@@ -28,28 +28,37 @@ export function ProductBuyPanel({
   const Title = titleLevel;
 
   return (
-    <div className="max-w-md">
-      <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-mute">
-        Поръчка
+    <div className={canAdd ? "max-w-md" : "w-full"}>
+      <p className={`text-[11px] font-medium uppercase tracking-[0.24em] ${canAdd ? "text-mute" : "text-accent"}`}>
+        {canAdd ? "Поръчка" : "Комплектът"}
       </p>
-      <Title className="mt-3 font-display text-3xl leading-tight tracking-tight text-ink sm:text-4xl">
+      <Title
+        className={`mt-3 font-display leading-[1.05] tracking-tight text-ink ${
+          canAdd ? "text-3xl sm:text-4xl" : "text-[2rem] sm:text-[2.35rem]"
+        }`}
+      >
         {product.title}
       </Title>
+      {canAdd ? null : (
+        <p className="mt-3 text-sm font-light leading-relaxed text-ink-soft">{product.subtitle}</p>
+      )}
       {showPrice ? (
-        <div className="mt-5">
-          <p className="font-display text-4xl leading-none tracking-tight">{formatPrice(product.price)}</p>
-          <p className="mt-2 text-xs font-light text-ink-soft">{product.priceNote}</p>
-          <ReviewSummaryLine />
+        <div className={canAdd ? "mt-5" : "mt-6"}>
+          <p className="font-display text-[2.75rem] leading-none tracking-tight">{formatPrice(product.price)}</p>
+          <p className="mt-2 text-[11px] font-light tracking-wide text-ink-soft">{product.priceNote}</p>
+          {canAdd ? <ReviewSummaryLine /> : null}
         </div>
       ) : null}
-      <ul className="mt-7 space-y-4">
-        {points.map(({ icon: Icon, text }) => (
-          <li key={text} className="flex items-center gap-3">
-            <Icon className="h-11 w-11 shrink-0 text-ink" />
-            <span className="text-sm font-light leading-snug text-ink">{text}</span>
-          </li>
-        ))}
-      </ul>
+      {canAdd ? (
+        <ul className="mt-7 space-y-4">
+          {points.map(({ icon: Icon, text }) => (
+            <li key={text} className="flex items-center gap-3">
+              <Icon className="h-11 w-11 shrink-0 text-ink" />
+              <span className="text-sm font-light leading-snug text-ink">{text}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {canAdd ? (
         <div className="mt-8 flex flex-col gap-3 border-t border-line pt-6 min-[420px]:flex-row min-[420px]:items-stretch">
