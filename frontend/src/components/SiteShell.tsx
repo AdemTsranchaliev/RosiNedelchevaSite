@@ -10,13 +10,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const checkout = pathname.startsWith("/porachka");
   const admin = pathname.startsWith("/admin");
+  const login = pathname.startsWith("/vhod");
 
   return (
     <>
       {admin ? null : <SiteBanner />}
       {admin ? null : <Header />}
       <main className="flex-1">{children}</main>
-      {checkout || admin ? null : <Footer />}
+      {checkout || admin || login ? null : <Footer />}
     </>
   );
 }
