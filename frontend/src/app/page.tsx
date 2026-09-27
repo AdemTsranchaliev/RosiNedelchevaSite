@@ -184,7 +184,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="razdeli" className="scroll-mt-20 overflow-hidden bg-paper px-5 py-12 md:px-8 md:py-24">
+      <section id="razdeli" className="scroll-mt-20 bg-paper px-5 py-12 md:px-8 md:py-24">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-end justify-between gap-6">
             <h2 className="font-display text-3xl tracking-tight md:text-5xl">
@@ -198,27 +198,25 @@ export default function HomePage() {
             </a>
           </div>
 
-          <div className="-mx-5 mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6">
+          <div className="mt-8 grid gap-2.5 sm:mt-10 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6">
             {sections.map((section, index) => {
               const Icon = sectionIcons[index];
               return (
                 <Link
                   key={section.id}
                   href="/karti"
-                  className="relative aspect-[2/3] w-[58vw] max-w-[210px] shrink-0 snap-center transition duration-300 hover:-translate-y-1 sm:w-auto sm:max-w-none"
+                  className="relative flex items-center gap-3.5 px-3.5 py-3.5 transition duration-300 hover:-translate-y-1 sm:aspect-[2/3] sm:flex-col sm:justify-between sm:gap-0 sm:px-4 sm:py-7"
                   style={{ backgroundColor: section.color }}
                   aria-label={`${section.name} — детайл за картите`}
                 >
-                  <div className="pointer-events-none absolute inset-2.5 rounded-[0.85rem] border border-ink/30" />
-                  <div className="relative flex h-full flex-col items-center justify-between px-3 py-6 text-center sm:px-4 sm:py-7">
-                    <Icon className="h-10 w-10 text-ink sm:h-11 sm:w-11" />
-                    <h3 className="font-display text-[1.05rem] leading-snug tracking-tight sm:text-[1.15rem]">
-                      {section.name}
-                    </h3>
-                    <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ink/45">
-                      {section.id}
-                    </p>
-                  </div>
+                  <div className="pointer-events-none absolute inset-2 rounded-[0.7rem] border border-ink/30 sm:inset-2.5 sm:rounded-[0.85rem]" />
+                  <Icon className="relative h-8 w-8 shrink-0 text-ink sm:h-11 sm:w-11" />
+                  <h3 className="relative min-w-0 flex-1 font-display text-[1.15rem] leading-snug tracking-tight sm:flex-none sm:text-center sm:text-[1.15rem]">
+                    {section.name}
+                  </h3>
+                  <p className="relative w-5 shrink-0 text-right font-display text-xl leading-none tabular-nums text-ink/45 sm:w-auto sm:text-[10px] sm:font-medium sm:uppercase sm:tracking-[0.2em]">
+                    {section.id}
+                  </p>
                 </Link>
               );
             })}
