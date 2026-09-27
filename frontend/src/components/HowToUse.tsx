@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { sectionIcons } from "@/components/Icons";
 import { howToUseTips, sections } from "@/lib/content";
@@ -19,6 +20,7 @@ export function HowToUse() {
   const Icon = sectionIcons[index];
   const caution = "caution" in active ? active.caution : undefined;
   const when = whenToUse(active.id);
+  const cardImage = "sample" in active && active.sample ? active.sample : active.cover;
 
   function select(id: number) {
     setActiveId(id);
@@ -113,30 +115,41 @@ export function HowToUse() {
             style={{ backgroundColor: active.color }}
           >
             <div className="pointer-events-none absolute inset-3 rounded-[1rem] border border-ink/20" />
-            <div key={active.id} className="animate-fade relative">
-              <div className="flex items-center justify-between gap-4">
-                <Icon className="h-10 w-10 text-ink" />
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-ink/55">
-                  Раздел {pad(active.id)}
-                </p>
+            <div key={active.id} className="animate-fade relative grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_10.5rem] lg:items-center">
+              <div className="order-2 min-w-0 lg:order-1">
+                <div className="flex items-center justify-between gap-4">
+                  <Icon className="h-10 w-10 text-ink" />
+                  <p className="font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-ink/55">
+                    Раздел {pad(active.id)}
+                  </p>
+                </div>
+                {when ? (
+                  <p className="mt-8 text-[11px] font-medium uppercase tracking-[0.2em] text-ink/55">
+                    {when}
+                  </p>
+                ) : null}
+                <h3 className="mt-2 max-w-lg font-display text-[1.85rem] leading-[1.12] tracking-tight sm:text-[2.15rem]">
+                  {active.name}
+                </h3>
+                <p className="mt-4 max-w-xl text-[15px] font-light leading-relaxed">{active.guide}</p>
+                {caution ? (
+                  <p className="mt-8 max-w-xl border-t border-ink/15 pt-5 text-sm font-light leading-relaxed">
+                    <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[0.18em] text-ink/55">
+                      Важно
+                    </span>
+                    {caution}
+                  </p>
+                ) : null}
               </div>
-              {when ? (
-                <p className="mt-8 text-[11px] font-medium uppercase tracking-[0.2em] text-ink/55">
-                  {when}
-                </p>
-              ) : null}
-              <h3 className="mt-2 max-w-lg font-display text-[1.85rem] leading-[1.12] tracking-tight sm:text-[2.15rem]">
-                {active.name}
-              </h3>
-              <p className="mt-4 max-w-xl text-[15px] font-light leading-relaxed">{active.guide}</p>
-              {caution ? (
-                <p className="mt-8 max-w-xl border-t border-ink/15 pt-5 text-sm font-light leading-relaxed">
-                  <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[0.18em] text-ink/55">
-                    Важно
-                  </span>
-                  {caution}
-                </p>
-              ) : null}
+              <figure className="relative order-1 mx-auto aspect-[2/3] w-40 shadow-[0_18px_36px_-22px_rgba(78,69,62,0.75)] ring-1 ring-ink/10 lg:order-2 lg:w-full lg:rotate-1">
+                <Image
+                  src={cardImage}
+                  alt={`Карта от раздел ${active.name}`}
+                  fill
+                  className="object-cover"
+                  sizes="180px"
+                />
+              </figure>
             </div>
           </article>
         </div>

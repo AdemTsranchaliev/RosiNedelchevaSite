@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
-import { faqs } from "@/lib/content";
+import { faqs, product } from "@/lib/content";
 
 export function Faq() {
   const [open, setOpen] = useState<number | null>(null);
@@ -15,6 +16,15 @@ export function Faq() {
           <p className="mt-4 max-w-xs text-[15px] font-light leading-relaxed text-ink-soft">
             За комплекта, ползването и доставката.
           </p>
+          <figure className="relative mt-8 hidden aspect-[2/1] overflow-hidden bg-paper-2 ring-1 ring-ink/10 lg:block">
+            <Image
+              src={product.imageCards}
+              alt="Шестте раздела на картите"
+              fill
+              className="object-cover object-center"
+              sizes="420px"
+            />
+          </figure>
         </div>
         <div>
           {faqs.map((item, index) => {

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CardDraw } from "@/components/CardDraw";
 import { Faq } from "@/components/Faq";
 import { HowToUse } from "@/components/HowToUse";
+import { PhoneVideo } from "@/components/PhoneVideo";
 import { ProductBuyPanel } from "@/components/ProductBuyPanel";
 import { ProductGallery } from "@/components/ProductGallery";
 import { sectionIcons } from "@/components/Icons";
@@ -24,6 +25,34 @@ const trustPoints = [
   "Работи с тревожност, стрес и взаимоотношения",
   "Сесии на живо и онлайн",
 ];
+
+const fan = [
+  { id: 2, className: "top-5 left-1 z-0 w-[40%] -rotate-6" },
+  { id: 1, className: "top-0 left-1/2 z-10 w-[42%] -translate-x-1/2" },
+  { id: 4, className: "top-6 right-1 z-0 w-[40%] rotate-6" },
+];
+
+function CardFan() {
+  return (
+    <div className="relative mx-auto h-64 w-full max-w-sm sm:h-72" aria-hidden>
+      {fan.map((item) => {
+        const section = sections.find((entry) => entry.id === item.id);
+        const src = section && "sample" in section ? section.sample : undefined;
+        if (!src) return null;
+        return (
+          <div
+            key={item.id}
+            className={`absolute shadow-[0_22px_40px_-24px_rgba(20,16,12,0.85)] ring-1 ring-paper/30 ${item.className}`}
+          >
+            <div className="relative aspect-[2/3]">
+              <Image src={src} alt="" fill className="object-cover" sizes="180px" />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -224,12 +253,14 @@ export default function HomePage() {
         </div>
       </section>
 
+      <PhoneVideo />
+
       <HowToUse />
 
       <CardDraw />
 
-      <section className="bg-clay px-5 py-12 text-paper md:px-8 md:py-20">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 sm:flex-row sm:items-end">
+      <section className="overflow-hidden bg-clay px-5 py-12 text-paper md:px-8 md:py-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(17rem,24rem)] md:gap-14">
           <div>
             <h2 className="font-display text-3xl tracking-tight md:text-4xl">
               {product.title}
@@ -240,21 +271,22 @@ export default function HomePage() {
             >
               Подробно за картите
             </Link>
+            <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+              <Link
+                href="/karti"
+                className="inline-flex h-12 items-center justify-center bg-paper px-8 text-[11px] font-medium uppercase tracking-[0.16em] text-ink transition hover:bg-card-gold sm:tracking-[0.2em]"
+              >
+                Поръчай
+              </Link>
+              <a
+                href={site.phoneHref}
+                className="inline-flex h-12 items-center justify-center border border-paper/40 px-8 text-[11px] font-medium uppercase tracking-[0.16em] text-paper transition hover:border-paper sm:tracking-[0.2em]"
+              >
+                {site.phone}
+              </a>
+            </div>
           </div>
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <Link
-              href="/karti"
-              className="inline-flex h-12 items-center justify-center bg-paper px-8 text-[11px] font-medium uppercase tracking-[0.16em] text-ink transition hover:bg-card-gold sm:tracking-[0.2em]"
-            >
-              Поръчай
-            </Link>
-            <a
-              href={site.phoneHref}
-              className="inline-flex h-12 items-center justify-center border border-paper/40 px-8 text-[11px] font-medium uppercase tracking-[0.16em] text-paper transition hover:border-paper sm:tracking-[0.2em]"
-            >
-              {site.phone}
-            </a>
-          </div>
+          <CardFan />
         </div>
       </section>
 
