@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RosiNedelcheva.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aa7bfeac0ebfd21484300f8e7f92e254f3258fbc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5697dcab3c67688682118bfef3b3c0de8edf1223")]
 [assembly: System.Reflection.AssemblyProductAttribute("RosiNedelcheva.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RosiNedelcheva.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

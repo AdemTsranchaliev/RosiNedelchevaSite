@@ -32,3 +32,13 @@
 /Applications/GitHub/RosiNedelchevaSite/backend/obj/Debug/net8.0/RosiNedelcheva.Api.pdb
 /Applications/GitHub/RosiNedelchevaSite/backend/obj/Debug/net8.0/RosiNedelcheva.Api.genruntimeconfig.cache
 /Applications/GitHub/RosiNedelchevaSite/backend/obj/Debug/net8.0/ref/RosiNedelcheva.Api.dll
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/Microsoft.IdentityModel.Abstractions.dll
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/Microsoft.IdentityModel.Logging.dll
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.dll
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/Microsoft.IdentityModel.Tokens.dll
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/System.IdentityModel.Tokens.Jwt.dll
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/data/store.json
+/Applications/GitHub/RosiNedelchevaSite/backend/bin/Debug/net8.0/RosiNedelcheva.Api.staticwebassets.runtime.json

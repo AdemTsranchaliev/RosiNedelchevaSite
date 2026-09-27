@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "/Applications/GitHub/RosiNedelchevaSite/backend/wwwroot/uploads/b8ca2405cf5f4913bb3d0e5c44904612.png",
+      "PackagePath": "staticwebassets/uploads/b8ca2405cf5f4913bb3d0e5c44904612.png"
+    },
+    {
+      "Id": "/Applications/GitHub/RosiNedelchevaSite/backend/wwwroot/uploads/d2a7fe71c6d244fcbe49aee474d60f36.png",
+      "PackagePath": "staticwebassets/uploads/d2a7fe71c6d244fcbe49aee474d60f36.png"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.RosiNedelcheva.Api.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.RosiNedelcheva.Api.props",
+      "PackagePath": "build\\RosiNedelcheva.Api.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.RosiNedelcheva.Api.props",
+      "PackagePath": "buildMultiTargeting\\RosiNedelcheva.Api.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.RosiNedelcheva.Api.props",
+      "PackagePath": "buildTransitive\\RosiNedelcheva.Api.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

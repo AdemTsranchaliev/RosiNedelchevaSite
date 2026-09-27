@@ -1,11 +1,58 @@
 {
   "Version": 1,
-  "Hash": "17aE/+XVXkZcXhvsnL1sZqLvmRj6dfOUWRDS+ixWwLc=",
+  "Hash": "Haxo715Iq8TQEilU25wzLsxYVViG+CXH6bmQUbMM8M8=",
   "Source": "RosiNedelcheva.Api",
   "BasePath": "_content/RosiNedelcheva.Api",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "RosiNedelcheva.Api/wwwroot",
+      "Source": "RosiNedelcheva.Api",
+      "ContentRoot": "/Applications/GitHub/RosiNedelchevaSite/backend/wwwroot/",
+      "BasePath": "_content/RosiNedelcheva.Api",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/Applications/GitHub/RosiNedelchevaSite/backend/wwwroot/uploads/b8ca2405cf5f4913bb3d0e5c44904612.png",
+      "SourceId": "RosiNedelcheva.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Applications/GitHub/RosiNedelchevaSite/backend/wwwroot/",
+      "BasePath": "_content/RosiNedelcheva.Api",
+      "RelativePath": "uploads/b8ca2405cf5f4913bb3d0e5c44904612.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/b8ca2405cf5f4913bb3d0e5c44904612.png"
+    },
+    {
+      "Identity": "/Applications/GitHub/RosiNedelchevaSite/backend/wwwroot/uploads/d2a7fe71c6d244fcbe49aee474d60f36.png",
+      "SourceId": "RosiNedelcheva.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Applications/GitHub/RosiNedelchevaSite/backend/wwwroot/",
+      "BasePath": "_content/RosiNedelcheva.Api",
+      "RelativePath": "uploads/d2a7fe71c6d244fcbe49aee474d60f36.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/d2a7fe71c6d244fcbe49aee474d60f36.png"
+    }
+  ]
 }
