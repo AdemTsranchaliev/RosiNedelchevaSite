@@ -11,11 +11,13 @@ public class ShopOrder
     public string City { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public string Note { get; set; } = string.Empty;
+    public bool AcceptedTerms { get; set; }
     public string PaymentMethod { get; set; } = "card";
     public string DeliveryType { get; set; } = "address";
     public string? OfficeCode { get; set; }
     public string? OfficeName { get; set; }
     public decimal Total { get; set; }
+    public decimal Shipping { get; set; }
     public string? PromoCode { get; set; }
     public int DiscountPercent { get; set; }
     public string Status { get; set; } = "new";

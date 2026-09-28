@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Monogram } from "@/components/BrandMark";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { CookieSettingsButton } from "@/components/CookieConsent";
 import { footerNav, legalLinks, site, socials } from "@/lib/content";
 
 function LineIcon({ children }: { children: React.ReactNode }) {
@@ -155,6 +156,7 @@ export function Footer() {
                 {link.label}
               </Link>
             ))}
+            <CookieSettingsButton className="text-[11px] uppercase tracking-[0.14em] text-mute transition hover:text-ink" />
           </nav>
         </div>
       </div>

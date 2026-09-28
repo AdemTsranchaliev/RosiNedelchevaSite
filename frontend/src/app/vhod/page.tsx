@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -59,8 +58,7 @@ export default function LoginPage() {
 
       <div className="flex items-center px-5 py-10 sm:px-8 md:px-10 lg:px-16">
         <div className="w-full max-w-sm">
-          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-accent">Акаунт</p>
-          <h1 className="mt-3 font-display text-4xl tracking-tight md:text-5xl">Влезте</h1>
+          <h1 className="font-display text-4xl tracking-tight md:text-5xl">Влезте</h1>
           <p className="mt-3 text-[15px] font-light leading-relaxed text-ink-soft">
             Поръчките и профилът се отварят оттук.
           </p>
@@ -112,16 +110,6 @@ export default function LoginPage() {
               {sending ? "Влизане…" : "Влез"}
             </button>
           </form>
-
-          <p className="mt-6 text-sm font-light text-ink-soft">
-            Нямате акаунт?{" "}
-            <Link
-              href="/registracia"
-              className="text-ink underline decoration-accent/60 underline-offset-[6px] transition hover:decoration-ink"
-            >
-              Регистрация
-            </Link>
-          </p>
         </div>
       </div>
     </div>

@@ -24,8 +24,38 @@ public class CourierController : ControllerBase
     public async Task<ActionResult> Offices([FromQuery] string city)
     {
         if (string.IsNullOrWhiteSpace(city)) return Ok(Array.Empty<EcontOffice>());
-        var offices = await _econt.Offices(_store.Courier(), city.Trim());
-        return Ok(offices);
+        return Ok(await _econt.Offices(_store.Courier(), city.Trim()));
+    }
+
+    [AllowAnonymous]
+    [HttpGet("cities")]
+    public async Task<ActionResult> Cities([FromQuery] string q)
+    {
+        if (string.IsNullOrWhiteSpace(q)) return Ok(Array.Empty<EcontCity>());
+        return Ok(await _econt.SuggestCities(_store.Courier(), q.Trim()));
+    }
+
+    [AllowAnonymous]
+    [HttpGet("streets")]
+    public async Task<ActionResult> Streets([FromQuery] string city, [FromQuery] string q)
+    {
+        if (string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(q)) return Ok(Array.Empty<string>());
+        return Ok(await _econt.SuggestStreets(_store.Courier(), city.Trim(), q.Trim()));
+    }
+
+    [AllowAnonymous]
+    [HttpPost("quote")]
+    public async Task<ActionResult<ShippingQuote>> Quote([FromBody] ShopOrder order)
+    {
+        if (string.IsNullOrWhiteSpace(order.City)) return BadRequest(new { message = "Изберете град." });
+        try
+        {
+            return Ok(await _econt.QuoteShipping(_store.Courier(), order, order.Total));
+        }
+        catch (Exception exception)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
     }
 
     [HttpGet("orders/{id:int}/track")]

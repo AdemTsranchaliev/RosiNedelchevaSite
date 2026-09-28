@@ -114,6 +114,21 @@ body {
   animation: fade 0.4s ease both;
 }
 
+@keyframes cookie-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cookie-card {
+  animation: cookie-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .rn-admin {
   background: #e6e0d6;
   color: #241f1c;
@@ -323,6 +338,20 @@ body {
   transition-delay: 0.08s;
 }
 
+.product-fan {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.product-card-tilt {
+  transform: rotateY(-9deg) rotateX(4deg);
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.product-card-tilt:hover {
+  transform: rotateY(0deg) rotateX(0deg) translateY(-8px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-rise,
   .animate-reveal,
@@ -332,12 +361,16 @@ body {
   .deck-layer,
   .faq-panel,
   .faq-answer,
-  .faq-mark {
+  .faq-mark,
+  .product-fan,
+  .product-card-tilt {
     transition: none !important;
     animation: none !important;
   }
 
-  .card-stage.is-lifting {
+  .card-stage.is-lifting,
+  .product-card-tilt,
+  .product-card-tilt:hover {
     transform: none;
   }
 }

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { CheckoutBar } from "@/components/CheckoutForm";
 import { formatPrice, site } from "@/lib/content";
 import { readOrder, type PlacedOrder } from "@/lib/order";
 
@@ -14,13 +15,18 @@ export function OrderSuccess() {
   }, []);
 
   if (order === undefined) {
-    return <div className="bg-paper pt-24" />;
+    return (
+      <div className="bg-paper">
+        <CheckoutBar href="/" label="Към началото" />
+      </div>
+    );
   }
 
   if (!order) {
     return (
-      <div className="bg-paper px-5 pb-20 pt-28 md:px-8">
-        <div className="mx-auto max-w-lg">
+      <div className="bg-paper">
+        <CheckoutBar href="/" label="Към началото" />
+        <div className="mx-auto max-w-lg px-5 pb-20 pt-10 md:px-8">
           <h1 className="font-display text-4xl tracking-tight">Няма активна поръчка</h1>
           <Link
             href="/karti"
@@ -34,8 +40,9 @@ export function OrderSuccess() {
   }
 
   return (
-    <div className="bg-paper px-5 pb-20 pt-24 md:px-8 md:pt-28">
-      <div className="mx-auto grid max-w-5xl gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.8fr)]">
+    <div className="bg-paper">
+      <CheckoutBar href="/" label="Към началото" />
+      <div className="mx-auto grid max-w-5xl gap-12 px-5 pb-20 pt-10 md:px-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.8fr)]">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-accent">Готово</p>
           <h1 className="mt-3 font-display text-4xl leading-[1.05] tracking-tight md:text-5xl">
@@ -52,15 +59,25 @@ export function OrderSuccess() {
               <dd className="mt-1 text-ink">{order.customer.name}</dd>
             </div>
             <div>
-              <dt className="text-[11px] uppercase tracking-[0.16em] text-mute">Адрес</dt>
+              <dt className="text-[11px] uppercase tracking-[0.16em] text-mute">
+                {order.delivery === "office" ? "Офис" : "Адрес"}
+              </dt>
               <dd className="mt-1 text-ink">
-                {order.customer.address}, {order.customer.city}
+                {order.customer.address === order.customer.city
+                  ? order.customer.city
+                  : `${order.customer.address}, ${order.customer.city}`}
               </dd>
             </div>
             <div>
               <dt className="text-[11px] uppercase tracking-[0.16em] text-mute">Имейл</dt>
               <dd className="mt-1 text-ink">{order.customer.email}</dd>
             </div>
+            {order.payment ? (
+              <div>
+                <dt className="text-[11px] uppercase tracking-[0.16em] text-mute">Плащане</dt>
+                <dd className="mt-1 text-ink">{order.payment === "cod" ? "Наложен платеж" : "С карта"}</dd>
+              </div>
+            ) : null}
           </dl>
 
           <p className="mt-8 text-sm font-light text-ink-soft">
@@ -99,9 +116,19 @@ export function OrderSuccess() {
               </li>
             ))}
           </ul>
-          <div className="mt-5 flex items-baseline justify-between border-t border-ink/10 pt-4">
-            <span className="text-[11px] uppercase tracking-[0.16em] text-mute">Общо</span>
-            <span className="font-display text-3xl leading-none">{formatPrice(order.total)}</span>
+          <div className="mt-5 space-y-2 border-t border-ink/10 pt-4 text-sm">
+            {order.shipping ? (
+              <div className="flex items-baseline justify-between text-ink-soft">
+                <span>Доставка</span>
+                <span className="tabular-nums">{formatPrice(order.shipping)}</span>
+              </div>
+            ) : null}
+            <div className="flex items-baseline justify-between">
+              <span className="text-[11px] uppercase tracking-[0.16em] text-mute">
+                {order.discount ? `Общо −${order.discount}%` : "Общо"}
+              </span>
+              <span className="font-display text-3xl leading-none">{formatPrice(order.total)}</span>
+            </div>
           </div>
         </aside>
       </div>

@@ -246,7 +246,7 @@ const emailCatalog = [
   ["order-confirmed", "Поръчки", "Потвърдена", "Поръчката се подготвя."],
   ["order-shipped", "Поръчки", "Изпратена", "Товарителница и очакване на пратката."],
   ["order-completed", "Поръчки", "Завършена", "След като комплектът е получен."],
-  ["welcome", "Хора", "Добре дошъл", "След регистрация в профила."],
+  ["welcome", "Хора", "Добре дошъл", "Писмо към профила."],
   ["newsletter", "Хора", "Бюлетин", "Потвърждение за абонамент."],
   ["review-invite", "Магазин", "Покана за ревю", "След завършена поръчка, с линк за оценка и снимки."],
 ].map(([id, group, name, description]) => ({ id, group, name, description }));
@@ -329,6 +329,7 @@ export async function demoCall(path: string, init: RequestInit = {}): Promise<un
 
   if (route === "/api/orders" && method === "GET") return store.orders;
   if (route === "/api/orders" && method === "POST") {
+    if (!body.acceptedTerms) throw new Error("Потвърдете, че приемате условията.");
     const order: Order = {
       id: nextId(store.orders),
       number: String(body.number ?? `RN-DEMO-${1100 + store.orders.length}`),
@@ -513,9 +514,30 @@ export async function demoCall(path: string, init: RequestInit = {}): Promise<un
   if (route === "/api/courier/offices") {
     const city = url.searchParams.get("city") || "София";
     return [
-      { code: "1001", name: `${city} — офис Център` },
-      { code: "1002", name: `${city} — офис Младост` },
+      { code: "1001", name: `${city} Център`, kind: "office", address: "ул. Примерна 1", city, hours: "09:00–18:00" },
+      { code: "1702", name: `Еконтомат ${city}`, kind: "aps", address: "бул. Пример 8", city, hours: "00:00–24:00" },
+      { code: "1801", name: `${city} Econt Drive`, kind: "drive", address: "Околовръстен път", city, hours: "08:00–20:00" },
     ];
+  }
+  if (route === "/api/courier/cities") {
+    const query = (url.searchParams.get("q") || "").toLocaleLowerCase("bg");
+    return [
+      { name: "София", postCode: "1000", region: "София" },
+      { name: "Пловдив", postCode: "4000", region: "Пловдив" },
+      { name: "Варна", postCode: "9000", region: "Варна" },
+      { name: "Бургас", postCode: "8000", region: "Бургас" },
+      { name: "Русе", postCode: "7000", region: "Русе" },
+    ].filter((city) => city.name.toLocaleLowerCase("bg").includes(query));
+  }
+  if (route === "/api/courier/streets") {
+    const query = (url.searchParams.get("q") || "").toLocaleLowerCase("bg");
+    return ["ул. Витоша", "бул. България", "ул. Граф Игнатиев"].filter((street) => street.toLocaleLowerCase("bg").includes(query));
+  }
+  if (route === "/api/courier/quote") {
+    const office = String(body.deliveryType ?? "") === "office";
+    const cod = String(body.paymentMethod ?? "") === "cod" ? 1.08 : 0;
+    const amount = Math.round(((office ? 4.1 : 5.62) + cod) * 100) / 100;
+    return { amount, currency: "EUR", description: office ? "До офис или еконтомат" : "До адрес" };
   }
   if (route === "/api/courier" && method === "GET") return store.courier;
   if (route === "/api/courier" && method === "PUT") {

@@ -12,14 +12,16 @@ public class OrdersController : ControllerBase
 {
     private static readonly HashSet<string> Statuses = ["new", "confirmed", "shipped", "completed", "cancelled", "unclaimed", "returned"];
     private readonly AppStore _store;
+    private readonly EcontService _econt;
     private readonly NekorektenService _nekorekten;
     private readonly MailService _mail;
     private readonly EmailTemplates _templates;
     private readonly ILogger<OrdersController> _logger;
 
-    public OrdersController(AppStore store, NekorektenService nekorekten, MailService mail, EmailTemplates templates, ILogger<OrdersController> logger)
+    public OrdersController(AppStore store, EcontService econt, NekorektenService nekorekten, MailService mail, EmailTemplates templates, ILogger<OrdersController> logger)
     {
         _store = store;
+        _econt = econt;
         _nekorekten = nekorekten;
         _mail = mail;
         _templates = templates;
@@ -27,7 +29,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<ShopOrder> Create([FromBody] ShopOrder order)
+    public async Task<ActionResult<ShopOrder>> Create([FromBody] ShopOrder order)
     {
         if (string.IsNullOrWhiteSpace(order.CustomerName) ||
             string.IsNullOrWhiteSpace(order.Phone) ||
@@ -37,6 +39,11 @@ public class OrdersController : ControllerBase
             order.Items.Count == 0)
         {
             return BadRequest(new { message = "Поръчката е непълна." });
+        }
+
+        if (!order.AcceptedTerms)
+        {
+            return BadRequest(new { message = "Потвърдете, че приемате условията." });
         }
 
         order.UserId = CurrentUserId();
@@ -49,7 +56,18 @@ public class OrdersController : ControllerBase
 
         order.DiscountPercent = quote.Percent;
         order.PromoCode = quote.Code;
-        order.Total = quote.Total;
+        ShippingQuote shipping;
+        try
+        {
+            shipping = await _econt.QuoteShipping(_store.Courier(), order, quote.Total);
+        }
+        catch (Exception exception)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
+
+        order.Shipping = shipping.Amount;
+        order.Total = quote.Total + shipping.Amount;
         if (quote.Code is not null)
         {
             _store.ConsumeCode(quote.Code);

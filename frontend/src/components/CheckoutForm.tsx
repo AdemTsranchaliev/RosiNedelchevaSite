@@ -3,66 +3,327 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { formatPrice, product } from "@/lib/content";
 import { nextOrderNumber, saveOrder, type OrderCustomer } from "@/lib/order";
 import { api } from "@/lib/session";
-import { useCart } from "./CartProvider";
+import { useCart, type CartItem } from "./CartProvider";
 
 const fieldClass =
-  "mt-2 w-full border border-line bg-paper px-3 py-3 text-[15px] text-ink outline-none transition placeholder:text-mute/70 focus:border-accent";
+  "mt-1.5 w-full rounded-lg border bg-paper px-3 py-3 text-base text-ink outline-none transition placeholder:text-mute/70 focus:border-clay";
+const DRAFT_KEY = "rosi-checkout-v1";
+
+type Delivery = "address" | "office";
+type Payment = "card" | "cod";
+
+type Draft = {
+  name: string;
+  phone: string;
+  email: string;
+  city: string;
+  address: string;
+  note: string;
+  officeCode: string;
+  delivery: Delivery;
+  payment: Payment;
+  promo: string;
+};
+
+type Quote = { ok: boolean; message: string; percent: number; total: number };
+type ShipQuote = { amount: number; currency: string; description: string };
+type Office = {
+  code: string;
+  name: string;
+  kind?: string;
+  address?: string;
+  city?: string;
+  hours?: string;
+};
+type CityHit = { name: string; postCode: string; region: string };
+type FieldName = "name" | "phone" | "email" | "city" | "address" | "office";
+
+const emptyDraft: Draft = {
+  name: "",
+  phone: "",
+  email: "",
+  city: "",
+  address: "",
+  note: "",
+  officeCode: "",
+  delivery: "address",
+  payment: "card",
+  promo: "",
+};
 
 export function CheckoutForm() {
   const { items, total, ready, clear } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
-  const [error, setError] = useState("");
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [hydrated, setHydrated] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
+  const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
   const [placed, setPlaced] = useState(false);
-  const [promo, setPromo] = useState("");
+  const [appliedCode, setAppliedCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [payable, setPayable] = useState<number | null>(null);
   const [promoNote, setPromoNote] = useState("");
-  const [delivery, setDelivery] = useState<"address" | "office">("address");
-  const [payment, setPayment] = useState<"card" | "cod">("card");
-  const [offices, setOffices] = useState<{ code: string; name: string }[]>([]);
+  const [quoting, setQuoting] = useState(false);
+  const [offices, setOffices] = useState<Office[]>([]);
+  const [officesStatus, setOfficesStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [officeRetry, setOfficeRetry] = useState(0);
+  const [officeQuery, setOfficeQuery] = useState("");
+  const [cityHits, setCityHits] = useState<CityHit[]>([]);
+  const [streetHits, setStreetHits] = useState<string[]>([]);
+  const [shipping, setShipping] = useState<number | null>(null);
+  const [shippingNote, setShippingNote] = useState("");
+  const [shippingStatus, setShippingStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [accepted, setAccepted] = useState(false);
+  const [termsError, setTermsError] = useState("");
+
+  useEffect(() => {
+    const saved = readDraft();
+    if (saved) {
+      setDraft(saved);
+      setAppliedCode(saved.promo.trim());
+      if (saved.note) setNoteOpen(true);
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || !user) return;
+    setDraft((prev) => ({
+      ...prev,
+      name: prev.name || user.name,
+      email: prev.email || user.email,
+    }));
+  }, [hydrated, user]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  }, [draft, hydrated]);
+
+  useEffect(() => {
+    if (!ready || items.length === 0) return;
+    let cancelled = false;
+    if (appliedCode) setQuoting(true);
+    api<Quote>("/api/promo/quote", {
+      method: "POST",
+      body: JSON.stringify({
+        subtotal: total,
+        code: appliedCode,
+        items: orderLines(items),
+      }),
+    })
+      .then((quote) => {
+        if (cancelled) return;
+        setDiscount(quote.ok ? quote.percent : 0);
+        setPayable(quote.ok ? quote.total : total);
+        setPromoNote(quote.percent > 0 || appliedCode ? quote.message : "");
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPayable(total);
+        if (appliedCode) setPromoNote("Кодът не можа да се провери. Опитайте отново.");
+      })
+      .finally(() => {
+        if (!cancelled) setQuoting(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, total, appliedCode, items]);
+
+  useEffect(() => {
+    if (draft.delivery !== "office") return;
+    const city = draft.city.trim();
+    if (city.length < 2) {
+      setOffices([]);
+      setOfficesStatus("idle");
+      return;
+    }
+
+    let cancelled = false;
+    setOffices([]);
+    setOfficesStatus("loading");
+    setOfficeQuery("");
+    const handle = window.setTimeout(() => {
+      api<Office[]>(`/api/courier/offices?city=${encodeURIComponent(city)}`)
+        .then((list) => {
+          if (cancelled) return;
+          setOffices(list);
+          setDraft((prev) => {
+            if (list.some((office) => office.code === prev.officeCode)) return prev;
+            const next = list.length === 1 ? list[0].code : "";
+            if (prev.officeCode === next) return prev;
+            return { ...prev, officeCode: next };
+          });
+          setOfficesStatus("ready");
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setOffices([]);
+          setOfficesStatus("error");
+        });
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(handle);
+    };
+  }, [draft.delivery, draft.city, officeRetry]);
+
+  useEffect(() => {
+    const query = draft.city.trim();
+    if (query.length < 2) {
+      setCityHits([]);
+      return;
+    }
+    setCityHits([]);
+    let cancelled = false;
+    const handle = window.setTimeout(() => {
+      api<CityHit[]>(`/api/courier/cities?q=${encodeURIComponent(query)}`)
+        .then((list) => {
+          if (!cancelled) setCityHits(list);
+        })
+        .catch(() => {
+          if (!cancelled) setCityHits([]);
+        });
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(handle);
+    };
+  }, [draft.city]);
+
+  useEffect(() => {
+    if (draft.delivery !== "address" || /\d/.test(draft.address)) {
+      setStreetHits([]);
+      return;
+    }
+    const city = draft.city.trim();
+    const query = draft.address.trim();
+    if (city.length < 2 || query.length < 2) {
+      setStreetHits([]);
+      return;
+    }
+    setStreetHits([]);
+    let cancelled = false;
+    const handle = window.setTimeout(() => {
+      api<string[]>(`/api/courier/streets?city=${encodeURIComponent(city)}&q=${encodeURIComponent(query)}`)
+        .then((list) => {
+          if (!cancelled) setStreetHits(list);
+        })
+        .catch(() => {
+          if (!cancelled) setStreetHits([]);
+        });
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(handle);
+    };
+  }, [draft.delivery, draft.city, draft.address]);
+
+  useEffect(() => {
+    const city = draft.city.trim();
+    const readyDestination =
+      draft.delivery === "office"
+        ? Boolean(draft.officeCode)
+        : city.length >= 2 && /\d/.test(draft.address);
+    if (!readyDestination) {
+      setShipping(null);
+      setShippingNote("");
+      setShippingStatus("idle");
+      return;
+    }
+
+    let cancelled = false;
+    setShippingStatus("loading");
+    const handle = window.setTimeout(() => {
+      api<ShipQuote>("/api/courier/quote", {
+        method: "POST",
+        body: JSON.stringify({
+          city,
+          deliveryType: draft.delivery,
+          officeCode: draft.delivery === "office" ? draft.officeCode : null,
+          address: draft.delivery === "address" ? draft.address.trim() : "",
+          paymentMethod: draft.payment,
+          total: payable ?? total,
+        }),
+      })
+        .then((quote) => {
+          if (cancelled) return;
+          setShipping(quote.amount);
+          setShippingNote(quote.description);
+          setShippingStatus("ready");
+        })
+        .catch((cause) => {
+          if (cancelled) return;
+          setShipping(null);
+          setShippingNote(cause instanceof Error ? cause.message : "Доставката не се изчисли.");
+          setShippingStatus("error");
+        });
+    }, 450);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(handle);
+    };
+  }, [draft.city, draft.delivery, draft.officeCode, draft.address, draft.payment, payable, total]);
+
+  function patch(partial: Partial<Draft>) {
+    setDraft((prev) => ({ ...prev, ...partial }));
+  }
+
+  function applyPromo() {
+    setAppliedCode(draft.promo.trim());
+  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (items.length === 0 || sending) return;
 
-    const data = new FormData(event.currentTarget);
     const customer: OrderCustomer = {
-      name: String(data.get("name") ?? "").trim(),
-      phone: String(data.get("phone") ?? "").trim(),
-      email: String(data.get("email") ?? "").trim(),
-      city: String(data.get("city") ?? "").trim(),
-      address: String(data.get("address") ?? "").trim(),
-      note: String(data.get("note") ?? "").trim(),
+      name: draft.name.trim(),
+      phone: draft.phone.trim(),
+      email: draft.email.trim(),
+      city: draft.city.trim(),
+      address: draft.address.trim(),
+      note: draft.note.trim(),
     };
-    const officeCode = String(data.get("office") ?? "");
-    const office = offices.find((item) => item.code === officeCode);
-
-    if (!customer.name || !customer.phone || !customer.email || !customer.city || (delivery === "address" && !customer.address)) {
-      setError("Попълнете име, телефон, имейл, град и адрес.");
-      return;
+    const office = offices.find((item) => item.code === draft.officeCode);
+    const place =
+      draft.delivery === "office" && office
+        ? [office.name, office.address].filter(Boolean).join(" · ")
+        : customer.address;
+    const problems = validate(customer, draft.delivery, office);
+    if (!accepted) {
+      setTermsError("Приемете условията, за да продължите.");
     }
-    if (delivery === "office" && !office) {
-      setError("Изберете офис на Еконт.");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) {
-      setError("Въведете валиден имейл.");
-      return;
-    }
-    if (customer.phone.replace(/\D/g, "").length < 8) {
-      setError("Въведете телефон за връзка.");
+    if (Object.keys(problems).length > 0 || !accepted) {
+      setErrors(problems);
+      setError(Object.keys(problems).length > 0 ? "Попълнете отбелязаните полета." : "Приемете условията, за да продължите.");
+      const first = Object.keys(problems)[0] ?? "terms";
+      document.getElementById(`field-${first}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
     const number = nextOrderNumber();
+    const goods = payable ?? total;
+    if (shipping === null) {
+      setError(shippingNote || "Изберете адрес или пункт, за да изчислим доставката.");
+      return;
+    }
+    const amount = goods + shipping;
     setSending(true);
     setError("");
+    setErrors({});
     try {
       await api("/api/orders", {
         method: "POST",
@@ -73,19 +334,15 @@ export function CheckoutForm() {
           email: customer.email,
           city: customer.city,
           note: customer.note,
-          paymentMethod: payment,
-          deliveryType: delivery,
+          paymentMethod: draft.payment,
+          deliveryType: draft.delivery,
           officeCode: office?.code ?? null,
           officeName: office?.name ?? null,
-          address: delivery === "office" ? office?.name ?? customer.address : customer.address,
-          total: payable ?? total,
-          promoCode: promo.trim() || null,
-          items: items.map((item) => ({
-            productId: item.id === product.id ? 1 : 0,
-            title: item.title,
-            price: item.price,
-            quantity: item.quantity,
-          })),
+          address: place,
+          acceptedTerms: true,
+          total: amount,
+          promoCode: appliedCode || null,
+          items: orderLines(items),
         }),
       });
     } catch (cause) {
@@ -99,41 +356,33 @@ export function CheckoutForm() {
       number,
       createdAt: new Date().toISOString(),
       items,
-      total,
-      customer,
+      total: amount,
+      customer: {
+        ...customer,
+        address: place,
+      },
+      payment: draft.payment,
+      delivery: draft.delivery,
+      discount,
+      shipping,
     });
     clear();
     router.push("/porachka/uspeh");
   }
 
-  async function loadOffices(city: string) {
-    if (delivery !== "office" || city.trim().length < 2) return;
-    try {
-      const list = await api<{ code: string; name: string }[]>(`/api/courier/offices?city=${encodeURIComponent(city.trim())}`);
-      setOffices(list);
-    } catch {
-      setOffices([]);
-    }
-  }
-
-  async function applyPromo() {
-    const quote = await api<{ ok: boolean; message: string; percent: number; total: number }>("/api/promo/quote", {
-      method: "POST",
-      body: JSON.stringify({ subtotal: total, code: promo }),
-    });
-    setPromoNote(quote.message);
-    setDiscount(quote.ok ? quote.percent : 0);
-    setPayable(quote.ok ? quote.total : total);
-  }
-
   if (!ready || placed) {
-    return <div className="bg-paper pt-24" />;
+    return (
+      <div className="bg-paper">
+        <CheckoutBar />
+      </div>
+    );
   }
 
   if (items.length === 0) {
     return (
-      <div className="bg-paper px-5 pb-20 pt-28 md:px-8">
-        <div className="mx-auto max-w-lg">
+      <div className="bg-paper">
+        <CheckoutBar />
+        <div className="mx-auto max-w-lg px-5 pb-20 pt-10 md:px-8">
           <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-accent">Поръчка</p>
           <h1 className="mt-3 font-display text-4xl tracking-tight">Количката е празна</h1>
           <p className="mt-4 text-[15px] font-light leading-relaxed text-ink-soft">
@@ -150,32 +399,49 @@ export function CheckoutForm() {
     );
   }
 
+  const goods = payable ?? total;
+  const amount = goods + (shipping ?? 0);
+  const shipLabel = shippingStatus === "loading" ? "…" : shipping !== null ? formatPrice(shipping) : undefined;
+
   return (
-    <div className="bg-paper pt-16 md:pt-[4.25rem]">
-      <div className="lg:grid lg:min-h-[calc(100svh-4.25rem)] lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.85fr)]">
-        <form onSubmit={onSubmit} noValidate className="px-5 py-8 sm:px-10 lg:px-14 lg:py-12">
+    <div className="bg-paper">
+      <CheckoutBar />
+      <div className="lg:grid lg:min-h-[calc(100svh-3.5rem)] lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.85fr)]">
+        <form id="checkout" onSubmit={onSubmit} noValidate className="px-4 py-6 pb-36 sm:px-10 lg:px-14 lg:py-12 lg:pb-12">
           <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-accent">Поръчка</p>
-          <h1 className="mt-3 font-display text-4xl tracking-tight">Данни за доставка</h1>
-          <p className="mt-3 max-w-md text-sm font-light leading-relaxed text-ink-soft">
-            След потвърждение ще се свържем на телефона. Доставка в България за 1–3 работни дни.
+          <h1 className="mt-2 font-display text-3xl tracking-tight sm:text-4xl">Данни за доставка</h1>
+          <p className="mt-2 max-w-md text-sm font-light leading-relaxed text-ink-soft">
+            Потвърждаваме по телефона. Цената за доставка идва от Еконт, след като изберете адрес или пункт.
           </p>
 
-          <div className="mt-6 border border-line lg:hidden">
+          <div className="mt-5 overflow-hidden rounded-xl border border-line lg:hidden">
             <button
               type="button"
-              className="flex w-full items-center justify-between px-4 py-3 text-left"
+              className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
               aria-expanded={summaryOpen}
               onClick={() => setSummaryOpen((open) => !open)}
             >
               <span className="text-[11px] uppercase tracking-[0.16em] text-accent">
                 {summaryOpen ? "Скрий поръчката" : "Покажи поръчката"}
               </span>
-              <span className="font-display text-xl">{formatPrice(total)}</span>
+              <span className="font-display text-xl">{formatPrice(amount)}</span>
             </button>
             {summaryOpen ? (
               <div className="border-t border-line px-4 py-4">
                 <SummaryItems />
+                <Totals discount={discount} subtotal={total} goods={goods} shipping={shipping} shippingStatus={shippingStatus} />
+                <div className="mt-4">
+                  <PromoField
+                    value={draft.promo}
+                    quoting={quoting}
+                    note={promoNote}
+                    onChange={(promo) => patch({ promo })}
+                    onApply={applyPromo}
+                  />
+                </div>
               </div>
+            ) : promoNote ? (
+              <p className="border-t border-line px-4 py-2.5 text-[12px] text-ink-soft">{promoNote}</p>
             ) : null}
           </div>
 
@@ -185,77 +451,230 @@ export function CheckoutForm() {
             </p>
           ) : null}
 
-          <fieldset className="mt-8">
+          <fieldset className="mt-6 lg:mt-8">
             <legend className="font-display text-2xl tracking-tight">Контакт</legend>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <Field label="Име" name="name" autoComplete="name" placeholder="Име и фамилия" />
-              <Field label="Телефон" name="phone" type="tel" autoComplete="tel" placeholder="089 …" />
+              <Field
+                label="Име"
+                name="name"
+                autoComplete="name"
+                placeholder="Име и фамилия"
+                value={draft.name}
+                error={errors.name}
+                onChange={(name) => patch({ name })}
+              />
+              <Field
+                label="Телефон"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="089 …"
+                value={draft.phone}
+                error={errors.phone}
+                onChange={(phone) => patch({ phone })}
+              />
               <Field
                 label="Имейл"
                 name="email"
                 type="email"
+                inputMode="email"
                 autoComplete="email"
                 placeholder="name@email.com"
                 className="sm:col-span-2"
+                value={draft.email}
+                error={errors.email}
+                onChange={(email) => patch({ email })}
               />
             </div>
           </fieldset>
 
-          <fieldset className="mt-10">
-            <legend className="font-display text-2xl tracking-tight">Адрес</legend>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <Field label="Град" name="city" autoComplete="address-level2" placeholder="София" onBlur={(event) => loadOffices(event.target.value)} />
-              {delivery === "address" ? (
-                <Field
+          <fieldset className="mt-6 lg:mt-8">
+            <legend className="font-display text-2xl tracking-tight">Доставка</legend>
+            <div className="mt-4 overflow-hidden rounded-xl border border-line">
+              <Choice
+                name="delivery"
+                checked={draft.delivery === "address"}
+                onChange={() => patch({ delivery: "address" })}
+                title="До адрес"
+                detail="Куриер до врата"
+                price={draft.delivery === "address" ? shipLabel : undefined}
+              />
+              <div className="border-t border-line">
+                <Choice
+                  name="delivery"
+                  checked={draft.delivery === "office"}
+                  onChange={() => patch({ delivery: "office" })}
+                  title="До офис или еконтомат"
+                  detail="Офис, еконтомат или драйв"
+                  price={draft.delivery === "office" ? shipLabel : undefined}
+                />
+              </div>
+            </div>
+            <div className="mt-4 grid gap-4">
+              <ComboField
+                label="Град"
+                name="city"
+                autoComplete="address-level2"
+                placeholder="Започнете да пишете"
+                value={draft.city}
+                error={errors.city}
+                onChange={(city) => patch({ city })}
+                suggestions={cityHits.some((city) => city.name === draft.city.trim())
+                  ? []
+                  : cityHits.map((city) => ({
+                      key: city.name,
+                      title: city.name,
+                      detail: [city.region !== city.name ? city.region : "", city.postCode].filter(Boolean).join(" · "),
+                    }))}
+                onPick={(city) => patch({ city })}
+              />
+              {draft.delivery === "address" ? (
+                <ComboField
                   label="Адрес"
                   name="address"
                   autoComplete="street-address"
-                  placeholder="Улица, номер, вход"
-                  className="sm:col-span-2"
+                  placeholder="Улица и номер"
+                  value={draft.address}
+                  error={errors.address}
+                  onChange={(address) => patch({ address })}
+                  suggestions={streetHits
+                    .filter((street) => street !== draft.address.trim())
+                    .map((street) => ({ key: street, title: street }))}
+                  onPick={(address) => patch({ address: `${address} ` })}
                 />
               ) : (
-                <label className="block sm:col-span-2">
-                  <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">Офис на Еконт</span>
-                  <select name="office" className={fieldClass} defaultValue="">
-                    <option value="">Изберете офис</option>
-                    {offices.map((office) => (
-                      <option key={office.code} value={office.code}>{office.name}</option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <label className="block sm:col-span-2">
-                <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">
-                  Бележка
-                </span>
-                <textarea
-                  name="note"
-                  rows={3}
-                  className={fieldClass}
-                  placeholder="По желание"
+                <OfficePicker
+                  city={draft.city}
+                  offices={offices}
+                  status={officesStatus}
+                  query={officeQuery}
+                  selectedCode={draft.officeCode}
+                  error={errors.office}
+                  onQuery={setOfficeQuery}
+                  onSelect={(officeCode) => patch({ officeCode })}
+                  onRetry={() => setOfficeRetry((value) => value + 1)}
                 />
-              </label>
+              )}
+            </div>
+            {shippingStatus === "error" && shippingNote ? (
+              <p className="mt-3 text-[12px] text-ink" role="alert">
+                {shippingNote}
+              </p>
+            ) : null}
+          </fieldset>
+
+          <fieldset className="mt-6 lg:mt-8">
+            <legend className="font-display text-2xl tracking-tight">Плащане</legend>
+            <div className="mt-4 overflow-hidden rounded-xl border border-line">
+              <Choice
+                name="payment"
+                checked={draft.payment === "card"}
+                onChange={() => patch({ payment: "card" })}
+                title="С карта"
+                detail="Уреждаме го по телефона"
+              />
+              <div className="border-t border-line">
+                <Choice
+                  name="payment"
+                  checked={draft.payment === "cod"}
+                  onChange={() => patch({ payment: "cod" })}
+                  title="Наложен платеж"
+                  detail="Плащате на куриера"
+                />
+              </div>
             </div>
           </fieldset>
 
-          <fieldset className="mt-10">
-            <legend className="font-display text-2xl tracking-tight">Доставка и плащане</legend>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <Choice name="delivery" checked={delivery === "address"} onChange={() => setDelivery("address")} title="До адрес" />
-              <Choice name="delivery" checked={delivery === "office"} onChange={() => setDelivery("office")} title="До офис на Еконт" />
-              <Choice name="payment" checked={payment === "card"} onChange={() => setPayment("card")} title="С карта" />
-              <Choice name="payment" checked={payment === "cod"} onChange={() => setPayment("cod")} title="Наложен платеж" />
+          {noteOpen ? (
+            <label className="mt-8 block">
+              <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">Бележка</span>
+              <textarea
+                name="note"
+                rows={3}
+                value={draft.note}
+                onChange={(event) => patch({ note: event.target.value })}
+                className={`${fieldClass} border-line`}
+                placeholder="По желание"
+              />
+            </label>
+          ) : (
+            <button
+              type="button"
+              className="mt-6 text-[12px] uppercase tracking-[0.14em] text-mute underline decoration-ink/20 underline-offset-4 lg:mt-8"
+              onClick={() => setNoteOpen(true)}
+            >
+              Добави бележка
+            </button>
+          )}
+
+          <div id="field-terms" className="mt-6 scroll-mb-36 lg:mt-8">
+            <div
+              className={`flex items-start gap-3 rounded-xl border px-4 py-3.5 ${
+                termsError ? "border-[#b42318] bg-[#fdf2f2]" : accepted ? "border-clay bg-[#f3eee6]" : "border-line"
+              }`}
+            >
+              <input
+                id="accept-terms"
+                type="checkbox"
+                checked={accepted}
+                aria-invalid={termsError ? true : undefined}
+                aria-describedby={termsError ? "terms-error" : undefined}
+                aria-label="Приемам общите условия, политиката за поверителност и условията за доставка и връщане"
+                onChange={(event) => {
+                  setAccepted(event.target.checked);
+                  if (event.target.checked) setTermsError("");
+                }}
+                className="sr-only"
+              />
+              <label
+                htmlFor="accept-terms"
+                className={`mt-0.5 grid h-[18px] w-[18px] shrink-0 cursor-pointer place-items-center rounded border ${
+                  termsError ? "border-[#b42318]" : accepted ? "border-clay bg-clay" : "border-ink/25"
+                }`}
+              >
+                <span className={`mb-0.5 h-2 w-1.5 rotate-45 border-b-2 border-r-2 border-paper ${accepted ? "opacity-100" : "opacity-0"}`} />
+              </label>
+              <p className={`text-sm font-light leading-relaxed ${termsError ? "text-[#b42318]" : "text-ink-soft"}`}>
+                <label htmlFor="accept-terms" className="cursor-pointer">
+                  Приемам{" "}
+                </label>
+                <Link href="/obshti-uslovia" target="_blank" className={`underline underline-offset-4 ${termsError ? "text-[#b42318] decoration-[#b42318]/40" : "text-ink decoration-ink/20"}`}>
+                  общите условия
+                </Link>
+                <label htmlFor="accept-terms" className="cursor-pointer">
+                  ,{" "}
+                </label>
+                <Link href="/poveritelnost" target="_blank" className={`underline underline-offset-4 ${termsError ? "text-[#b42318] decoration-[#b42318]/40" : "text-ink decoration-ink/20"}`}>
+                  политиката за поверителност
+                </Link>
+                <label htmlFor="accept-terms" className="cursor-pointer">
+                  {" "}
+                  и{" "}
+                </label>
+                <Link href="/dostavka" target="_blank" className={`underline underline-offset-4 ${termsError ? "text-[#b42318] decoration-[#b42318]/40" : "text-ink decoration-ink/20"}`}>
+                  условията за доставка и връщане
+                </Link>
+                .
+              </p>
             </div>
-            <p className="mt-3 text-[12px] font-light text-ink-soft">{product.priceNote}</p>
-          </fieldset>
+            {termsError ? (
+              <p id="terms-error" className="mt-2 text-[12px] text-[#b42318]" role="alert">
+                {termsError}
+              </p>
+            ) : null}
+          </div>
 
           <button
             type="submit"
-            disabled={sending}
-            className="mt-8 flex h-12 w-full items-center justify-center bg-clay text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink disabled:opacity-60 sm:w-auto sm:px-10"
+            disabled={sending || shipping === null}
+            className="mt-8 hidden h-12 w-full items-center justify-center rounded-lg bg-clay text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink disabled:opacity-60 sm:w-auto sm:px-10 lg:flex"
           >
-            {sending ? "Изпращане…" : "Завърши поръчката"}
+            {sending ? "Изпращане…" : `Завърши · ${formatPrice(amount)}`}
           </button>
+          <p className="mt-3 hidden text-[12px] font-light text-ink-soft lg:block">
+            Без плащане в тази стъпка. Доставката е по тарифата на Еконт.
+          </p>
         </form>
 
         <aside className="hidden border-l border-line bg-[#f3eee6] lg:block">
@@ -264,28 +683,135 @@ export function CheckoutForm() {
             <div className="mt-6">
               <SummaryItems />
             </div>
-            <div className="mt-6 flex gap-2">
-              <input
-                value={promo}
-                onChange={(event) => setPromo(event.target.value.toUpperCase())}
-                placeholder="Промокод"
-                className="h-11 min-w-0 flex-1 border border-line bg-paper px-3 text-sm uppercase outline-none"
+            <div className="mt-6">
+              <PromoField
+                value={draft.promo}
+                quoting={quoting}
+                note={promoNote}
+                onChange={(promo) => patch({ promo })}
+                onApply={applyPromo}
               />
-              <button type="button" onClick={applyPromo} className="h-11 bg-clay px-4 text-[11px] uppercase tracking-[0.14em] text-paper">
-                Приложи
-              </button>
             </div>
-            {promoNote ? <p className="mt-2 text-sm text-ink-soft">{promoNote}</p> : null}
-            <div className="mt-6 flex items-baseline justify-between border-t border-ink/10 pt-4">
-              <span className="text-[11px] uppercase tracking-[0.16em] text-mute">
-                {discount > 0 ? `Общо −${discount}%` : "Общо"}
-              </span>
-              <span className="font-display text-3xl leading-none">{formatPrice(payable ?? total)}</span>
-            </div>
-            <p className="mt-2 text-[12px] font-light text-ink-soft">{product.priceNote}</p>
+            <Totals discount={discount} subtotal={total} goods={goods} shipping={shipping} shippingStatus={shippingStatus} />
           </div>
         </aside>
       </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
+        <button
+          type="submit"
+          form="checkout"
+          disabled={sending || shipping === null}
+          className="flex h-12 w-full items-center justify-center rounded-lg bg-clay px-4 text-[13px] font-medium uppercase tracking-[0.14em] text-paper transition hover:bg-ink disabled:opacity-60"
+        >
+          {sending ? "Изпращане…" : `Завърши · ${formatPrice(amount)}`}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function CheckoutBar({ href = "/karti", label = "Назад" }: { href?: string; label?: string }) {
+  return (
+    <header className="border-b border-line bg-paper">
+      <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-10 lg:px-14">
+        <Link href={href} className="inline-flex shrink-0 items-center gap-1.5 text-[12px] uppercase tracking-[0.14em] text-ink">
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
+            <path d="M15 6 9 12l6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {label}
+        </Link>
+        <Link href="/" aria-label="Росица Неделчева — начало" className="min-w-0 truncate text-right font-display text-[12px] uppercase tracking-[0.12em] text-ink sm:text-[13px] sm:tracking-[0.16em]">
+          Росица Неделчева
+        </Link>
+      </div>
+    </header>
+  );
+}
+
+function Totals({
+  discount,
+  subtotal,
+  goods,
+  shipping,
+  shippingStatus,
+}: {
+  discount: number;
+  subtotal: number;
+  goods: number;
+  shipping: number | null;
+  shippingStatus: "idle" | "loading" | "ready" | "error";
+}) {
+  const delivery =
+    shippingStatus === "loading" ? "Изчисляване…" : shipping === null ? "След адрес" : formatPrice(shipping);
+  return (
+    <div className="mt-6 space-y-2 border-t border-ink/10 pt-4 text-sm">
+      <div className="flex items-baseline justify-between text-ink-soft">
+        <span>Междинна сума</span>
+        <span className="tabular-nums">{formatPrice(subtotal)}</span>
+      </div>
+      {discount > 0 ? (
+        <div className="flex items-baseline justify-between text-ink-soft">
+          <span>Отстъпка −{discount}%</span>
+          <span className="tabular-nums">−{formatPrice(subtotal - goods)}</span>
+        </div>
+      ) : null}
+      <div className="flex items-baseline justify-between text-ink-soft">
+        <span>Доставка</span>
+        <span className="tabular-nums">{delivery}</span>
+      </div>
+      <div className="flex items-baseline justify-between border-t border-ink/10 pt-3">
+        <span className="text-[11px] uppercase tracking-[0.16em] text-mute">Общо</span>
+        <span className="font-display text-3xl leading-none">{formatPrice(goods + (shipping ?? 0))}</span>
+      </div>
+    </div>
+  );
+}
+
+function PromoField({
+  value,
+  quoting,
+  note,
+  onChange,
+  onApply,
+}: {
+  value: string;
+  quoting: boolean;
+  note: string;
+  onChange: (value: string) => void;
+  onApply: () => void;
+}) {
+  return (
+    <div>
+      <div className="flex gap-2">
+        <input
+          value={value}
+          onChange={(event) => onChange(event.target.value.toUpperCase())}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onApply();
+            }
+          }}
+          placeholder="Промокод"
+          aria-label="Промокод"
+          spellCheck={false}
+          className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-paper px-3 text-sm uppercase outline-none focus:border-clay"
+        />
+        <button
+          type="button"
+          onClick={onApply}
+          disabled={quoting}
+          className="h-11 rounded-lg bg-clay px-4 text-[11px] uppercase tracking-[0.14em] text-paper disabled:opacity-60"
+        >
+          {quoting ? "…" : "Приложи"}
+        </button>
+      </div>
+      {note ? (
+        <p className="mt-2 text-sm text-ink-soft" aria-live="polite">
+          {note}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -313,11 +839,253 @@ function SummaryItems() {
   );
 }
 
-function Choice({ name, checked, onChange, title }: { name: string; checked: boolean; onChange: () => void; title: string }) {
+function OfficePicker({
+  city,
+  offices,
+  status,
+  query,
+  selectedCode,
+  error,
+  onQuery,
+  onSelect,
+  onRetry,
+}: {
+  city: string;
+  offices: Office[];
+  status: "idle" | "loading" | "ready" | "error";
+  query: string;
+  selectedCode: string;
+  error?: string;
+  onQuery: (value: string) => void;
+  onSelect: (code: string) => void;
+  onRetry: () => void;
+}) {
+  const [kind, setKind] = useState<string>("all");
+  const [menu, setMenu] = useState(false);
+  const blurTimer = useRef<number | null>(null);
+  const selected = offices.find((office) => office.code === selectedCode);
+  const present = (["office", "aps", "drive", "mps"] as const).filter((id) => offices.some((office) => (office.kind || "office") === id));
+  const activeKind = kind !== "all" && !present.includes(kind as (typeof present)[number]) ? "all" : kind;
+  const pool = activeKind === "all" ? offices : offices.filter((office) => (office.kind || "office") === activeKind);
+  const needle = query.trim().toLocaleLowerCase("bg");
+  const matches = needle
+    ? pool.filter((office) => `${office.name} ${office.address ?? ""}`.toLocaleLowerCase("bg").includes(needle))
+    : pool;
+  const visible = matches.slice(0, 6);
+
   return (
-    <label className={`flex cursor-pointer items-center gap-3 border px-4 py-3 text-sm ${checked ? "border-clay bg-paper-2" : "border-line"}`}>
-      <input type="radio" name={name} checked={checked} onChange={onChange} />
-      {title}
+    <div id="field-office" className="relative">
+      <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">Място за получаване</span>
+      {selected ? (
+        <div className="mt-1.5 flex items-start justify-between gap-3 rounded-xl border border-clay bg-paper-2 px-3 py-3">
+          <span className="min-w-0">
+            <span className="block text-sm text-ink">{selected.name}</span>
+            <span className="mt-1 block text-[12px] font-light leading-relaxed text-ink-soft">{pointDetail(selected)}</span>
+          </span>
+          <button
+            type="button"
+            className="shrink-0 text-[12px] text-mute underline decoration-ink/20 underline-offset-4"
+            onClick={() => onSelect("")}
+          >
+            Промени
+          </button>
+        </div>
+      ) : (
+        <>
+          <input
+            value={query}
+            onChange={(event) => onQuery(event.target.value)}
+            onFocus={() => {
+              if (blurTimer.current) window.clearTimeout(blurTimer.current);
+              setMenu(true);
+            }}
+            onBlur={() => {
+              blurTimer.current = window.setTimeout(() => setMenu(false), 120);
+            }}
+            placeholder={status === "loading" ? "Зареждаме пунктовете…" : "Търси офис, еконтомат или драйв"}
+            disabled={status !== "ready"}
+            aria-invalid={error ? true : undefined}
+            aria-expanded={menu}
+            className={`${fieldClass} ${error ? "border-accent" : "border-line"} disabled:opacity-60`}
+          />
+          {menu && status === "ready" ? (
+            <div className="absolute left-0 right-0 top-full z-[45] mt-1 overflow-hidden rounded-xl border border-line bg-paper shadow-[0_18px_40px_-24px_rgba(78,69,62,0.55)]">
+              {present.length > 1 ? (
+                <div className="flex gap-1 border-b border-line px-2 py-2">
+                  {[{ id: "all", label: "Всички" }, ...present.map((id) => ({ id, label: kindLabel(id) }))].map((filter) => (
+                    <button
+                      key={filter.id}
+                      type="button"
+                      onMouseDown={(event) => {
+                        event.preventDefault();
+                        setKind(filter.id);
+                      }}
+                      className={`rounded-full px-3 py-1 text-[11px] ${
+                        activeKind === filter.id ? "bg-clay text-paper" : "text-mute hover:bg-paper-2"
+                      }`}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {visible.length > 0 ? (
+                <ul className="max-h-[min(16rem,42svh)] overflow-auto py-1">
+                  {visible.map((office) => (
+                    <li key={office.code}>
+                      <button
+                        type="button"
+                        className="w-full px-3 py-2.5 text-left hover:bg-paper-2"
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          onSelect(office.code);
+                          setMenu(false);
+                        }}
+                      >
+                        <span className="block text-sm text-ink">{office.name}</span>
+                        <span className="mt-0.5 block text-[12px] font-light text-ink-soft">{pointDetail(office)}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="px-3 py-3 text-[12px] text-ink-soft">Няма съвпадение.</p>
+              )}
+              {matches.length > visible.length ? (
+                <p className="border-t border-line px-3 py-2 text-[12px] font-light text-ink-soft">
+                  Още {matches.length - visible.length}. Продължете да пишете.
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </>
+      )}
+      {error ? <span className="mt-1 block text-[12px] text-ink">{error}</span> : null}
+      {status === "error" ? (
+        <button
+          type="button"
+          className="mt-2 text-[12px] text-ink underline decoration-accent/60 underline-offset-4"
+          onClick={onRetry}
+        >
+          Еконт не отговори. Опитайте пак.
+        </button>
+      ) : null}
+      {status === "ready" && offices.length === 0 ? (
+        <span className="mt-1 block text-[12px] text-ink-soft">Няма пункт на Еконт за този град.</span>
+      ) : null}
+      {city.trim().length < 2 ? (
+        <span className="mt-1 block text-[12px] font-light text-ink-soft">Напишете града, за да заредим пунктовете.</span>
+      ) : null}
+    </div>
+  );
+}
+
+function ComboField({
+  label,
+  name,
+  autoComplete,
+  placeholder,
+  value,
+  error,
+  suggestions,
+  onChange,
+  onPick,
+}: {
+  label: string;
+  name: FieldName;
+  autoComplete?: string;
+  placeholder?: string;
+  value: string;
+  error?: string;
+  suggestions: { key: string; title: string; detail?: string }[];
+  onChange: (value: string) => void;
+  onPick: (key: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const blurTimer = useRef<number | null>(null);
+  function showMenu() {
+    if (blurTimer.current) window.clearTimeout(blurTimer.current);
+    setOpen(true);
+  }
+  return (
+    <div className="relative" id={`field-${name}`}>
+      <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">{label}</span>
+      <input
+        name={name}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        value={value}
+        aria-invalid={error ? true : undefined}
+        aria-expanded={open && suggestions.length > 0}
+        onFocus={showMenu}
+        onBlur={() => {
+          blurTimer.current = window.setTimeout(() => setOpen(false), 120);
+        }}
+        onChange={(event) => onChange(event.target.value)}
+        className={`${fieldClass} ${error ? "border-accent" : "border-line"}`}
+      />
+      {error ? <span className="mt-1 block text-[12px] text-ink">{error}</span> : null}
+      {open && suggestions.length > 0 ? (
+        <ul className="absolute left-0 right-0 top-full z-[45] mt-1 max-h-[min(15rem,40svh)] overflow-auto rounded-xl border border-line bg-paper py-1 shadow-[0_18px_40px_-24px_rgba(78,69,62,0.55)]">
+          {suggestions.map((item) => (
+            <li key={item.key}>
+              <button
+                type="button"
+                className="w-full px-3 py-2.5 text-left hover:bg-paper-2"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  onPick(item.key);
+                  setOpen(false);
+                }}
+              >
+                <span className="block text-sm text-ink">{item.title}</span>
+                {item.detail ? <span className="mt-0.5 block text-[12px] font-light text-ink-soft">{item.detail}</span> : null}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+function kindLabel(kind: string) {
+  if (kind === "aps") return "Еконтомат";
+  if (kind === "drive") return "Еконт Драйв";
+  if (kind === "mps") return "Мобилен офис";
+  return "Офис";
+}
+
+function pointDetail(office: Office) {
+  return [kindLabel(office.kind || "office"), office.address, office.hours].filter(Boolean).join(" · ");
+}
+
+function Choice({
+  name,
+  checked,
+  onChange,
+  title,
+  detail,
+  price,
+}: {
+  name: string;
+  checked: boolean;
+  onChange: () => void;
+  title: string;
+  detail: string;
+  price?: string;
+}) {
+  return (
+    <label className={`flex cursor-pointer items-center gap-3 px-4 py-3.5 ${checked ? "bg-[#f3eee6]" : "bg-paper"}`}>
+      <span className={`grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border ${checked ? "border-clay" : "border-ink/25"}`}>
+        <span className={`h-2 w-2 rounded-full bg-clay ${checked ? "opacity-100" : "opacity-0"}`} />
+      </span>
+      <input type="radio" name={name} checked={checked} onChange={onChange} className="sr-only" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm text-ink">{title}</span>
+        <span className="mt-0.5 block text-[12px] font-light text-ink-soft">{detail}</span>
+      </span>
+      {price ? <span className="shrink-0 text-sm tabular-nums">{price}</span> : null}
     </label>
   );
 }
@@ -326,30 +1094,95 @@ function Field({
   label,
   name,
   type = "text",
+  inputMode,
   autoComplete,
   placeholder,
   className = "",
-  onBlur,
+  value,
+  error,
+  list,
+  onChange,
 }: {
   label: string;
-  name: string;
+  name: FieldName;
   type?: string;
+  inputMode?: "tel" | "email" | "text";
   autoComplete?: string;
   placeholder?: string;
   className?: string;
-  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  value: string;
+  error?: string;
+  list?: string;
+  onChange: (value: string) => void;
 }) {
   return (
-    <label className={`block ${className}`}>
+    <label className={`block ${className}`} id={`field-${name}`}>
       <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">{label}</span>
       <input
         type={type}
         name={name}
+        inputMode={inputMode}
         autoComplete={autoComplete}
         placeholder={placeholder}
-        onBlur={onBlur}
-        className={fieldClass}
+        value={value}
+        list={list}
+        spellCheck={type === "email" ? false : undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${name}-error` : undefined}
+        onChange={(event) => onChange(event.target.value)}
+        className={`${fieldClass} ${error ? "border-accent" : "border-line"}`}
       />
+      {error ? (
+        <span id={`${name}-error`} className="mt-1 block text-[12px] text-ink">
+          {error}
+        </span>
+      ) : null}
     </label>
   );
+}
+
+function validate(customer: OrderCustomer, delivery: Delivery, office: Office | undefined) {
+  const problems: Partial<Record<FieldName, string>> = {};
+  if (!customer.name) problems.name = "Напишете име и фамилия.";
+  if (customer.phone.replace(/\D/g, "").length < 8) problems.phone = "Въведете телефон за връзка.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) problems.email = "Въведете валиден имейл.";
+  if (!customer.city) problems.city = "Напишете град.";
+  if (delivery === "address" && !customer.address) problems.address = "Напишете адрес.";
+  if (delivery === "office" && !office) problems.office = "Изберете офис или еконтомат.";
+  return problems;
+}
+
+function orderLines(items: CartItem[]) {
+  return items.map((item) => ({
+    productId: item.id === product.id ? 1 : 0,
+    title: item.title,
+    price: item.price,
+    quantity: item.quantity,
+  }));
+}
+
+function readDraft(): Draft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<Draft>;
+    return {
+      name: text(parsed.name),
+      phone: text(parsed.phone),
+      email: text(parsed.email),
+      city: text(parsed.city),
+      address: text(parsed.address),
+      note: text(parsed.note),
+      officeCode: text(parsed.officeCode),
+      delivery: parsed.delivery === "office" ? "office" : "address",
+      payment: parsed.payment === "cod" ? "cod" : "card",
+      promo: text(parsed.promo).toUpperCase(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function text(value: unknown) {
+  return typeof value === "string" ? value : "";
 }

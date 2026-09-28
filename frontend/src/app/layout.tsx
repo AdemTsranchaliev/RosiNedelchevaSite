@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Great_Vibes, Manrope } from "next/font/google";
 import { AuthProvider } from "@/components/AuthProvider";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CartProvider } from "@/components/CartProvider";
+import { CookieConsent } from "@/components/CookieConsent";
 import { SiteShell } from "@/components/SiteShell";
 import "./globals.css";
 
@@ -48,6 +49,7 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <SiteShell>{children}</SiteShell>
+            <CookieConsent />
             <CartDrawer />
           </CartProvider>
         </AuthProvider>

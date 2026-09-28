@@ -69,7 +69,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 142.20,
+      "total": 142.2,
+      "shipping": 0,
       "promoCode": "GRIZHA10",
       "discountPercent": 10,
       "status": "cancelled",
@@ -126,7 +127,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "completed",
@@ -157,7 +159,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "unclaimed",
@@ -209,7 +212,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": "GRIZHA10",
       "discountPercent": 10,
       "status": "confirmed",
@@ -251,7 +255,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "completed",
@@ -309,6 +314,7 @@
       "officeCode": null,
       "officeName": null,
       "total": 158,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 0,
       "status": "cancelled",
@@ -339,7 +345,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": "GRIZHA10",
       "discountPercent": 10,
       "status": "completed",
@@ -370,7 +377,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "completed",
@@ -427,7 +435,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "shipped",
@@ -469,7 +478,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": "GRIZHA10",
       "discountPercent": 10,
       "status": "confirmed",
@@ -511,7 +521,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 142.20,
+      "total": 142.2,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "confirmed",
@@ -554,6 +565,7 @@
       "officeCode": null,
       "officeName": null,
       "total": 79,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 0,
       "status": "cancelled",
@@ -584,7 +596,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": "GRIZHA10",
       "discountPercent": 10,
       "status": "completed",
@@ -615,7 +628,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "completed",
@@ -646,7 +660,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "shipped",
@@ -677,7 +692,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 142.20,
+      "total": 142.2,
+      "shipping": 0,
       "promoCode": "GRIZHA10",
       "discountPercent": 10,
       "status": "confirmed",
@@ -708,7 +724,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "confirmed",
@@ -756,6 +773,7 @@
       "officeCode": null,
       "officeName": null,
       "total": 79,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 0,
       "status": "cancelled",
@@ -786,7 +804,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": "GRIZHA10",
       "discountPercent": 10,
       "status": "completed",
@@ -817,7 +836,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "completed",
@@ -848,7 +868,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 142.20,
+      "total": 142.2,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "shipped",
@@ -879,7 +900,8 @@
       "deliveryType": "address",
       "officeCode": null,
       "officeName": null,
-      "total": 71.10,
+      "total": 71.1,
+      "shipping": 0,
       "promoCode": "GRIZHA10",
       "discountPercent": 10,
       "status": "confirmed",
@@ -911,6 +933,7 @@
       "officeCode": null,
       "officeName": null,
       "total": 71.1,
+      "shipping": 0,
       "promoCode": null,
       "discountPercent": 10,
       "status": "shipped",
@@ -945,6 +968,120 @@
           "status": "shipped",
           "note": "",
           "at": "2026-09-24T20:04:57.657393Z"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "number": "RN-20260928-3608",
+      "userId": null,
+      "customerName": "\u041C\u0430\u0440\u0438\u044F \u041F\u0435\u0442\u0440\u043E\u0432\u0430",
+      "phone": "0895563333",
+      "email": "maria@example.com",
+      "city": "\u0421\u043E\u0444\u0438\u044F",
+      "address": "\u0421\u043E\u0444\u0438\u044F \u041C\u043B\u0430\u0434\u043E\u0441\u0442 1",
+      "note": "",
+      "paymentMethod": "cod",
+      "deliveryType": "office",
+      "officeCode": "1056",
+      "officeName": "\u0421\u043E\u0444\u0438\u044F \u041C\u043B\u0430\u0434\u043E\u0441\u0442 1",
+      "total": 71.1,
+      "shipping": 0,
+      "promoCode": null,
+      "discountPercent": 10,
+      "status": "new",
+      "trackingCode": null,
+      "labelUrl": null,
+      "createdAt": "2026-09-28T16:26:20.982509Z",
+      "items": [
+        {
+          "productId": 1,
+          "title": "\u0421\u043F\u0440\u0430\u0432\u044F\u043D\u0435 \u0441 \u0442\u0440\u0435\u0432\u043E\u0436\u043D\u043E\u0441\u0442\u0442\u0430",
+          "price": 79,
+          "quantity": 1
+        }
+      ],
+      "history": [
+        {
+          "status": "new",
+          "note": "\u041F\u043E\u043B\u0443\u0447\u0435\u043D\u0430 \u043F\u043E\u0440\u044A\u0447\u043A\u0430",
+          "at": "2026-09-28T16:26:20.982509Z"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "number": "RN-20260928-1306",
+      "userId": null,
+      "customerName": "\u041C\u0430\u0440\u0438\u044F \u041F\u0435\u0442\u0440\u043E\u0432\u0430",
+      "phone": "0895563333",
+      "email": "maria@example.com",
+      "city": "\u0421\u043E\u0444\u0438\u044F",
+      "address": "\u0421\u043E\u0444\u0438\u044F",
+      "note": "",
+      "paymentMethod": "card",
+      "deliveryType": "office",
+      "officeCode": "1127",
+      "officeName": "\u0421\u043E\u0444\u0438\u044F",
+      "total": 75.65,
+      "shipping": 4.55,
+      "promoCode": null,
+      "discountPercent": 10,
+      "status": "new",
+      "trackingCode": null,
+      "labelUrl": null,
+      "createdAt": "2026-09-28T16:58:16.198706Z",
+      "items": [
+        {
+          "productId": 1,
+          "title": "\u0421\u043F\u0440\u0430\u0432\u044F\u043D\u0435 \u0441 \u0442\u0440\u0435\u0432\u043E\u0436\u043D\u043E\u0441\u0442\u0442\u0430",
+          "price": 79,
+          "quantity": 1
+        }
+      ],
+      "history": [
+        {
+          "status": "new",
+          "note": "\u041F\u043E\u043B\u0443\u0447\u0435\u043D\u0430 \u043F\u043E\u0440\u044A\u0447\u043A\u0430",
+          "at": "2026-09-28T16:58:16.198706Z"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "number": "RN-20260928-3585",
+      "userId": null,
+      "customerName": "Adem Tsranchaliev",
+      "phone": "\u002B359892609802",
+      "email": "ademcran4aliew@gmail.com",
+      "city": "\u041F\u0435\u0449\u0435\u0440\u0430",
+      "address": "\u041F\u0435\u0449\u0435\u0440\u0430 \u0411\u044A\u043B\u0433\u0430\u0440\u0438\u044F \u00B7 \u0443\u043B. \u0413\u0435\u043E\u0440\u0433\u0438 \u041A\u044C\u043E\u0441\u0435\u0438\u0432\u0430\u043D\u043E\u0432 \u211652 \u0434\u043E \u043C-\u043D \u0411\u0438\u043B\u0430",
+      "note": "",
+      "paymentMethod": "card",
+      "deliveryType": "office",
+      "officeCode": "4552",
+      "officeName": "\u041F\u0435\u0449\u0435\u0440\u0430 \u0411\u044A\u043B\u0433\u0430\u0440\u0438\u044F",
+      "total": 75.65,
+      "shipping": 4.55,
+      "promoCode": null,
+      "discountPercent": 10,
+      "status": "new",
+      "trackingCode": null,
+      "labelUrl": null,
+      "createdAt": "2026-09-28T20:19:15.782995Z",
+      "items": [
+        {
+          "productId": 1,
+          "title": "\u0421\u043F\u0440\u0430\u0432\u044F\u043D\u0435 \u0441 \u0442\u0440\u0435\u0432\u043E\u0436\u043D\u043E\u0441\u0442\u0442\u0430",
+          "price": 79,
+          "quantity": 1
+        }
+      ],
+      "history": [
+        {
+          "status": "new",
+          "note": "\u041F\u043E\u043B\u0443\u0447\u0435\u043D\u0430 \u043F\u043E\u0440\u044A\u0447\u043A\u0430",
+          "at": "2026-09-28T20:19:15.782995Z"
         }
       ]
     }
@@ -1131,6 +1268,678 @@
       "images": [],
       "status": "published",
       "createdAt": "2026-09-25T10:32:04.638062Z"
+    },
+    {
+      "id": 2,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview1@example.com",
+      "authorName": "\u041C\u0430\u0440\u0438\u044F",
+      "city": "\u0421\u043E\u0444\u0438\u044F",
+      "rating": 5,
+      "body": "\u041A\u0440\u0430\u0442\u044A\u043A \u043E\u0442\u0437\u0438\u0432 \u0437\u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435.",
+      "images": [
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-28T12:00:00Z"
+    },
+    {
+      "id": 3,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview2@example.com",
+      "authorName": "\u0415\u043B\u0435\u043D\u0430",
+      "city": "\u041F\u043B\u043E\u0432\u0434\u0438\u0432",
+      "rating": 5,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438.",
+      "images": [
+        "/images/cards/section-4-card-1.jpg",
+        "/images/product-box.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-27T12:00:00Z"
+    },
+    {
+      "id": 4,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview3@example.com",
+      "authorName": "\u041D\u0438\u043A\u043E\u043B",
+      "city": "\u0412\u0430\u0440\u043D\u0430",
+      "rating": 5,
+      "body": "\u0412\u0437\u0435\u0445 \u0433\u0438 \u0438 \u0437\u0430 \u043A\u0430\u0431\u0438\u043D\u0435\u0442\u0430. \u041A\u043B\u0438\u0435\u043D\u0442\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0434\u044A\u0440\u0436\u0430\u0442 \u043F\u043E-\u043B\u0435\u0441\u043D\u043E \u0432\u044A\u0440\u0445\u0443 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430, \u0432\u043C\u0435\u0441\u0442\u043E \u0432\u044A\u0440\u0445\u0443 \u0446\u0435\u043B\u0438\u044F \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440.",
+      "images": [],
+      "status": "published",
+      "createdAt": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": 5,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview4@example.com",
+      "authorName": "\u0418\u0432\u0430\u043D\u0430",
+      "city": "\u0411\u0443\u0440\u0433\u0430\u0441",
+      "rating": 4,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438, \u0438 \u043D\u0435 \u0442\u0435 \u043F\u0440\u0438\u0442\u0438\u0441\u043A\u0430\u0442 \u043A\u044A\u043C \u0432\u0435\u0440\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u0421\u043B\u0435\u0434 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0441\u0438 \u0434\u0430\u0432\u0430\u043C \u0432\u0440\u0435\u043C\u0435 \u0434\u0430 \u0437\u0430\u0431\u0435\u043B\u0435\u0436\u0430 \u043A\u0430\u043A\u0432\u043E \u0441\u0435 \u0441\u043B\u0443\u0447\u0432\u0430 \u0432 \u0442\u044F\u043B\u043E\u0442\u043E.",
+      "images": [
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards-overview.jpg",
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-25T12:00:00Z"
+    },
+    {
+      "id": 6,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview5@example.com",
+      "authorName": "\u041F\u0435\u0442\u044F",
+      "city": "\u0421\u0442\u0430\u0440\u0430 \u0417\u0430\u0433\u043E\u0440\u0430",
+      "rating": 4,
+      "body": "\u0425\u0430\u0440\u0435\u0441\u0430 \u043C\u0438, \u0447\u0435 \u043D\u044F\u043C\u0430 \u043F\u0440\u0430\u0432\u0438\u043B\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u041E\u0442\u0432\u0430\u0440\u044F\u043C \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0438 \u0441\u043F\u0438\u0440\u0430\u043C \u0442\u0430\u043C.",
+      "images": [
+        "/images/product-box.jpg",
+        "/images/cards/section-1-card-1.jpg",
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards/section-4-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-24T12:00:00Z"
+    },
+    {
+      "id": 7,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview6@example.com",
+      "authorName": "\u0410\u043D\u043D\u0430",
+      "city": "\u0420\u0443\u0441\u0435",
+      "rating": 3,
+      "body": "\u041A\u0443\u0442\u0438\u044F\u0442\u0430 \u0435 \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0430, \u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435 \u0441\u0430 \u044F\u0441\u043D\u0438. \u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0431\u0430\u0432\u043D\u043E, \u0431\u0435\u0437 \u0434\u0430 \u0431\u044A\u0440\u0437\u0430\u043C \u043F\u0440\u0435\u0437 \u0440\u0430\u0437\u0434\u0435\u043B\u0430.",
+      "images": [
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-23T12:00:00Z"
+    },
+    {
+      "id": 8,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview7@example.com",
+      "authorName": "\u0413\u0435\u0440\u0433\u0430\u043D\u0430",
+      "city": "\u041F\u043B\u0435\u0432\u0435\u043D",
+      "rating": 2,
+      "body": "\u041A\u0440\u0430\u0442\u044A\u043A \u043E\u0442\u0437\u0438\u0432 \u0437\u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435.",
+      "images": [
+        "/images/cards/section-4-card-1.jpg",
+        "/images/product-box.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-22T12:00:00Z"
+    },
+    {
+      "id": 9,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview8@example.com",
+      "authorName": "\u0414\u0430\u043D\u0438\u0435\u043B\u0430",
+      "city": "",
+      "rating": 1,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438.",
+      "images": [],
+      "status": "published",
+      "createdAt": "2026-09-21T12:00:00Z"
+    },
+    {
+      "id": 10,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview9@example.com",
+      "authorName": "\u0421\u0438\u043B\u0432\u0438\u044F",
+      "city": "\u0421\u043E\u0444\u0438\u044F",
+      "rating": 5,
+      "body": "\u0412\u0437\u0435\u0445 \u0433\u0438 \u0438 \u0437\u0430 \u043A\u0430\u0431\u0438\u043D\u0435\u0442\u0430. \u041A\u043B\u0438\u0435\u043D\u0442\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0434\u044A\u0440\u0436\u0430\u0442 \u043F\u043E-\u043B\u0435\u0441\u043D\u043E \u0432\u044A\u0440\u0445\u0443 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430, \u0432\u043C\u0435\u0441\u0442\u043E \u0432\u044A\u0440\u0445\u0443 \u0446\u0435\u043B\u0438\u044F \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440.",
+      "images": [
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards-overview.jpg",
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-20T12:00:00Z"
+    },
+    {
+      "id": 11,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview10@example.com",
+      "authorName": "\u041A\u0430\u043B\u0438\u043D\u0430",
+      "city": "\u041F\u043B\u043E\u0432\u0434\u0438\u0432",
+      "rating": 5,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438, \u0438 \u043D\u0435 \u0442\u0435 \u043F\u0440\u0438\u0442\u0438\u0441\u043A\u0430\u0442 \u043A\u044A\u043C \u0432\u0435\u0440\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u0421\u043B\u0435\u0434 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0441\u0438 \u0434\u0430\u0432\u0430\u043C \u0432\u0440\u0435\u043C\u0435 \u0434\u0430 \u0437\u0430\u0431\u0435\u043B\u0435\u0436\u0430 \u043A\u0430\u043A\u0432\u043E \u0441\u0435 \u0441\u043B\u0443\u0447\u0432\u0430 \u0432 \u0442\u044F\u043B\u043E\u0442\u043E.",
+      "images": [
+        "/images/product-box.jpg",
+        "/images/cards/section-1-card-1.jpg",
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards/section-4-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-19T12:00:00Z"
+    },
+    {
+      "id": 12,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview11@example.com",
+      "authorName": "\u041C\u0430\u0440\u0438\u044F",
+      "city": "\u0412\u0430\u0440\u043D\u0430",
+      "rating": 5,
+      "body": "\u0425\u0430\u0440\u0435\u0441\u0430 \u043C\u0438, \u0447\u0435 \u043D\u044F\u043C\u0430 \u043F\u0440\u0430\u0432\u0438\u043B\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u041E\u0442\u0432\u0430\u0440\u044F\u043C \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0438 \u0441\u043F\u0438\u0440\u0430\u043C \u0442\u0430\u043C.",
+      "images": [
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-18T12:00:00Z"
+    },
+    {
+      "id": 13,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview12@example.com",
+      "authorName": "\u0415\u043B\u0435\u043D\u0430",
+      "city": "\u0411\u0443\u0440\u0433\u0430\u0441",
+      "rating": 4,
+      "body": "\u041A\u0443\u0442\u0438\u044F\u0442\u0430 \u0435 \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0430, \u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435 \u0441\u0430 \u044F\u0441\u043D\u0438. \u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0431\u0430\u0432\u043D\u043E, \u0431\u0435\u0437 \u0434\u0430 \u0431\u044A\u0440\u0437\u0430\u043C \u043F\u0440\u0435\u0437 \u0440\u0430\u0437\u0434\u0435\u043B\u0430.",
+      "images": [
+        "/images/cards/section-4-card-1.jpg",
+        "/images/product-box.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-17T12:00:00Z"
+    },
+    {
+      "id": 14,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview13@example.com",
+      "authorName": "\u041D\u0438\u043A\u043E\u043B",
+      "city": "\u0421\u0442\u0430\u0440\u0430 \u0417\u0430\u0433\u043E\u0440\u0430",
+      "rating": 4,
+      "body": "\u041A\u0440\u0430\u0442\u044A\u043A \u043E\u0442\u0437\u0438\u0432 \u0437\u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435.",
+      "images": [],
+      "status": "published",
+      "createdAt": "2026-09-16T12:00:00Z"
+    },
+    {
+      "id": 15,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview14@example.com",
+      "authorName": "\u0418\u0432\u0430\u043D\u0430",
+      "city": "\u0420\u0443\u0441\u0435",
+      "rating": 3,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438.",
+      "images": [
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards-overview.jpg",
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-15T12:00:00Z"
+    },
+    {
+      "id": 16,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview15@example.com",
+      "authorName": "\u041F\u0435\u0442\u044F",
+      "city": "\u041F\u043B\u0435\u0432\u0435\u043D",
+      "rating": 2,
+      "body": "\u0412\u0437\u0435\u0445 \u0433\u0438 \u0438 \u0437\u0430 \u043A\u0430\u0431\u0438\u043D\u0435\u0442\u0430. \u041A\u043B\u0438\u0435\u043D\u0442\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0434\u044A\u0440\u0436\u0430\u0442 \u043F\u043E-\u043B\u0435\u0441\u043D\u043E \u0432\u044A\u0440\u0445\u0443 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430, \u0432\u043C\u0435\u0441\u0442\u043E \u0432\u044A\u0440\u0445\u0443 \u0446\u0435\u043B\u0438\u044F \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440.",
+      "images": [
+        "/images/product-box.jpg",
+        "/images/cards/section-1-card-1.jpg",
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards/section-4-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-14T12:00:00Z"
+    },
+    {
+      "id": 17,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview16@example.com",
+      "authorName": "\u0410\u043D\u043D\u0430",
+      "city": "",
+      "rating": 1,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438, \u0438 \u043D\u0435 \u0442\u0435 \u043F\u0440\u0438\u0442\u0438\u0441\u043A\u0430\u0442 \u043A\u044A\u043C \u0432\u0435\u0440\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u0421\u043B\u0435\u0434 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0441\u0438 \u0434\u0430\u0432\u0430\u043C \u0432\u0440\u0435\u043C\u0435 \u0434\u0430 \u0437\u0430\u0431\u0435\u043B\u0435\u0436\u0430 \u043A\u0430\u043A\u0432\u043E \u0441\u0435 \u0441\u043B\u0443\u0447\u0432\u0430 \u0432 \u0442\u044F\u043B\u043E\u0442\u043E.",
+      "images": [
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-13T12:00:00Z"
+    },
+    {
+      "id": 18,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview17@example.com",
+      "authorName": "\u0413\u0435\u0440\u0433\u0430\u043D\u0430",
+      "city": "\u0421\u043E\u0444\u0438\u044F",
+      "rating": 5,
+      "body": "\u0425\u0430\u0440\u0435\u0441\u0430 \u043C\u0438, \u0447\u0435 \u043D\u044F\u043C\u0430 \u043F\u0440\u0430\u0432\u0438\u043B\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u041E\u0442\u0432\u0430\u0440\u044F\u043C \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0438 \u0441\u043F\u0438\u0440\u0430\u043C \u0442\u0430\u043C.",
+      "images": [
+        "/images/cards/section-4-card-1.jpg",
+        "/images/product-box.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-12T12:00:00Z"
+    },
+    {
+      "id": 19,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview18@example.com",
+      "authorName": "\u0414\u0430\u043D\u0438\u0435\u043B\u0430",
+      "city": "\u041F\u043B\u043E\u0432\u0434\u0438\u0432",
+      "rating": 5,
+      "body": "\u041A\u0443\u0442\u0438\u044F\u0442\u0430 \u0435 \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0430, \u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435 \u0441\u0430 \u044F\u0441\u043D\u0438. \u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0431\u0430\u0432\u043D\u043E, \u0431\u0435\u0437 \u0434\u0430 \u0431\u044A\u0440\u0437\u0430\u043C \u043F\u0440\u0435\u0437 \u0440\u0430\u0437\u0434\u0435\u043B\u0430.",
+      "images": [],
+      "status": "published",
+      "createdAt": "2026-09-11T12:00:00Z"
+    },
+    {
+      "id": 20,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview19@example.com",
+      "authorName": "\u0421\u0438\u043B\u0432\u0438\u044F",
+      "city": "\u0412\u0430\u0440\u043D\u0430",
+      "rating": 5,
+      "body": "\u041A\u0440\u0430\u0442\u044A\u043A \u043E\u0442\u0437\u0438\u0432 \u0437\u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435.",
+      "images": [
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards-overview.jpg",
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-10T12:00:00Z"
+    },
+    {
+      "id": 21,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview20@example.com",
+      "authorName": "\u041A\u0430\u043B\u0438\u043D\u0430",
+      "city": "\u0411\u0443\u0440\u0433\u0430\u0441",
+      "rating": 4,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438.",
+      "images": [
+        "/images/product-box.jpg",
+        "/images/cards/section-1-card-1.jpg",
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards/section-4-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-09T12:00:00Z"
+    },
+    {
+      "id": 22,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview21@example.com",
+      "authorName": "\u041C\u0430\u0440\u0438\u044F",
+      "city": "\u0421\u0442\u0430\u0440\u0430 \u0417\u0430\u0433\u043E\u0440\u0430",
+      "rating": 4,
+      "body": "\u0412\u0437\u0435\u0445 \u0433\u0438 \u0438 \u0437\u0430 \u043A\u0430\u0431\u0438\u043D\u0435\u0442\u0430. \u041A\u043B\u0438\u0435\u043D\u0442\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0434\u044A\u0440\u0436\u0430\u0442 \u043F\u043E-\u043B\u0435\u0441\u043D\u043E \u0432\u044A\u0440\u0445\u0443 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430, \u0432\u043C\u0435\u0441\u0442\u043E \u0432\u044A\u0440\u0445\u0443 \u0446\u0435\u043B\u0438\u044F \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440.",
+      "images": [
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-08T12:00:00Z"
+    },
+    {
+      "id": 23,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview22@example.com",
+      "authorName": "\u0415\u043B\u0435\u043D\u0430",
+      "city": "\u0420\u0443\u0441\u0435",
+      "rating": 3,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438, \u0438 \u043D\u0435 \u0442\u0435 \u043F\u0440\u0438\u0442\u0438\u0441\u043A\u0430\u0442 \u043A\u044A\u043C \u0432\u0435\u0440\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u0421\u043B\u0435\u0434 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0441\u0438 \u0434\u0430\u0432\u0430\u043C \u0432\u0440\u0435\u043C\u0435 \u0434\u0430 \u0437\u0430\u0431\u0435\u043B\u0435\u0436\u0430 \u043A\u0430\u043A\u0432\u043E \u0441\u0435 \u0441\u043B\u0443\u0447\u0432\u0430 \u0432 \u0442\u044F\u043B\u043E\u0442\u043E.",
+      "images": [
+        "/images/cards/section-4-card-1.jpg",
+        "/images/product-box.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-07T12:00:00Z"
+    },
+    {
+      "id": 24,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview23@example.com",
+      "authorName": "\u041D\u0438\u043A\u043E\u043B",
+      "city": "\u041F\u043B\u0435\u0432\u0435\u043D",
+      "rating": 2,
+      "body": "\u0425\u0430\u0440\u0435\u0441\u0430 \u043C\u0438, \u0447\u0435 \u043D\u044F\u043C\u0430 \u043F\u0440\u0430\u0432\u0438\u043B\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u041E\u0442\u0432\u0430\u0440\u044F\u043C \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0438 \u0441\u043F\u0438\u0440\u0430\u043C \u0442\u0430\u043C.",
+      "images": [],
+      "status": "published",
+      "createdAt": "2026-09-06T12:00:00Z"
+    },
+    {
+      "id": 25,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview24@example.com",
+      "authorName": "\u0418\u0432\u0430\u043D\u0430",
+      "city": "",
+      "rating": 1,
+      "body": "\u041A\u0443\u0442\u0438\u044F\u0442\u0430 \u0435 \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0430, \u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435 \u0441\u0430 \u044F\u0441\u043D\u0438. \u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0431\u0430\u0432\u043D\u043E, \u0431\u0435\u0437 \u0434\u0430 \u0431\u044A\u0440\u0437\u0430\u043C \u043F\u0440\u0435\u0437 \u0440\u0430\u0437\u0434\u0435\u043B\u0430.",
+      "images": [
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards-overview.jpg",
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-05T12:00:00Z"
+    },
+    {
+      "id": 26,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview25@example.com",
+      "authorName": "\u041F\u0435\u0442\u044F",
+      "city": "\u0421\u043E\u0444\u0438\u044F",
+      "rating": 5,
+      "body": "\u041A\u0440\u0430\u0442\u044A\u043A \u043E\u0442\u0437\u0438\u0432 \u0437\u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435.",
+      "images": [
+        "/images/product-box.jpg",
+        "/images/cards/section-1-card-1.jpg",
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards/section-4-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-04T12:00:00Z"
+    },
+    {
+      "id": 27,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview26@example.com",
+      "authorName": "\u0410\u043D\u043D\u0430",
+      "city": "\u041F\u043B\u043E\u0432\u0434\u0438\u0432",
+      "rating": 5,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438.",
+      "images": [
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-03T12:00:00Z"
+    },
+    {
+      "id": 28,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview27@example.com",
+      "authorName": "\u0413\u0435\u0440\u0433\u0430\u043D\u0430",
+      "city": "\u0412\u0430\u0440\u043D\u0430",
+      "rating": 5,
+      "body": "\u0412\u0437\u0435\u0445 \u0433\u0438 \u0438 \u0437\u0430 \u043A\u0430\u0431\u0438\u043D\u0435\u0442\u0430. \u041A\u043B\u0438\u0435\u043D\u0442\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0434\u044A\u0440\u0436\u0430\u0442 \u043F\u043E-\u043B\u0435\u0441\u043D\u043E \u0432\u044A\u0440\u0445\u0443 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430, \u0432\u043C\u0435\u0441\u0442\u043E \u0432\u044A\u0440\u0445\u0443 \u0446\u0435\u043B\u0438\u044F \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440.",
+      "images": [
+        "/images/cards/section-4-card-1.jpg",
+        "/images/product-box.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-09-02T12:00:00Z"
+    },
+    {
+      "id": 29,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview28@example.com",
+      "authorName": "\u0414\u0430\u043D\u0438\u0435\u043B\u0430",
+      "city": "\u0411\u0443\u0440\u0433\u0430\u0441",
+      "rating": 4,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438, \u0438 \u043D\u0435 \u0442\u0435 \u043F\u0440\u0438\u0442\u0438\u0441\u043A\u0430\u0442 \u043A\u044A\u043C \u0432\u0435\u0440\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u0421\u043B\u0435\u0434 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0441\u0438 \u0434\u0430\u0432\u0430\u043C \u0432\u0440\u0435\u043C\u0435 \u0434\u0430 \u0437\u0430\u0431\u0435\u043B\u0435\u0436\u0430 \u043A\u0430\u043A\u0432\u043E \u0441\u0435 \u0441\u043B\u0443\u0447\u0432\u0430 \u0432 \u0442\u044F\u043B\u043E\u0442\u043E.",
+      "images": [],
+      "status": "published",
+      "createdAt": "2026-09-01T12:00:00Z"
+    },
+    {
+      "id": 30,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview29@example.com",
+      "authorName": "\u0421\u0438\u043B\u0432\u0438\u044F",
+      "city": "\u0421\u0442\u0430\u0440\u0430 \u0417\u0430\u0433\u043E\u0440\u0430",
+      "rating": 4,
+      "body": "\u0425\u0430\u0440\u0435\u0441\u0430 \u043C\u0438, \u0447\u0435 \u043D\u044F\u043C\u0430 \u043F\u0440\u0430\u0432\u0438\u043B\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u041E\u0442\u0432\u0430\u0440\u044F\u043C \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0438 \u0441\u043F\u0438\u0440\u0430\u043C \u0442\u0430\u043C.",
+      "images": [
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards-overview.jpg",
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-31T12:00:00Z"
+    },
+    {
+      "id": 31,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview30@example.com",
+      "authorName": "\u041A\u0430\u043B\u0438\u043D\u0430",
+      "city": "\u0420\u0443\u0441\u0435",
+      "rating": 3,
+      "body": "\u041A\u0443\u0442\u0438\u044F\u0442\u0430 \u0435 \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0430, \u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435 \u0441\u0430 \u044F\u0441\u043D\u0438. \u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0431\u0430\u0432\u043D\u043E, \u0431\u0435\u0437 \u0434\u0430 \u0431\u044A\u0440\u0437\u0430\u043C \u043F\u0440\u0435\u0437 \u0440\u0430\u0437\u0434\u0435\u043B\u0430.",
+      "images": [
+        "/images/product-box.jpg",
+        "/images/cards/section-1-card-1.jpg",
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards/section-4-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-30T12:00:00Z"
+    },
+    {
+      "id": 32,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview31@example.com",
+      "authorName": "\u041C\u0430\u0440\u0438\u044F",
+      "city": "\u041F\u043B\u0435\u0432\u0435\u043D",
+      "rating": 2,
+      "body": "\u041A\u0440\u0430\u0442\u044A\u043A \u043E\u0442\u0437\u0438\u0432 \u0437\u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435.",
+      "images": [
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-29T12:00:00Z"
+    },
+    {
+      "id": 33,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview32@example.com",
+      "authorName": "\u0415\u043B\u0435\u043D\u0430",
+      "city": "",
+      "rating": 1,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438.",
+      "images": [
+        "/images/cards/section-4-card-1.jpg",
+        "/images/product-box.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-28T12:00:00Z"
+    },
+    {
+      "id": 34,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview33@example.com",
+      "authorName": "\u041D\u0438\u043A\u043E\u043B",
+      "city": "\u0421\u043E\u0444\u0438\u044F",
+      "rating": 5,
+      "body": "\u0412\u0437\u0435\u0445 \u0433\u0438 \u0438 \u0437\u0430 \u043A\u0430\u0431\u0438\u043D\u0435\u0442\u0430. \u041A\u043B\u0438\u0435\u043D\u0442\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0434\u044A\u0440\u0436\u0430\u0442 \u043F\u043E-\u043B\u0435\u0441\u043D\u043E \u0432\u044A\u0440\u0445\u0443 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430, \u0432\u043C\u0435\u0441\u0442\u043E \u0432\u044A\u0440\u0445\u0443 \u0446\u0435\u043B\u0438\u044F \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440.",
+      "images": [],
+      "status": "published",
+      "createdAt": "2026-08-27T12:00:00Z"
+    },
+    {
+      "id": 35,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview34@example.com",
+      "authorName": "\u0418\u0432\u0430\u043D\u0430",
+      "city": "\u041F\u043B\u043E\u0432\u0434\u0438\u0432",
+      "rating": 5,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438, \u0438 \u043D\u0435 \u0442\u0435 \u043F\u0440\u0438\u0442\u0438\u0441\u043A\u0430\u0442 \u043A\u044A\u043C \u0432\u0435\u0440\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u0421\u043B\u0435\u0434 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0441\u0438 \u0434\u0430\u0432\u0430\u043C \u0432\u0440\u0435\u043C\u0435 \u0434\u0430 \u0437\u0430\u0431\u0435\u043B\u0435\u0436\u0430 \u043A\u0430\u043A\u0432\u043E \u0441\u0435 \u0441\u043B\u0443\u0447\u0432\u0430 \u0432 \u0442\u044F\u043B\u043E\u0442\u043E.",
+      "images": [
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards-overview.jpg",
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-26T12:00:00Z"
+    },
+    {
+      "id": 36,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview35@example.com",
+      "authorName": "\u041F\u0435\u0442\u044F",
+      "city": "\u0412\u0430\u0440\u043D\u0430",
+      "rating": 5,
+      "body": "\u0425\u0430\u0440\u0435\u0441\u0430 \u043C\u0438, \u0447\u0435 \u043D\u044F\u043C\u0430 \u043F\u0440\u0430\u0432\u0438\u043B\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u041E\u0442\u0432\u0430\u0440\u044F\u043C \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0438 \u0441\u043F\u0438\u0440\u0430\u043C \u0442\u0430\u043C.",
+      "images": [
+        "/images/product-box.jpg",
+        "/images/cards/section-1-card-1.jpg",
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards/section-4-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-25T12:00:00Z"
+    },
+    {
+      "id": 37,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview36@example.com",
+      "authorName": "\u0410\u043D\u043D\u0430",
+      "city": "\u0411\u0443\u0440\u0433\u0430\u0441",
+      "rating": 4,
+      "body": "\u041A\u0443\u0442\u0438\u044F\u0442\u0430 \u0435 \u0441\u043F\u043E\u043A\u043E\u0439\u043D\u0430, \u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435 \u0441\u0430 \u044F\u0441\u043D\u0438. \u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0431\u0430\u0432\u043D\u043E, \u0431\u0435\u0437 \u0434\u0430 \u0431\u044A\u0440\u0437\u0430\u043C \u043F\u0440\u0435\u0437 \u0440\u0430\u0437\u0434\u0435\u043B\u0430.",
+      "images": [
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-24T12:00:00Z"
+    },
+    {
+      "id": 38,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview37@example.com",
+      "authorName": "\u0413\u0435\u0440\u0433\u0430\u043D\u0430",
+      "city": "\u0421\u0442\u0430\u0440\u0430 \u0417\u0430\u0433\u043E\u0440\u0430",
+      "rating": 4,
+      "body": "\u041A\u0440\u0430\u0442\u044A\u043A \u043E\u0442\u0437\u0438\u0432 \u0437\u0430 \u043A\u0430\u0440\u0442\u0438\u0442\u0435.",
+      "images": [
+        "/images/cards/section-4-card-1.jpg",
+        "/images/product-box.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-23T12:00:00Z"
+    },
+    {
+      "id": 39,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview38@example.com",
+      "authorName": "\u0414\u0430\u043D\u0438\u0435\u043B\u0430",
+      "city": "\u0420\u0443\u0441\u0435",
+      "rating": 3,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438.",
+      "images": [],
+      "status": "published",
+      "createdAt": "2026-08-22T12:00:00Z"
+    },
+    {
+      "id": 40,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview39@example.com",
+      "authorName": "\u0421\u0438\u043B\u0432\u0438\u044F",
+      "city": "\u041F\u043B\u0435\u0432\u0435\u043D",
+      "rating": 2,
+      "body": "\u0412\u0437\u0435\u0445 \u0433\u0438 \u0438 \u0437\u0430 \u043A\u0430\u0431\u0438\u043D\u0435\u0442\u0430. \u041A\u043B\u0438\u0435\u043D\u0442\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0434\u044A\u0440\u0436\u0430\u0442 \u043F\u043E-\u043B\u0435\u0441\u043D\u043E \u0432\u044A\u0440\u0445\u0443 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430, \u0432\u043C\u0435\u0441\u0442\u043E \u0432\u044A\u0440\u0445\u0443 \u0446\u0435\u043B\u0438\u044F \u0440\u0430\u0437\u0433\u043E\u0432\u043E\u0440.",
+      "images": [
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards-overview.jpg",
+        "/images/cards/section-1-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-21T12:00:00Z"
+    },
+    {
+      "id": 41,
+      "productId": 1,
+      "orderId": 0,
+      "orderNumber": "",
+      "email": "preview40@example.com",
+      "authorName": "\u041A\u0430\u043B\u0438\u043D\u0430",
+      "city": "",
+      "rating": 1,
+      "body": "\u041F\u043E\u043B\u0437\u0432\u0430\u043C \u0433\u0438 \u0432\u0435\u0447\u0435\u0440, \u043A\u043E\u0433\u0430\u0442\u043E \u043C\u0438\u0441\u043B\u0438\u0442\u0435 \u0441\u0435 \u0437\u0430\u0432\u044A\u0440\u0442\u044F\u0442. \u0412\u044A\u043F\u0440\u043E\u0441\u0438\u0442\u0435 \u0441\u0430 \u0442\u0438\u0445\u0438 \u0438 \u043A\u043E\u043D\u043A\u0440\u0435\u0442\u043D\u0438, \u0438 \u043D\u0435 \u0442\u0435 \u043F\u0440\u0438\u0442\u0438\u0441\u043A\u0430\u0442 \u043A\u044A\u043C \u0432\u0435\u0440\u0435\u043D \u043E\u0442\u0433\u043E\u0432\u043E\u0440. \u0421\u043B\u0435\u0434 \u0435\u0434\u043D\u0430 \u043A\u0430\u0440\u0442\u0430 \u0441\u0438 \u0434\u0430\u0432\u0430\u043C \u0432\u0440\u0435\u043C\u0435 \u0434\u0430 \u0437\u0430\u0431\u0435\u043B\u0435\u0436\u0430 \u043A\u0430\u043A\u0432\u043E \u0441\u0435 \u0441\u043B\u0443\u0447\u0432\u0430 \u0432 \u0442\u044F\u043B\u043E\u0442\u043E.",
+      "images": [
+        "/images/product-box.jpg",
+        "/images/cards/section-1-card-1.jpg",
+        "/images/cards/section-2-card-1.jpg",
+        "/images/cards/section-4-card-1.jpg"
+      ],
+      "status": "published",
+      "createdAt": "2026-08-20T12:00:00Z"
     }
   ],
   "reviewInvites": [

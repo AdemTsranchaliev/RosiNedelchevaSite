@@ -15,6 +15,10 @@ export type PlacedOrder = {
   items: CartItem[];
   total: number;
   customer: OrderCustomer;
+  payment?: "card" | "cod";
+  delivery?: "address" | "office";
+  discount?: number;
+  shipping?: number;
 };
 
 const ORDER_KEY = "rosi-order";

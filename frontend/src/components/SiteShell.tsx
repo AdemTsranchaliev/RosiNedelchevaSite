@@ -14,8 +14,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {admin ? null : <SiteBanner />}
-      {admin ? null : <Header />}
+      {admin || checkout ? null : <SiteBanner />}
+      {admin || checkout ? null : <Header />}
       <main className="flex-1">{children}</main>
       {checkout || admin || login ? null : <Footer />}
     </>

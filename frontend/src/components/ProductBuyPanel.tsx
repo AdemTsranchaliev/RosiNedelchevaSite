@@ -18,33 +18,43 @@ export function ProductBuyPanel({
   showPrice = false,
   titleLevel = "h2",
   canAdd = false,
+  editorial = false,
 }: {
   showPrice?: boolean;
   titleLevel?: "h1" | "h2";
   canAdd?: boolean;
+  editorial?: boolean;
 }) {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const Title = titleLevel;
 
   return (
-    <div className={canAdd ? "max-w-md" : "w-full"}>
-      <p className={`text-[11px] font-medium uppercase tracking-[0.24em] ${canAdd ? "text-mute" : "text-accent"}`}>
-        {canAdd ? "Поръчка" : "Комплектът"}
+    <div className={editorial ? "w-full max-w-lg" : canAdd ? "max-w-md" : "w-full"}>
+      <p className={`text-[11px] font-medium uppercase tracking-[0.24em] ${editorial || !canAdd ? "text-accent" : "text-mute"}`}>
+        {editorial ? "Терапевтични карти" : canAdd ? "Поръчка" : "Комплектът"}
       </p>
       <Title
-        className={`mt-3 font-display leading-[1.05] tracking-tight text-ink ${
-          canAdd ? "text-3xl sm:text-4xl" : "text-[2rem] sm:text-[2.35rem]"
+        className={`mt-3 font-display tracking-tight text-ink ${
+          editorial
+            ? "text-[2.65rem] leading-[0.96] sm:text-5xl lg:text-[3.4rem]"
+            : canAdd
+              ? "text-3xl leading-[1.05] sm:text-4xl"
+              : "text-[2rem] leading-[1.05] sm:text-[2.35rem]"
         }`}
       >
         {product.title}
       </Title>
-      {canAdd ? null : (
-        <p className="mt-3 text-sm font-light leading-relaxed text-ink-soft">{product.subtitle}</p>
-      )}
+      {editorial || !canAdd ? (
+        <p className={`max-w-md font-light leading-relaxed text-ink-soft ${editorial ? "mt-4 text-[15px]" : "mt-3 text-sm"}`}>
+          {product.subtitle}
+        </p>
+      ) : null}
       {showPrice ? (
         <div className={canAdd ? "mt-5" : "mt-6"}>
-          <p className="font-display text-[2.75rem] leading-none tracking-tight">{formatPrice(product.price)}</p>
+          <p className={`font-display leading-none tracking-tight ${editorial ? "text-5xl" : "text-[2.75rem]"}`}>
+            {formatPrice(product.price)}
+          </p>
           <p className="mt-2 text-[11px] font-light tracking-wide text-ink-soft">{product.priceNote}</p>
           {canAdd ? <ReviewSummaryLine /> : null}
         </div>
