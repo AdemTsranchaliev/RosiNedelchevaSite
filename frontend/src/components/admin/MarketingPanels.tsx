@@ -46,6 +46,8 @@ type ShopOrder = {
   promoCode?: string | null;
   discountPercent?: number;
   status: string;
+  paymentMethod?: string;
+  paymentStatus?: string | null;
   trackingCode?: string | null;
   createdAt: string;
   items: OrderLine[];
@@ -118,7 +120,7 @@ export function Reports({ orders }: { orders: ShopOrder[] }) {
     if (to && day > to) return false;
     return true;
   });
-  const paid = period.filter((order) => order.status !== "cancelled" && order.status !== "returned");
+  const paid = period.filter((order) => order.status !== "cancelled" && order.status !== "returned" && order.paymentStatus !== "unpaid");
   const revenue = paid.reduce((sum, order) => sum + order.total, 0);
   const average = paid.length ? revenue / paid.length : 0;
   const cities = new Map<string, { total: number; count: number }>();
@@ -270,7 +272,25 @@ export function Reports({ orders }: { orders: ShopOrder[] }) {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
-        <table className="w-full text-left text-sm">
+        <ul className="divide-y divide-slate-100 md:hidden">
+          {period.length === 0 ? (
+            <li className="px-4 py-8 text-center text-sm text-slate-500">Няма поръчки за този период.</li>
+          ) : period.map((order) => (
+            <li key={order.number} className="px-4 py-3 text-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-medium">{order.number}</p>
+                  <p className="break-words text-[11px] text-slate-500">
+                    {new Date(order.createdAt).toLocaleDateString("bg-BG")} · {order.customerName} · {order.city}
+                  </p>
+                </div>
+                <p className="shrink-0 tabular-nums">{money(order.total)}</p>
+              </div>
+              <p className="mt-1 text-xs text-slate-600">{order.paymentStatus === "unpaid" ? "Чака плащане" : reportStatus[order.status] ?? order.status}</p>
+            </li>
+          ))}
+        </ul>
+        <table className="hidden w-full text-left text-sm md:table">
           <thead className="bg-slate-50 text-[11px] text-slate-500">
             <tr>
               <th className="px-4 py-2 font-medium">Поръчка</th>
@@ -291,7 +311,7 @@ export function Reports({ orders }: { orders: ShopOrder[] }) {
                 </td>
                 <td className="px-3 py-2.5">{order.customerName}</td>
                 <td className="px-3 py-2.5 text-slate-600">{order.city}</td>
-                <td className="px-3 py-2.5">{reportStatus[order.status] ?? order.status}</td>
+                <td className="px-3 py-2.5">{order.paymentStatus === "unpaid" ? "Чака плащане" : reportStatus[order.status] ?? order.status}</td>
                 <td className="px-4 py-2.5 text-right tabular-nums">{money(order.total)}</td>
               </tr>
             ))}
@@ -834,7 +854,7 @@ export function Newsletter({
         <p className="mt-1 text-sm text-slate-500">{subscribers.length} абоната</p>
         <ul className="mt-4 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
           {subscribers.map((person) => (
-            <li key={person.id} className="px-5 py-3 text-sm">
+            <li key={person.id} className="break-all px-4 py-3 text-sm sm:px-5">
               {person.email}
             </li>
           ))}

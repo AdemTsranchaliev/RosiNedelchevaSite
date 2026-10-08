@@ -75,13 +75,13 @@ export function Footer() {
                 </span>
               </span>
             </Link>
-            <p className="mt-5 max-w-[17rem] text-sm font-light leading-relaxed text-mute">
-              Терапевтични карти за тревожност — за теб и за практиката.
+            <p className="mt-5 max-w-sm text-sm font-light leading-relaxed text-mute">
+              Терапевтични карти „Справяне с тревожността“ за хора, изпитващи тревожност и за психолози/психотерапевти.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:gap-12 md:contents">
-            <nav aria-label="Навигация" className="md:col-span-3">
+          <div className="grid min-w-0 grid-cols-2 gap-8 sm:gap-12 md:contents">
+            <nav aria-label="Навигация" className="min-w-0 md:col-span-3">
               <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-accent">Навигация</p>
               <ul className="mt-4 space-y-2.5">
                 {footerNav.map((link) => (
@@ -97,7 +97,7 @@ export function Footer() {
               </ul>
             </nav>
 
-            <div className="md:col-span-4">
+            <div className="min-w-0 md:col-span-4">
               <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-accent">Контакт</p>
               <a
                 href={site.phoneHref}
@@ -110,12 +110,12 @@ export function Footer() {
               </a>
               <a
                 href={site.emailHref}
-                className="mt-2.5 flex items-center gap-2.5 break-words text-[15px] font-light text-ink-soft transition hover:text-ink"
+                className="mt-2.5 flex min-w-0 items-center gap-2.5 text-[15px] font-light text-ink-soft transition hover:text-ink"
               >
                 <span className="text-accent">
                   <MailIcon />
                 </span>
-                {site.email}
+                <span className="min-w-0 break-all">{site.email}</span>
               </a>
 
               <p className="mt-8 text-[11px] font-medium uppercase tracking-[0.2em] text-accent">Социални</p>

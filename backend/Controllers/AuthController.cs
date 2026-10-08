@@ -14,15 +14,17 @@ public class AuthController : ControllerBase
 {
     private readonly AppStore _store;
     private readonly IConfiguration _configuration;
+    private readonly ShopMail _shop;
 
-    public AuthController(AppStore store, IConfiguration configuration)
+    public AuthController(AppStore store, IConfiguration configuration, ShopMail shop)
     {
         _store = store;
         _configuration = configuration;
+        _shop = shop;
     }
 
     [HttpPost("register")]
-    public ActionResult<AuthResponse> Register([FromBody] RegisterRequest request)
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
         var name = request.Name?.Trim() ?? "";
         var email = request.Email?.Trim() ?? "";
@@ -36,6 +38,7 @@ public class AuthController : ControllerBase
         try
         {
             var user = _store.AddUser(name, email, password, "Customer");
+            await _shop.Welcome(user.Name, user.Email);
             return Ok(Issue(user));
         }
         catch (InvalidOperationException exception)

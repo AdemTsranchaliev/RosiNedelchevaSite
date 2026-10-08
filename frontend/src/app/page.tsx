@@ -21,8 +21,7 @@ const forWhom = [
 ];
 
 const trustPoints = [
-  "Картите са от нейната практика",
-  "Работи с тревожност, стрес и взаимоотношения",
+  "Картите са базирани на нейния професионален опит в темата за справянето с тревожността",
   "Сесии на живо и онлайн",
 ];
 
@@ -108,8 +107,8 @@ export default function HomePage() {
           <div className="order-1 flex items-center bg-card-gold lg:order-2">
             <div className="relative aspect-[3/2] w-full bg-card-gold">
               <Image
-                src={product.imageBox}
-                alt="Терапевтични карти Справяне с тревожността"
+                src={siteImages.hero}
+                alt="Росица Неделчева с терапевтичните карти"
                 fill
                 priority
                 className="animate-reveal object-cover object-center [-webkit-mask-image:linear-gradient(to_bottom,#000_52%,transparent)] [mask-image:linear-gradient(to_bottom,#000_52%,transparent)] lg:[-webkit-mask-image:none] lg:[mask-image:none]"
@@ -144,7 +143,7 @@ export default function HomePage() {
               src={siteImages.portrait}
               alt="Росица Неделчева"
               fill
-              className="object-cover object-[center_14%]"
+              className="object-cover object-[center_22%]"
               sizes="(max-width: 768px) 100vw, 48vw"
             />
             <figure className="absolute right-4 bottom-5 z-10 w-[9.25rem] -rotate-3 shadow-[0_18px_36px_-20px_rgba(78,69,62,0.65)] ring-[6px] ring-card-gold sm:w-40 md:-right-16 md:bottom-16 md:w-[12.5rem] md:-rotate-2">

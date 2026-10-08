@@ -12,9 +12,20 @@ type Invite = {
   used: boolean;
 };
 
+function reviewToken(param: string | string[] | undefined) {
+  const fromParam = Array.isArray(param) ? param[0] : param ?? "";
+  if (typeof window === "undefined") return fromParam;
+  const injected = (window as Window & { __REVIEW_TOKEN?: string }).__REVIEW_TOKEN;
+  if (injected) return injected;
+  const parts = window.location.pathname.split("/").filter(Boolean);
+  const index = parts.lastIndexOf("revyu");
+  const fromUrl = index >= 0 ? decodeURIComponent(parts[index + 1] ?? "") : "";
+  return fromUrl || fromParam;
+}
+
 export function ReviewInvite() {
   const params = useParams<{ token: string }>();
-  const token = params.token;
+  const [token, setToken] = useState("");
   const [invite, setInvite] = useState<Invite | null>(null);
   const [missing, setMissing] = useState(false);
   const [rating, setRating] = useState(5);
@@ -27,14 +38,24 @@ export function ReviewInvite() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    api<Invite>(`/api/reviews/invite/${token}`)
+    const current = reviewToken(params.token);
+    setToken(current);
+    if (!current) return;
+    let cancelled = false;
+    api<Invite>(`/api/reviews/invite/${current}`)
       .then((next) => {
+        if (cancelled) return;
         setInvite(next);
         setAuthorName(next.authorName);
         if (next.used) setDone(true);
       })
-      .catch(() => setMissing(true));
-  }, [token]);
+      .catch(() => {
+        if (!cancelled) setMissing(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [params.token]);
 
   function addPhotos(list: FileList | null) {
     if (!list) return;

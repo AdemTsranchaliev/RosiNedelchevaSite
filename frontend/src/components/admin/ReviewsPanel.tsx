@@ -95,7 +95,7 @@ export function ReviewsPanel({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Търсене по име, имейл или поръчка"
-          className="h-10 min-w-56 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm"
+          className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm sm:h-10 sm:w-auto sm:min-w-56 sm:flex-1"
         />
         {filters.map((item) => (
           <button
@@ -120,12 +120,12 @@ export function ReviewsPanel({
             const busy = busyId === review.id;
             return (
               <li key={review.id} className="flex flex-wrap items-start gap-x-4 gap-y-3 px-4 py-3">
-                <div className="min-w-56 flex-1">
+                <div className="min-w-0 flex-1">
                   <p className="font-medium text-slate-950">
                     {review.authorName || "Без име"}
                     {review.city ? <span className="font-normal text-slate-500"> · {review.city}</span> : null}
                   </p>
-                  <p className="mt-0.5 text-sm text-slate-500">
+                  <p className="mt-0.5 break-all text-sm text-slate-500">
                     {products.find((product) => product.id === review.productId)?.name || "Продукт"} · {review.email} · {stamp(review.createdAt)}
                   </p>
                   <p className="mt-1 text-sm">

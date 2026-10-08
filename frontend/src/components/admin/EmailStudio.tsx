@@ -60,7 +60,7 @@ export function EmailStudio({ defaultTo }: { defaultTo: string }) {
       </p>
       {catalog && !catalog.configured ? (
         <p className="mt-3 max-w-2xl rounded-xl bg-white px-4 py-3 text-sm text-slate-600 ring-1 ring-slate-200">
-          SMTP още не е въведен, затова тестът не може да излезе. Прегледът е готов.
+          Имейлът още не е свързан, затова тестът не може да излезе. Прегледът е готов.
         </p>
       ) : null}
       {error ? <p className="mt-3 text-sm text-rose-700">{error}</p> : null}
@@ -110,7 +110,7 @@ export function EmailStudio({ defaultTo }: { defaultTo: string }) {
                   value={to}
                   onChange={(event) => setTo(event.target.value)}
                   placeholder="имейл за теста"
-                  className="h-10 min-w-64 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                  className="h-11 w-full min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm sm:h-10 sm:w-auto sm:min-w-64"
                 />
                 <button
                   type="submit"

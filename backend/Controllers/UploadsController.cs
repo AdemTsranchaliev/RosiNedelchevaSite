@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RosiNedelcheva.Api.Services;
 
 namespace RosiNedelcheva.Api.Controllers;
 
@@ -32,8 +33,7 @@ public class UploadsController : ControllerBase
             return BadRequest(new { message = "Позволени са снимки (jpg, png, webp) и видео (mp4, webm)." });
         }
 
-        var folder = Path.Combine(_environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot"), "uploads");
-        Directory.CreateDirectory(folder);
+        var folder = SiteStorage.UploadsFolder(_environment);
         var name = $"{Guid.NewGuid():N}{extension}";
         var path = Path.Combine(folder, name);
         await using var stream = System.IO.File.Create(path);

@@ -6,24 +6,19 @@ import { product, siteImages } from "@/lib/content";
 
 const gallery = [
   {
-    src: product.imageBox,
+    src: product.imagePackage,
     alt: "Кутия — Справяне с тревожността",
     fit: "object-contain",
   },
   {
-    src: product.imageCards,
-    alt: "Картите по раздели",
-    fit: "object-contain",
+    src: siteImages.hero,
+    alt: "Росица Неделчева с терапевтичните карти",
+    fit: "object-cover",
   },
   {
-    src: siteImages.portrait,
-    alt: "Росица Неделчева",
-    fit: "object-cover object-[center_22%]",
-  },
-  {
-    src: siteImages.wide,
-    alt: "Росица Неделчева — портрет",
-    fit: "object-cover object-center",
+    src: product.imageFan,
+    alt: "Картите, подредени на ветрило",
+    fit: "object-cover",
   },
 ];
 
@@ -150,7 +145,7 @@ export function ProductGallery() {
         </p>
       </div>
 
-      <div className="mt-2.5 grid grid-cols-4 gap-2" role="tablist" aria-label="Снимки">
+      <div className="mt-2.5 grid grid-cols-3 gap-2" role="tablist" aria-label="Снимки">
         {gallery.map((image, index) => (
           <button
             key={image.src}

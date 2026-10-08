@@ -74,7 +74,7 @@ export default function ProductPage() {
             })}
           </div>
 
-          <figure className="relative mt-14 aspect-[2/1] overflow-hidden bg-paper-2 md:mt-20">
+          <figure className="relative mt-14 aspect-[3/2] overflow-hidden bg-paper-2 md:mt-20">
             <Image
               src={product.imageCards}
               alt="Шестте раздела и примерни карти"
@@ -89,7 +89,7 @@ export default function ProductPage() {
       <section className="grid overflow-hidden md:grid-cols-[minmax(16rem,0.78fr)_minmax(0,1.22fr)]">
         <div className="relative min-h-[24rem] md:min-h-[36rem]">
           <Image
-            src={siteImages.portrait}
+            src={siteImages.withCards}
             alt={site.name}
             fill
             className="object-cover object-[center_16%]"

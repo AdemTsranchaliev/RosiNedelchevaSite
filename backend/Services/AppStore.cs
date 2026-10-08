@@ -1,21 +1,33 @@
+using System.Linq.Expressions;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using RosiNedelcheva.Api.Data;
 using RosiNedelcheva.Api.Models;
 
 namespace RosiNedelcheva.Api.Services;
 
 public class AppStore
 {
-    private readonly string _path;
+    private readonly IDbContextFactory<AppDbContext> _factory;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<AppStore> _logger;
+    private readonly string _storePath;
     private readonly object _gate = new();
-    private StoreData _data;
 
-    public AppStore(IWebHostEnvironment environment, IConfiguration configuration)
+    public AppStore(
+        IDbContextFactory<AppDbContext> factory,
+        IWebHostEnvironment environment,
+        IConfiguration configuration,
+        ILogger<AppStore> logger)
     {
-        var dir = Path.Combine(environment.ContentRootPath, "data");
-        Directory.CreateDirectory(dir);
-        _path = Path.Combine(dir, "store.json");
-        _data = Load();
-        EnsureSeed(configuration);
+        _factory = factory;
+        _configuration = configuration;
+        _logger = logger;
+        _storePath = Path.Combine(environment.ContentRootPath, "data", "store.json");
+        using var db = factory.CreateDbContext();
+        db.Database.Migrate();
+        ImportJsonIfEmpty(db);
+        EnsureSeed(db);
     }
 
     public UserProfile ToProfile(AppUser user) => new()
@@ -29,102 +41,80 @@ public class AppStore
 
     public AppUser? FindUserByEmail(string email)
     {
-        lock (_gate)
-        {
-            return _data.Users.FirstOrDefault(user =>
-                string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase));
-        }
+        var normalized = email.Trim().ToLowerInvariant();
+        return With(db => db.Users.FirstOrDefault(user => user.Email.ToLower() == normalized));
     }
 
-    public AppUser? FindUserById(int id)
-    {
-        lock (_gate)
-        {
-            return _data.Users.FirstOrDefault(user => user.Id == id);
-        }
-    }
+    public AppUser? FindUserById(int id) => With(db => db.Users.FirstOrDefault(user => user.Id == id));
 
-    public IReadOnlyList<UserProfile> Users()
-    {
-        lock (_gate)
-        {
-            return _data.Users
-                .OrderByDescending(user => user.CreatedAt)
-                .Select(ToProfile)
-                .ToList();
-        }
-    }
+    public IReadOnlyList<UserProfile> Users() =>
+        With(db => (IReadOnlyList<UserProfile>)db.Users
+            .OrderByDescending(user => user.CreatedAt)
+            .AsEnumerable()
+            .Select(ToProfile)
+            .ToList());
 
     public AppUser AddUser(string name, string email, string password, string role)
     {
-        lock (_gate)
+        return With(db =>
         {
-            if (_data.Users.Any(user => string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase)))
+            var normalized = email.Trim().ToLowerInvariant();
+            if (db.Users.Any(user => user.Email.ToLower() == normalized))
             {
                 throw new InvalidOperationException("Този имейл вече е регистриран.");
             }
 
             var user = new AppUser
             {
-                Id = NextId(_data.Users.Select(item => item.Id)),
+                Id = NextId(db.Users, item => item.Id),
                 Name = name.Trim(),
-                Email = email.Trim().ToLowerInvariant(),
+                Email = normalized,
                 PasswordHash = PasswordHasher.Hash(password),
                 Role = role,
                 CreatedAt = DateTime.UtcNow
             };
-            _data.Users.Add(user);
-            Save();
+            db.Users.Add(user);
+            db.SaveChanges();
             return user;
-        }
+        });
     }
 
-    public IReadOnlyList<Product> Products(bool includeInactive)
-    {
-        lock (_gate)
-        {
-            return _data.Products
-                .Where(product => includeInactive || product.IsActive)
-                .OrderBy(product => product.Id)
-                .Select(Clone)
-                .ToList();
-        }
-    }
+    public IReadOnlyList<Product> Products(bool includeInactive) =>
+        With(db => (IReadOnlyList<Product>)db.Products
+            .Where(product => includeInactive || product.IsActive)
+            .OrderBy(product => product.Id)
+            .AsEnumerable()
+            .Select(Clone)
+            .ToList());
 
-    public Product? Product(int id, bool includeInactive)
-    {
-        lock (_gate)
+    public Product? Product(int id, bool includeInactive) =>
+        With(db =>
         {
-            var product = _data.Products.FirstOrDefault(item =>
-                item.Id == id && (includeInactive || item.IsActive));
+            var product = db.Products.FirstOrDefault(item => item.Id == id && (includeInactive || item.IsActive));
             return product is null ? null : Clone(product);
-        }
-    }
+        });
 
     public Product AddProduct(Product product)
     {
-        lock (_gate)
+        return With(db =>
         {
-            product.Id = NextId(_data.Products.Select(item => item.Id));
+            product.Id = NextId(db.Products, item => item.Id);
             product.CreatedAt = DateTime.UtcNow;
             product.IsActive = true;
             product.Images ??= [];
             product.ImageUrl = product.Images.FirstOrDefault() ?? product.ImageUrl;
-            _data.Products.Add(product);
-            Save();
+            db.Products.Add(product);
+            db.SaveChanges();
             return Clone(product);
-        }
+        });
     }
 
     public Product? UpdateProduct(int id, Product product)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var existing = _data.Products.FirstOrDefault(item => item.Id == id);
-            if (existing is null)
-            {
-                return null;
-            }
+            var existing = db.Products.FirstOrDefault(item => item.Id == id);
+            if (existing is null) return null;
 
             existing.Name = product.Name;
             existing.Subtitle = product.Subtitle;
@@ -138,70 +128,107 @@ public class AppStore
             existing.Specs = product.Specs ?? [];
             existing.Stock = product.Stock;
             existing.IsActive = product.IsActive;
-            Save();
+            db.SaveChanges();
             return Clone(existing);
-        }
+        });
     }
 
     public bool ArchiveProduct(int id)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var existing = _data.Products.FirstOrDefault(item => item.Id == id);
-            if (existing is null)
-            {
-                return false;
-            }
-
+            var existing = db.Products.FirstOrDefault(item => item.Id == id);
+            if (existing is null) return false;
             existing.IsActive = false;
-            Save();
+            db.SaveChanges();
             return true;
-        }
+        });
     }
 
     public ShopOrder AddOrder(ShopOrder order)
     {
-        lock (_gate)
+        return With(db =>
         {
-            order.Id = NextId(_data.Orders.Select(item => item.Id));
+            order.Id = NextId(db.Orders, item => item.Id);
             order.CreatedAt = DateTime.UtcNow;
             order.Status = "new";
             order.History = [new OrderEvent { Status = "new", Note = "Получена поръчка", At = order.CreatedAt }];
-            _data.Orders.Add(order);
-            Save();
+            order.Items ??= [];
+            db.Orders.Add(order);
+            db.SaveChanges();
             return order;
-        }
+        });
     }
 
-    public IReadOnlyList<ShopOrder> Orders()
+    public void AttachStripeSession(int id, string sessionId)
     {
-        lock (_gate)
+        With(db =>
         {
-            return _data.Orders.OrderByDescending(order => order.CreatedAt).ToList();
-        }
+            var order = db.Orders.FirstOrDefault(item => item.Id == id);
+            if (order is null) return;
+            order.StripeSessionId = sessionId;
+            db.SaveChanges();
+        });
     }
 
-    public IReadOnlyList<ShopOrder> OrdersForUser(int userId)
+    public ShopOrder? OrderByStripeSession(string sessionId) =>
+        With(db => db.Orders.FirstOrDefault(item => item.StripeSessionId == sessionId));
+
+    public (ShopOrder Order, bool JustPaid, OrderAttribution? Attribution) MarkCardPaid(int id)
     {
-        lock (_gate)
+        return With(db =>
         {
-            return _data.Orders
-                .Where(order => order.UserId == userId)
-                .OrderByDescending(order => order.CreatedAt)
-                .ToList();
-        }
+            var order = db.Orders.FirstOrDefault(item => item.Id == id);
+            if (order is null)
+            {
+                throw new InvalidOperationException("Поръчката не е намерена.");
+            }
+
+            if (order.PaymentStatus == "paid")
+            {
+                return (order, false, (OrderAttribution?)null);
+            }
+
+            order.PaymentStatus = "paid";
+            order.PaidAt = DateTime.UtcNow;
+            order.History ??= [];
+            order.History.Add(new OrderEvent
+            {
+                Status = order.Status,
+                Note = "Платено с карта",
+                At = order.PaidAt.Value
+            });
+            var attribution = order.Attribution;
+            order.Attribution = null;
+            if (!string.IsNullOrWhiteSpace(order.PromoCode))
+            {
+                var code = order.PromoCode.Trim().ToLowerInvariant();
+                var match = db.PromoCodes.FirstOrDefault(item => item.Code.ToLower() == code);
+                if (match is not null) match.Used += 1;
+            }
+
+            db.SaveChanges();
+            return (order, true, attribution);
+        });
     }
+
+    public IReadOnlyList<ShopOrder> Orders() =>
+        With(db => (IReadOnlyList<ShopOrder>)db.Orders.OrderByDescending(order => order.CreatedAt).ToList());
+
+    public IReadOnlyList<ShopOrder> OrdersForUser(int userId) =>
+        With(db => (IReadOnlyList<ShopOrder>)db.Orders
+            .Where(order => order.UserId == userId)
+            .OrderByDescending(order => order.CreatedAt)
+            .ToList());
 
     public ShopOrder? UpdateOrderStatus(int id, string status, string? note, string? trackingCode)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var order = _data.Orders.FirstOrDefault(item => item.Id == id);
-            if (order is null)
-            {
-                return null;
-            }
+            var order = db.Orders.FirstOrDefault(item => item.Id == id);
+            if (order is null) return null;
 
+            order.History ??= [];
             if (order.History.Count == 0)
             {
                 order.History.Add(new OrderEvent { Status = "new", Note = "Получена поръчка", At = order.CreatedAt });
@@ -221,21 +248,22 @@ public class AppStore
             });
             if (status == "completed")
             {
-                EnsureReviewInvites(order);
+                EnsureReviewInvites(db, order);
             }
 
-            Save();
+            db.SaveChanges();
             return order;
-        }
+        });
     }
 
     public ReviewSummary PublishedReviews(int productId)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var reviews = _data.Reviews
+            var reviews = db.Reviews
                 .Where(review => review.ProductId == productId && review.Status == "published")
                 .OrderByDescending(review => review.CreatedAt)
+                .AsEnumerable()
                 .Select(review => new PublicReview
                 {
                     Id = review.Id,
@@ -243,7 +271,7 @@ public class AppStore
                     City = review.City,
                     Rating = review.Rating,
                     Body = review.Body,
-                    Images = review.Images,
+                    Images = review.Images ?? [],
                     CreatedAt = review.CreatedAt
                 })
                 .ToList();
@@ -255,71 +283,54 @@ public class AppStore
                 Average = count == 0 ? 0 : Math.Round(reviews.Average(review => review.Rating), 1),
                 Reviews = reviews
             };
-        }
+        });
     }
 
-    public ReviewInvite? ReviewInvite(string token)
-    {
-        lock (_gate)
-        {
-            return _data.ReviewInvites.FirstOrDefault(invite =>
-                string.Equals(invite.Token, token, StringComparison.Ordinal));
-        }
-    }
+    public ReviewInvite? ReviewInvite(string token) =>
+        With(db => db.ReviewInvites.FirstOrDefault(invite => invite.Token == token));
 
-    public IReadOnlyList<ReviewInvite> UnsentReviewInvites(int orderId)
-    {
-        lock (_gate)
-        {
-            return _data.ReviewInvites
-                .Where(invite => invite.OrderId == orderId && invite.UsedAt is null && invite.SentAt is null)
-                .ToList();
-        }
-    }
+    public IReadOnlyList<ReviewInvite> UnsentReviewInvites(int orderId) =>
+        With(db => (IReadOnlyList<ReviewInvite>)db.ReviewInvites
+            .Where(invite => invite.OrderId == orderId && invite.UsedAt == null && invite.SentAt == null)
+            .ToList());
 
     public void MarkReviewInviteSent(int id)
     {
-        lock (_gate)
+        With(db =>
         {
-            var invite = _data.ReviewInvites.FirstOrDefault(item => item.Id == id);
+            var invite = db.ReviewInvites.FirstOrDefault(item => item.Id == id);
             if (invite is null) return;
             invite.SentAt = DateTime.UtcNow;
-            Save();
-        }
+            db.SaveChanges();
+        });
     }
 
     public IReadOnlyList<object> ReviewInvitesForEmail(string email)
     {
-        lock (_gate)
-        {
-            return _data.ReviewInvites
-                .Where(invite => string.Equals(invite.Email, email, StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(invite => invite.CreatedAt)
-                .Select(invite => (object)new
-                {
-                    token = invite.Token,
-                    productName = invite.ProductName,
-                    orderNumber = invite.OrderNumber,
-                    used = invite.UsedAt is not null
-                })
-                .ToList();
-        }
+        var normalized = email.Trim().ToLowerInvariant();
+        return With(db => (IReadOnlyList<object>)db.ReviewInvites
+            .Where(invite => invite.Email.ToLower() == normalized)
+            .OrderByDescending(invite => invite.CreatedAt)
+            .Select(invite => new
+            {
+                token = invite.Token,
+                productName = invite.ProductName,
+                orderNumber = invite.OrderNumber,
+                used = invite.UsedAt != null
+            })
+            .ToList());
     }
 
     public ProductReview? SubmitReview(string token, int rating, string body, string authorName, List<string> images)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var invite = _data.ReviewInvites.FirstOrDefault(item =>
-                string.Equals(item.Token, token, StringComparison.Ordinal));
-            if (invite is null || invite.UsedAt is not null)
-            {
-                return null;
-            }
+            var invite = db.ReviewInvites.FirstOrDefault(item => item.Token == token);
+            if (invite is null || invite.UsedAt is not null) return null;
 
             var review = new ProductReview
             {
-                Id = NextId(_data.Reviews.Select(item => item.Id)),
+                Id = NextId(db.Reviews, item => item.Id),
                 ProductId = invite.ProductId,
                 OrderId = invite.OrderId,
                 OrderNumber = invite.OrderNumber,
@@ -328,167 +339,92 @@ public class AppStore
                 City = invite.City,
                 Rating = rating,
                 Body = body.Trim(),
-                Images = images,
+                Images = images ?? [],
                 Status = "pending",
                 CreatedAt = DateTime.UtcNow
             };
             invite.UsedAt = review.CreatedAt;
-            _data.Reviews.Add(review);
-            Save();
+            db.Reviews.Add(review);
+            db.SaveChanges();
             return review;
-        }
+        });
     }
 
-    public IReadOnlyList<ProductReview> Reviews()
-    {
-        lock (_gate)
-        {
-            return _data.Reviews.OrderByDescending(review => review.CreatedAt).ToList();
-        }
-    }
+    public IReadOnlyList<ProductReview> Reviews() =>
+        With(db => (IReadOnlyList<ProductReview>)db.Reviews.OrderByDescending(review => review.CreatedAt).ToList());
 
     public ProductReview? SetReviewStatus(int id, string status)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var review = _data.Reviews.FirstOrDefault(item => item.Id == id);
+            var review = db.Reviews.FirstOrDefault(item => item.Id == id);
             if (review is null) return null;
             review.Status = status;
-            Save();
+            db.SaveChanges();
             return review;
-        }
-    }
-
-    private void EnsureReviewInvites(ShopOrder order)
-    {
-        foreach (var line in order.Items)
-        {
-            var productId = ResolveProductId(line);
-            if (productId == 0) continue;
-            if (_data.ReviewInvites.Any(invite => invite.OrderId == order.Id && invite.ProductId == productId))
-            {
-                continue;
-            }
-
-            var product = _data.Products.FirstOrDefault(item => item.Id == productId);
-            _data.ReviewInvites.Add(new ReviewInvite
-            {
-                Id = NextId(_data.ReviewInvites.Select(item => item.Id)),
-                Token = Guid.NewGuid().ToString("N"),
-                OrderId = order.Id,
-                OrderNumber = order.Number,
-                ProductId = productId,
-                ProductName = product?.Name ?? line.Title,
-                Email = order.Email.Trim().ToLowerInvariant(),
-                AuthorName = FirstName(order.CustomerName),
-                City = order.City.Trim(),
-                CreatedAt = DateTime.UtcNow
-            });
-        }
-    }
-
-    private int ResolveProductId(OrderLine line)
-    {
-        if (line.ProductId > 0 && _data.Products.Any(product => product.Id == line.ProductId))
-        {
-            return line.ProductId;
-        }
-
-        var byName = _data.Products.FirstOrDefault(product =>
-            string.Equals(product.Name, line.Title, StringComparison.OrdinalIgnoreCase));
-        if (byName is not null) return byName.Id;
-        return _data.Products.Count == 1 ? _data.Products[0].Id : 0;
-    }
-
-    private static string FirstName(string name)
-    {
-        var part = name.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-        return string.IsNullOrWhiteSpace(part) ? name.Trim() : part;
+        });
     }
 
     public ContactMessage AddMessage(ContactMessage message)
     {
-        lock (_gate)
+        return With(db =>
         {
-            message.Id = NextId(_data.Messages.Select(item => item.Id));
+            message.Id = NextId(db.Messages, item => item.Id);
             message.CreatedAt = DateTime.UtcNow;
             message.IsRead = false;
-            _data.Messages.Add(message);
-            Save();
+            db.Messages.Add(message);
+            db.SaveChanges();
             return message;
-        }
+        });
     }
 
-    public IReadOnlyList<ContactMessage> Messages()
-    {
-        lock (_gate)
-        {
-            return _data.Messages.OrderByDescending(item => item.CreatedAt).ToList();
-        }
-    }
+    public IReadOnlyList<ContactMessage> Messages() =>
+        With(db => (IReadOnlyList<ContactMessage>)db.Messages.OrderByDescending(item => item.CreatedAt).ToList());
 
     public ContactMessage? SetMessageRead(int id, bool isRead)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var message = _data.Messages.FirstOrDefault(item => item.Id == id);
-            if (message is null)
-            {
-                return null;
-            }
-
+            var message = db.Messages.FirstOrDefault(item => item.Id == id);
+            if (message is null) return null;
             message.IsRead = isRead;
-            Save();
+            db.SaveChanges();
             return message;
-        }
+        });
     }
 
-    public IReadOnlyList<BlogEntry> Blog(bool includeUnpublished)
-    {
-        lock (_gate)
-        {
-            return _data.Blog
-                .Where(post => includeUnpublished || post.IsPublished)
-                .OrderByDescending(post => post.Date)
-                .ToList();
-        }
-    }
+    public IReadOnlyList<BlogEntry> Blog(bool includeUnpublished) =>
+        With(db => (IReadOnlyList<BlogEntry>)db.BlogPosts
+            .Where(post => includeUnpublished || post.IsPublished)
+            .OrderByDescending(post => post.Date)
+            .ToList());
 
-    public BlogEntry? BlogBySlug(string slug, bool includeUnpublished)
-    {
-        lock (_gate)
-        {
-            return _data.Blog.FirstOrDefault(post =>
-                post.Slug == slug && (includeUnpublished || post.IsPublished));
-        }
-    }
+    public BlogEntry? BlogBySlug(string slug, bool includeUnpublished) =>
+        With(db => db.BlogPosts.FirstOrDefault(post => post.Slug == slug && (includeUnpublished || post.IsPublished)));
 
     public BlogEntry AddBlog(BlogEntry entry)
     {
-        lock (_gate)
+        return With(db =>
         {
-            entry.Id = NextId(_data.Blog.Select(item => item.Id));
+            entry.Id = NextId(db.BlogPosts, item => item.Id);
             entry.Slug = Slugify(string.IsNullOrWhiteSpace(entry.Slug) ? entry.Title : entry.Slug);
-            if (_data.Blog.Any(post => post.Slug == entry.Slug))
+            if (db.BlogPosts.Any(post => post.Slug == entry.Slug))
             {
                 entry.Slug = $"{entry.Slug}-{entry.Id}";
             }
 
-            _data.Blog.Add(entry);
-            Save();
+            db.BlogPosts.Add(entry);
+            db.SaveChanges();
             return entry;
-        }
+        });
     }
 
     public BlogEntry? UpdateBlog(int id, BlogEntry entry)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var existing = _data.Blog.FirstOrDefault(item => item.Id == id);
-            if (existing is null)
-            {
-                return null;
-            }
+            var existing = db.BlogPosts.FirstOrDefault(item => item.Id == id);
+            if (existing is null) return null;
 
             existing.Title = entry.Title;
             existing.Excerpt = entry.Excerpt;
@@ -499,61 +435,54 @@ public class AppStore
             existing.Body = entry.Body;
             existing.IsPublished = entry.IsPublished;
             var slug = Slugify(string.IsNullOrWhiteSpace(entry.Slug) ? entry.Title : entry.Slug);
-            if (!_data.Blog.Any(post => post.Id != id && post.Slug == slug))
+            if (!db.BlogPosts.Any(post => post.Id != id && post.Slug == slug))
             {
                 existing.Slug = slug;
             }
 
-            Save();
+            db.SaveChanges();
             return existing;
-        }
+        });
     }
 
     public bool DeleteBlog(int id)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var removed = _data.Blog.RemoveAll(item => item.Id == id) > 0;
-            if (removed)
-            {
-                Save();
-            }
-
-            return removed;
-        }
+            var existing = db.BlogPosts.FirstOrDefault(item => item.Id == id);
+            if (existing is null) return false;
+            db.BlogPosts.Remove(existing);
+            db.SaveChanges();
+            return true;
+        });
     }
 
-    public IReadOnlyList<Promotion> Promotions()
-    {
-        lock (_gate) return _data.Promotions.OrderByDescending(item => item.StartsAt).ToList();
-    }
+    public IReadOnlyList<Promotion> Promotions() =>
+        With(db => (IReadOnlyList<Promotion>)db.Promotions.OrderByDescending(item => item.StartsAt).ToList());
 
     public Promotion? ActivePromotion()
     {
-        lock (_gate)
-        {
-            var now = DateTime.UtcNow;
-            return _data.Promotions.FirstOrDefault(item =>
-                item.IsActive && item.StartsAt <= now && item.EndsAt >= now);
-        }
+        var now = DateTime.UtcNow;
+        return With(db => db.Promotions.FirstOrDefault(item => item.IsActive && item.StartsAt <= now && item.EndsAt >= now));
     }
 
     public Promotion AddPromotion(Promotion item)
     {
-        lock (_gate)
+        return With(db =>
         {
-            item.Id = NextId(_data.Promotions.Select(entry => entry.Id));
-            _data.Promotions.Add(item);
-            Save();
+            item.Id = NextId(db.Promotions, entry => entry.Id);
+            item.ProductIds ??= [];
+            db.Promotions.Add(item);
+            db.SaveChanges();
             return item;
-        }
+        });
     }
 
     public Promotion? UpdatePromotion(int id, Promotion item)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var existing = _data.Promotions.FirstOrDefault(entry => entry.Id == id);
+            var existing = db.Promotions.FirstOrDefault(entry => entry.Id == id);
             if (existing is null) return null;
             existing.Name = item.Name;
             existing.Description = item.Description;
@@ -562,56 +491,54 @@ public class AppStore
             existing.EndsAt = item.EndsAt;
             existing.IsActive = item.IsActive;
             existing.ProductIds = item.ProductIds ?? [];
-            Save();
+            db.SaveChanges();
             return existing;
-        }
+        });
     }
 
-    public IReadOnlyList<PromoCode> PromoCodes()
-    {
-        lock (_gate) return _data.PromoCodes.OrderByDescending(item => item.Id).ToList();
-    }
+    public IReadOnlyList<PromoCode> PromoCodes() =>
+        With(db => (IReadOnlyList<PromoCode>)db.PromoCodes.OrderByDescending(item => item.Id).ToList());
 
     public PromoCode AddPromoCode(PromoCode item)
     {
-        lock (_gate)
+        return With(db =>
         {
-            item.Id = NextId(_data.PromoCodes.Select(entry => entry.Id));
+            item.Id = NextId(db.PromoCodes, entry => entry.Id);
             item.Code = item.Code.Trim().ToUpperInvariant();
-            _data.PromoCodes.Add(item);
-            Save();
+            db.PromoCodes.Add(item);
+            db.SaveChanges();
             return item;
-        }
+        });
     }
 
     public PromoCode? UpdatePromoCode(int id, PromoCode item)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var existing = _data.PromoCodes.FirstOrDefault(entry => entry.Id == id);
+            var existing = db.PromoCodes.FirstOrDefault(entry => entry.Id == id);
             if (existing is null) return null;
             existing.Code = item.Code.Trim().ToUpperInvariant();
             existing.Percent = item.Percent;
             existing.MaxUses = item.MaxUses;
             existing.ExpiresAt = item.ExpiresAt;
             existing.IsActive = item.IsActive;
-            Save();
+            db.SaveChanges();
             return existing;
-        }
+        });
     }
 
     public QuoteResult Quote(decimal subtotal, string? code, IReadOnlyList<OrderLine>? lines = null)
     {
-        lock (_gate)
+        return With(db =>
         {
-            var promotion = CurrentPromotion();
-            var promoDiscount = PromotionDiscount(promotion, subtotal, lines);
+            var promotion = CurrentPromotion(db);
+            var promoDiscount = PromotionDiscount(db, promotion, subtotal, lines);
             var percent = promoDiscount > 0 && promotion is not null ? promotion.Percent : 0;
             var label = promotion is null ? "" : promotion.Name;
             string? applied = null;
             if (!string.IsNullOrWhiteSpace(code))
             {
-                var match = FindCode(code);
+                var match = FindCode(db, code);
                 if (match is null)
                 {
                     return new QuoteResult { Ok = false, Message = "Този код не е валиден.", Subtotal = subtotal, Total = subtotal };
@@ -637,10 +564,196 @@ public class AppStore
                 Subtotal = subtotal,
                 Total = total
             };
+        });
+    }
+
+    public void ConsumeCode(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code)) return;
+        var normalized = code.Trim().ToLowerInvariant();
+        With(db =>
+        {
+            var match = db.PromoCodes.FirstOrDefault(item => item.Code.ToLower() == normalized);
+            if (match is null) return;
+            match.Used += 1;
+            db.SaveChanges();
+        });
+    }
+
+    public SiteBanner Banner() => With(db => ReadBanner(Settings(db)));
+
+    public CourierSettings Courier() => With(db => ReadCourier(Settings(db)));
+
+    public string NekorektenKey() => With(db => Settings(db).NekorektenKey ?? "");
+
+    public IReadOnlyList<ReputationCheck> ReputationChecks() =>
+        With(db => (IReadOnlyList<ReputationCheck>)db.ReputationChecks.OrderByDescending(item => item.CheckedAt).ToList());
+
+    public ReputationCheck SaveReputation(ReputationCheck check)
+    {
+        return With(db =>
+        {
+            check.Id = NextId(db.ReputationChecks, item => item.Id);
+            check.CheckedAt = DateTime.UtcNow;
+            check.Reports ??= [];
+            db.ReputationChecks.Add(check);
+            db.SaveChanges();
+            return check;
+        });
+    }
+
+    public CourierSettings UpdateCourier(CourierSettings settings)
+    {
+        return With(db =>
+        {
+            var row = Settings(db);
+            row.CourierJson = JsonSerializer.Serialize(settings, JsonColumns.Options);
+            db.SaveChanges();
+            return settings;
+        });
+    }
+
+    public ShopOrder? SetWaybill(int id, string number, string pdfUrl, string? note = null)
+    {
+        return With(db =>
+        {
+            var order = db.Orders.FirstOrDefault(item => item.Id == id);
+            if (order is null) return null;
+            order.TrackingCode = number;
+            order.LabelUrl = pdfUrl;
+            order.History ??= [];
+            if (order.History.Count == 0)
+            {
+                order.History.Add(new OrderEvent { Status = "new", Note = "Получена поръчка", At = order.CreatedAt });
+            }
+
+            order.History.Add(new OrderEvent
+            {
+                Status = order.Status,
+                Note = string.IsNullOrWhiteSpace(note) ? $"Товарителница {number}" : $"Товарителница {number}. {note.Trim()}",
+                At = DateTime.UtcNow
+            });
+            db.SaveChanges();
+            return order;
+        });
+    }
+
+    public SiteBanner UpdateBanner(SiteBanner banner)
+    {
+        return With(db =>
+        {
+            var row = Settings(db);
+            row.BannerText = banner.Text ?? "";
+            row.BannerHref = string.IsNullOrWhiteSpace(banner.Href) ? "/karti" : banner.Href;
+            row.BannerActive = banner.IsActive;
+            db.SaveChanges();
+            return ReadBanner(row);
+        });
+    }
+
+    public IReadOnlyList<Subscriber> Subscribers() =>
+        With(db => (IReadOnlyList<Subscriber>)db.Subscribers.OrderByDescending(item => item.CreatedAt).ToList());
+
+    public Subscriber AddSubscriber(string email)
+    {
+        var normalized = email.Trim().ToLowerInvariant();
+        return With(db =>
+        {
+            var existing = db.Subscribers.FirstOrDefault(item => item.Email.ToLower() == normalized);
+            if (existing is not null) return existing;
+            var subscriber = new Subscriber
+            {
+                Id = NextId(db.Subscribers, item => item.Id),
+                Email = normalized,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.Subscribers.Add(subscriber);
+            db.SaveChanges();
+            return subscriber;
+        });
+    }
+
+    public IReadOnlyList<string> Audience()
+    {
+        return With(db =>
+        {
+            var emails = db.Subscribers.Select(item => item.Email).ToList();
+            emails.AddRange(db.Users.Where(user => user.Role != "Admin").Select(user => user.Email));
+            emails.AddRange(db.Orders.Select(order => order.Email));
+            return (IReadOnlyList<string>)emails
+                .Where(email => !string.IsNullOrWhiteSpace(email))
+                .Select(email => email.Trim().ToLowerInvariant())
+                .Distinct()
+                .ToList();
+        });
+    }
+
+    public IReadOnlyList<EmailCampaign> Campaigns() =>
+        With(db => (IReadOnlyList<EmailCampaign>)db.Campaigns.OrderByDescending(item => item.CreatedAt).ToList());
+
+    public EmailCampaign AddCampaign(EmailCampaign campaign)
+    {
+        return With(db =>
+        {
+            campaign.Id = NextId(db.Campaigns, item => item.Id);
+            campaign.CreatedAt = DateTime.UtcNow;
+            db.Campaigns.Add(campaign);
+            db.SaveChanges();
+            return campaign;
+        });
+    }
+
+    private void EnsureReviewInvites(AppDbContext db, ShopOrder order)
+    {
+        order.Items ??= [];
+        foreach (var line in order.Items)
+        {
+            var productId = ResolveProductId(db, line);
+            if (productId == 0) continue;
+            if (db.ReviewInvites.Local.Any(invite => invite.OrderId == order.Id && invite.ProductId == productId)
+                || db.ReviewInvites.Any(invite => invite.OrderId == order.Id && invite.ProductId == productId))
+            {
+                continue;
+            }
+
+            var product = db.Products.FirstOrDefault(item => item.Id == productId);
+            db.ReviewInvites.Add(new ReviewInvite
+            {
+                Id = NextId(db.ReviewInvites, item => item.Id),
+                Token = Guid.NewGuid().ToString("N"),
+                OrderId = order.Id,
+                OrderNumber = order.Number,
+                ProductId = productId,
+                ProductName = product?.Name ?? line.Title,
+                Email = order.Email.Trim().ToLowerInvariant(),
+                AuthorName = FirstName(order.CustomerName),
+                City = order.City.Trim(),
+                CreatedAt = DateTime.UtcNow
+            });
         }
     }
 
-    private decimal PromotionDiscount(Promotion? promotion, decimal subtotal, IReadOnlyList<OrderLine>? lines)
+    private int ResolveProductId(AppDbContext db, OrderLine line)
+    {
+        if (line.ProductId > 0 && db.Products.Any(product => product.Id == line.ProductId))
+        {
+            return line.ProductId;
+        }
+
+        var title = line.Title.Trim().ToLowerInvariant();
+        var byName = db.Products.FirstOrDefault(product => product.Name.ToLower() == title);
+        if (byName is not null) return byName.Id;
+        var products = db.Products.Select(product => product.Id).ToList();
+        return products.Count == 1 ? products[0] : 0;
+    }
+
+    private static string FirstName(string name)
+    {
+        var part = name.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        return string.IsNullOrWhiteSpace(part) ? name.Trim() : part;
+    }
+
+    private decimal PromotionDiscount(AppDbContext db, Promotion? promotion, decimal subtotal, IReadOnlyList<OrderLine>? lines)
     {
         if (promotion is null || promotion.Percent <= 0) return 0;
         var ids = promotion.ProductIds ?? [];
@@ -650,9 +763,11 @@ public class AppStore
         }
 
         if (lines is null || lines.Count == 0) return 0;
-        var names = _data.Products
+        var names = db.Products
             .Where(product => ids.Contains(product.Id))
-            .Select(product => product.Name.Trim())
+            .Select(product => product.Name)
+            .AsEnumerable()
+            .Select(name => name.Trim())
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var eligible = lines
             .Where(line => ids.Contains(line.ProductId) || names.Contains(line.Title.Trim()))
@@ -660,306 +775,225 @@ public class AppStore
         return decimal.Round(eligible * promotion.Percent / 100m, 2);
     }
 
-    public void ConsumeCode(string? code)
-    {
-        if (string.IsNullOrWhiteSpace(code)) return;
-        lock (_gate)
-        {
-            var match = _data.PromoCodes.FirstOrDefault(item =>
-                string.Equals(item.Code, code.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (match is null) return;
-            match.Used += 1;
-            Save();
-        }
-    }
-
-    public SiteBanner Banner()
-    {
-        lock (_gate) return _data.Banner;
-    }
-
-    public CourierSettings Courier()
-    {
-        lock (_gate) return _data.Courier;
-    }
-
-    public string NekorektenKey()
-    {
-        lock (_gate) return _data.NekorektenKey ?? "";
-    }
-
-    public IReadOnlyList<ReputationCheck> ReputationChecks()
-    {
-        lock (_gate) return _data.Reputation.OrderByDescending(item => item.CheckedAt).ToList();
-    }
-
-    public ReputationCheck SaveReputation(ReputationCheck check)
-    {
-        lock (_gate)
-        {
-            check.Id = NextId(_data.Reputation.Select(item => item.Id));
-            check.CheckedAt = DateTime.UtcNow;
-            _data.Reputation.Add(check);
-            Save();
-            return check;
-        }
-    }
-
-    public CourierSettings UpdateCourier(CourierSettings settings)
-    {
-        lock (_gate)
-        {
-            _data.Courier = settings;
-            Save();
-            return settings;
-        }
-    }
-
-    public ShopOrder? SetWaybill(int id, string number, string pdfUrl, string? note = null)
-    {
-        lock (_gate)
-        {
-            var order = _data.Orders.FirstOrDefault(item => item.Id == id);
-            if (order is null) return null;
-            order.TrackingCode = number;
-            order.LabelUrl = pdfUrl;
-            if (order.History.Count == 0)
-            {
-                order.History.Add(new OrderEvent { Status = "new", Note = "Получена поръчка", At = order.CreatedAt });
-            }
-            order.History.Add(new OrderEvent
-            {
-                Status = order.Status,
-                Note = string.IsNullOrWhiteSpace(note) ? $"Товарителница {number}" : $"Товарителница {number}. {note.Trim()}",
-                At = DateTime.UtcNow
-            });
-            Save();
-            return order;
-        }
-    }
-
-    public SiteBanner UpdateBanner(SiteBanner banner)
-    {
-        lock (_gate)
-        {
-            _data.Banner = banner;
-            Save();
-            return banner;
-        }
-    }
-
-    public IReadOnlyList<Subscriber> Subscribers()
-    {
-        lock (_gate) return _data.Subscribers.OrderByDescending(item => item.CreatedAt).ToList();
-    }
-
-    public Subscriber AddSubscriber(string email)
-    {
-        lock (_gate)
-        {
-            var normalized = email.Trim().ToLowerInvariant();
-            var existing = _data.Subscribers.FirstOrDefault(item =>
-                string.Equals(item.Email, normalized, StringComparison.OrdinalIgnoreCase));
-            if (existing is not null) return existing;
-            var subscriber = new Subscriber
-            {
-                Id = NextId(_data.Subscribers.Select(item => item.Id)),
-                Email = normalized,
-                CreatedAt = DateTime.UtcNow
-            };
-            _data.Subscribers.Add(subscriber);
-            Save();
-            return subscriber;
-        }
-    }
-
-    public IReadOnlyList<string> Audience()
-    {
-        lock (_gate)
-        {
-            return _data.Subscribers.Select(item => item.Email)
-                .Concat(_data.Users.Where(user => user.Role != "Admin").Select(user => user.Email))
-                .Concat(_data.Orders.Select(order => order.Email))
-                .Where(email => !string.IsNullOrWhiteSpace(email))
-                .Select(email => email.Trim().ToLowerInvariant())
-                .Distinct()
-                .ToList();
-        }
-    }
-
-    public IReadOnlyList<EmailCampaign> Campaigns()
-    {
-        lock (_gate) return _data.Campaigns.OrderByDescending(item => item.CreatedAt).ToList();
-    }
-
-    public EmailCampaign AddCampaign(EmailCampaign campaign)
-    {
-        lock (_gate)
-        {
-            campaign.Id = NextId(_data.Campaigns.Select(item => item.Id));
-            campaign.CreatedAt = DateTime.UtcNow;
-            _data.Campaigns.Add(campaign);
-            Save();
-            return campaign;
-        }
-    }
-
-    private Promotion? CurrentPromotion()
+    private Promotion? CurrentPromotion(AppDbContext db)
     {
         var now = DateTime.UtcNow;
-        return _data.Promotions.FirstOrDefault(item => item.IsActive && item.StartsAt <= now && item.EndsAt >= now);
+        return db.Promotions.FirstOrDefault(item => item.IsActive && item.StartsAt <= now && item.EndsAt >= now);
     }
 
-    private PromoCode? FindCode(string code)
+    private PromoCode? FindCode(AppDbContext db, string code)
     {
-        var match = _data.PromoCodes.FirstOrDefault(item =>
-            item.IsActive && string.Equals(item.Code, code.Trim(), StringComparison.OrdinalIgnoreCase));
+        var normalized = code.Trim().ToLowerInvariant();
+        var match = db.PromoCodes.FirstOrDefault(item => item.IsActive && item.Code.ToLower() == normalized);
         if (match is null) return null;
         if (match.ExpiresAt is not null && match.ExpiresAt < DateTime.UtcNow) return null;
         if (match.Used >= match.MaxUses) return null;
         return match;
     }
 
-    private void EnsureSeed(IConfiguration configuration)
+    private void ImportJsonIfEmpty(AppDbContext db)
     {
-        lock (_gate)
+        if (db.Users.Any() || db.Products.Any()) return;
+        if (!File.Exists(_storePath)) return;
+
+        var data = JsonSerializer.Deserialize<StoreData>(File.ReadAllText(_storePath), JsonColumns.Options);
+        if (data is null) return;
+
+        foreach (var product in data.Products)
         {
-            var changed = false;
-            if (_data.Products.Count == 0)
+            product.Images ??= [];
+            product.Highlights ??= [];
+            product.Specs ??= [];
+        }
+
+        foreach (var order in data.Orders)
+        {
+            order.Items ??= [];
+            order.History ??= [];
+        }
+
+        foreach (var review in data.Reviews)
+        {
+            review.Images ??= [];
+        }
+
+        foreach (var promotion in data.Promotions)
+        {
+            promotion.ProductIds ??= [];
+        }
+
+        foreach (var check in data.Reputation)
+        {
+            check.Reports ??= [];
+        }
+
+        db.Users.AddRange(data.Users);
+        db.Products.AddRange(data.Products);
+        db.Orders.AddRange(data.Orders);
+        db.Messages.AddRange(data.Messages);
+        db.BlogPosts.AddRange(data.Blog);
+        db.Promotions.AddRange(data.Promotions);
+        db.PromoCodes.AddRange(data.PromoCodes);
+        db.Subscribers.AddRange(data.Subscribers);
+        db.Campaigns.AddRange(data.Campaigns);
+        db.Reviews.AddRange(data.Reviews);
+        db.ReviewInvites.AddRange(data.ReviewInvites);
+        db.ReputationChecks.AddRange(data.Reputation);
+
+        var settings = Settings(db);
+        settings.BannerText = data.Banner.Text ?? "";
+        settings.BannerHref = string.IsNullOrWhiteSpace(data.Banner.Href) ? "/karti" : data.Banner.Href;
+        settings.BannerActive = data.Banner.IsActive;
+        settings.CourierJson = JsonSerializer.Serialize(data.Courier ?? new CourierSettings(), JsonColumns.Options);
+        settings.NekorektenKey = data.NekorektenKey ?? "";
+        db.SaveChanges();
+        _logger.LogInformation(
+            "Imported store.json into SQL Server: {Users} users, {Orders} orders, {Reviews} reviews.",
+            data.Users.Count,
+            data.Orders.Count,
+            data.Reviews.Count);
+    }
+
+    private void EnsureSeed(AppDbContext db)
+    {
+        var changed = false;
+        if (!db.Products.Any())
+        {
+            db.Products.Add(new Product
             {
-                _data.Products.Add(new Product
+                Id = 1,
+                Name = "Справяне с тревожността",
+                Description = "Терапевтични карти за самопомощ, самоосъзнаване и вътрешна устойчивост.",
+                Price = 79m,
+                ImageUrl = "/images/product-box.jpg",
+                Images = [],
+                Highlights = [],
+                Specs = [],
+                Stock = 40,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            });
+            changed = true;
+        }
+
+        var adminEmail = (_configuration["Auth:AdminEmail"] ?? "admin@ertherapybg.com").Trim().ToLowerInvariant();
+        if (!db.Users.Any(user => user.Email.ToLower() == adminEmail))
+        {
+            db.Users.Add(new AppUser
+            {
+                Id = NextId(db.Users, item => item.Id),
+                Name = _configuration["Auth:AdminName"] ?? "Росица Неделчева",
+                Email = adminEmail,
+                PasswordHash = PasswordHasher.Hash(_configuration["Auth:AdminPassword"] ?? "RosiAdmin2026!"),
+                Role = "Admin",
+                CreatedAt = DateTime.UtcNow
+            });
+            changed = true;
+        }
+
+        if (!db.BlogPosts.Any())
+        {
+            db.BlogPosts.AddRange(
+            [
+                new BlogEntry
                 {
                     Id = 1,
-                    Name = "Справяне с тревожността",
-                    Description = "Терапевтични карти за самопомощ, самоосъзнаване и вътрешна устойчивост.",
-                    Price = 79m,
-                    ImageUrl = "/images/product-box.jpg",
-                    Stock = 40,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow
-                });
-                changed = true;
-            }
-
-            var adminEmail = configuration["Auth:AdminEmail"] ?? "admin@ertherapybg.com";
-            if (!_data.Users.Any(user => string.Equals(user.Email, adminEmail, StringComparison.OrdinalIgnoreCase)))
-            {
-                _data.Users.Add(new AppUser
+                    Slug = "kakvo-e-trevozhnost",
+                    Title = "Какво е тревожността и как да я разпознаем",
+                    Excerpt = "Тревожността не е само „мислене твърде много“. Как се проявява в тялото, емоциите и поведението.",
+                    Date = "2026-03-12",
+                    ReadMinutes = 5,
+                    Image = "/images/site/rosi-wide.jpg",
+                    ImageAlt = "Росица Неделчева до купчина книги в кабинета",
+                    Body = "Тревожността е естествена човешка реакция. Понякога ни предпазва, а понякога започва да заема твърде много пространство в ежедневието.\n\nРазпознаването ѝ в мислите, емоциите, тялото и поведението е първата стъпка към по-грижовна и осъзната реакция.\n\nКартите „Справяне с тревожността“ са създадени именно като инструмент за това постепенно опознаване — без бързане и без „правилни“ отговори.",
+                    IsPublished = true
+                },
+                new BlogEntry
                 {
-                    Id = NextId(_data.Users.Select(item => item.Id)),
-                    Name = configuration["Auth:AdminName"] ?? "Росица Неделчева",
-                    Email = adminEmail.Trim().ToLowerInvariant(),
-                    PasswordHash = PasswordHasher.Hash(configuration["Auth:AdminPassword"] ?? "RosiAdmin2026!"),
-                    Role = "Admin",
-                    CreatedAt = DateTime.UtcNow
-                });
-                changed = true;
-            }
+                    Id = 2,
+                    Slug = "resursi-pri-trevozhnost",
+                    Title = "Ресурси, свързаност и самоподкрепа",
+                    Excerpt = "Когато тревожността ни насочва към това, което не е наред, ресурсите ни връщат към опората.",
+                    Date = "2026-02-20",
+                    ReadMinutes = 4,
+                    Image = "/images/site/rosi-portrait-2.jpg",
+                    ImageAlt = "Портрет на Росица Неделчева",
+                    Body = "Ресурсите не означават, че трудността изчезва. Те ни помагат да преминаваме през нея с повече устойчивост и грижа към себе си.\n\nМогат да бъдат в тялото, във взаимоотношенията, в ежедневните навици и във вътрешните качества.\n\nПонякога малката стъпка — една карта, едно наблюдение, една пауза — е достатъчно начало.",
+                    IsPublished = true
+                },
+                new BlogEntry
+                {
+                    Id = 3,
+                    Slug = "kogato-da-potraishe-pomosht",
+                    Title = "Кога е добре да потърсим професионална помощ",
+                    Excerpt = "Самопомощта е ценна, но не замества терапията. Признаци, при които си струва да се обърнем към специалист.",
+                    Date = "2026-01-18",
+                    ReadMinutes = 6,
+                    Image = "/images/site/rosi-portrait.jpg",
+                    ImageAlt = "Росица Неделчева",
+                    Body = "Инструментите за самопомощ могат да подкрепят осъзнатостта и ежедневната грижа, но не заместват психотерапия, медицинска консултация или психиатрично лечение.\n\nАко тревожността е постоянна, пречи на съня, работата или взаимоотношенията, или ако има панически атаки и силен дистрес — потърсете професионална подкрепа.\n\nГрижата за себе си включва и знанието кога да помолим за помощ.",
+                    IsPublished = true
+                }
+            ]);
+            changed = true;
+        }
 
-            if (_data.Blog.Count == 0)
-            {
-                _data.Blog.AddRange(
-                [
-                    new BlogEntry
-                    {
-                        Id = 1,
-                        Slug = "kakvo-e-trevozhnost",
-                        Title = "Какво е тревожността и как да я разпознаем",
-                        Excerpt = "Тревожността не е само „мислене твърде много“. Как се проявява в тялото, емоциите и поведението.",
-                        Date = "2026-03-12",
-                        ReadMinutes = 5,
-                        Image = "/images/site/rosi-wide.jpg",
-                        ImageAlt = "Росица Неделчева до купчина книги в кабинета",
-                        Body = "Тревожността е естествена човешка реакция. Понякога ни предпазва, а понякога започва да заема твърде много пространство в ежедневието.\n\nРазпознаването ѝ в мислите, емоциите, тялото и поведението е първата стъпка към по-грижовна и осъзната реакция.\n\nКартите „Справяне с тревожността“ са създадени именно като инструмент за това постепенно опознаване — без бързане и без „правилни“ отговори.",
-                        IsPublished = true
-                    },
-                    new BlogEntry
-                    {
-                        Id = 2,
-                        Slug = "resursi-pri-trevozhnost",
-                        Title = "Ресурси, свързаност и самоподкрепа",
-                        Excerpt = "Когато тревожността ни насочва към това, което не е наред, ресурсите ни връщат към опората.",
-                        Date = "2026-02-20",
-                        ReadMinutes = 4,
-                        Image = "/images/site/rosi-portrait-2.jpg",
-                        ImageAlt = "Портрет на Росица Неделчева",
-                        Body = "Ресурсите не означават, че трудността изчезва. Те ни помагат да преминаваме през нея с повече устойчивост и грижа към себе си.\n\nМогат да бъдат в тялото, във взаимоотношенията, в ежедневните навици и във вътрешните качества.\n\nПонякога малката стъпка — една карта, едно наблюдение, една пауза — е достатъчно начало.",
-                        IsPublished = true
-                    },
-                    new BlogEntry
-                    {
-                        Id = 3,
-                        Slug = "kogato-da-potraishe-pomosht",
-                        Title = "Кога е добре да потърсим професионална помощ",
-                        Excerpt = "Самопомощта е ценна, но не замества терапията. Признаци, при които си струва да се обърнем към специалист.",
-                        Date = "2026-01-18",
-                        ReadMinutes = 6,
-                        Image = "/images/site/rosi-portrait.jpg",
-                        ImageAlt = "Росица Неделчева",
-                        Body = "Инструментите за самопомощ могат да подкрепят осъзнатостта и ежедневната грижа, но не заместват психотерапия, медицинска консултация или психиатрично лечение.\n\nАко тревожността е постоянна, пречи на съня, работата или взаимоотношенията, или ако има панически атаки и силен дистрес — потърсете професионална подкрепа.\n\nГрижата за себе си включва и знанието кога да помолим за помощ.",
-                        IsPublished = true
-                    }
-                ]);
-                changed = true;
-            }
+        var products = db.Products.ToList();
+        foreach (var local in db.Products.Local)
+        {
+            if (!products.Contains(local)) products.Add(local);
+        }
 
-            foreach (var product in _data.Products)
-            {
-                product.Images ??= [];
-                product.Highlights ??= [];
-                product.Specs ??= [];
-            }
+        foreach (var product in products.Where(item => (item.Images?.Count ?? 0) == 0 && string.IsNullOrWhiteSpace(item.Subtitle)))
+        {
+            product.Subtitle = "Инструмент за самопомощ, самоосъзнаване и вътрешна устойчивост";
+            product.Details = "Създадени са от практиката на Росица Неделчева. Помагат тревожността да се разбира постепенно.";
+            product.Images =
+            [
+                "/images/product-box.jpg",
+                "/images/cards-overview.jpg",
+                "/images/site/rosi-portrait.jpg",
+                "/images/site/rosi-wide.jpg"
+            ];
+            product.ImageUrl = product.Images[0];
+            product.Highlights =
+            [
+                "100 карти",
+                "6 раздела с въпроси, насоки и техники",
+                "За хора с тревожност и за психолози/терапевти",
+                "Създадени от практикуващ психолог и психотерапевт"
+            ];
+            product.Specs =
+            [
+                new ProductSpec { Lead = "100", Detail = "карти" },
+                new ProductSpec { Lead = "6", Detail = "раздела" },
+                new ProductSpec { Lead = "Кутия", Detail = "целият комплект" },
+                new ProductSpec { Lead = "Език", Detail = "български" }
+            ];
+            changed = true;
+        }
 
-            foreach (var product in _data.Products.Where(item => item.Images.Count == 0 && string.IsNullOrWhiteSpace(item.Subtitle)))
-            {
-                product.Subtitle = "Инструмент за самопомощ, самоосъзнаване и вътрешна устойчивост";
-                product.Details = "Създадени са от практиката на Росица Неделчева. Помагат тревожността да се разбира постепенно.";
-                product.Images =
-                [
-                    "/images/product-box.jpg",
-                    "/images/cards-overview.jpg",
-                    "/images/site/rosi-portrait.jpg",
-                    "/images/site/rosi-wide.jpg"
-                ];
-                product.ImageUrl = product.Images[0];
-                product.Highlights =
-                [
-                    "100 карти",
-                    "6 раздела с въпроси, насоки и техники",
-                    "За хора с тревожност и за психолози/терапевти",
-                    "Създадени от практикуващ психолог и психотерапевт"
-                ];
-                product.Specs =
-                [
-                    new ProductSpec { Lead = "100", Detail = "карти" },
-                    new ProductSpec { Lead = "6", Detail = "раздела" },
-                    new ProductSpec { Lead = "Кутия", Detail = "целият комплект" },
-                    new ProductSpec { Lead = "Език", Detail = "български" }
-                ];
-                changed = true;
-            }
+        if (!db.Orders.Any())
+        {
+            SeedDemo(db);
+            changed = true;
+        }
 
-            if (_data.Orders.Count == 0)
-            {
-                SeedDemo();
-                changed = true;
-            }
+        foreach (var order in db.Orders.Where(item => item.Status == "completed").ToList())
+        {
+            var before = db.ReviewInvites.Count();
+            EnsureReviewInvites(db, order);
+            if (db.ReviewInvites.Count() != before) changed = true;
+        }
 
-            foreach (var order in _data.Orders.Where(item => item.Status == "completed"))
-            {
-                var before = _data.ReviewInvites.Count;
-                EnsureReviewInvites(order);
-                if (_data.ReviewInvites.Count != before) changed = true;
-            }
-
-            if (changed)
-            {
-                Save();
-            }
+        Settings(db);
+        if (changed || db.ChangeTracker.HasChanges())
+        {
+            db.SaveChanges();
         }
     }
 
-    private void SeedDemo()
+    private void SeedDemo(AppDbContext db)
     {
         var names = new[] { "Мария Иванова", "Елена Петрова", "Никол Георгиева", "Ива Стоянова", "Теодора Димитрова", "Анна Колева" };
         var cities = new[] { "София", "Пловдив", "Варна", "Бургас", "Стара Загора" };
@@ -969,7 +1003,7 @@ public class AppStore
         {
             var status = statuses[index % statuses.Length];
             var quantity = index % 5 == 0 ? 2 : 1;
-            _data.Orders.Add(new ShopOrder
+            db.Orders.Add(new ShopOrder
             {
                 Id = index + 1,
                 Number = $"RN-DEMO-{1000 + index}",
@@ -983,17 +1017,18 @@ public class AppStore
                 PromoCode = index % 3 == 0 ? "GRIZHA10" : null,
                 Status = status,
                 CreatedAt = now.AddDays(-(index % 28)).AddHours(-index),
-                Items = [new OrderLine { ProductId = 1, Title = "Справяне с тревожността", Price = 79m, Quantity = quantity }]
+                Items = [new OrderLine { ProductId = 1, Title = "Справяне с тревожността", Price = 79m, Quantity = quantity }],
+                History = []
             });
         }
 
-        _data.Messages.AddRange(
+        db.Messages.AddRange(
         [
             new ContactMessage { Id = 1, Name = "Мария Иванова", Email = "maria@example.com", Topic = "Картите", Message = "Подходящи ли са за работа в група?", IsRead = false, CreatedAt = now.AddDays(-2) },
             new ContactMessage { Id = 2, Name = "Петър Николов", Email = "petar@example.com", Topic = "Сесия", Message = "Имате ли свободен час онлайн следващата седмица?", IsRead = true, CreatedAt = now.AddDays(-6) }
         ]);
 
-        _data.Promotions.Add(new Promotion
+        db.Promotions.Add(new Promotion
         {
             Id = 1,
             Name = "Есенна грижа",
@@ -1001,30 +1036,31 @@ public class AppStore
             Percent = 10,
             StartsAt = now.AddDays(-3),
             EndsAt = now.AddDays(11),
-            IsActive = true
+            IsActive = true,
+            ProductIds = []
         });
-        _data.PromoCodes.AddRange(
+        db.PromoCodes.AddRange(
         [
             new PromoCode { Id = 1, Code = "GRIZHA10", Percent = 10, Used = 8, MaxUses = 50, ExpiresAt = now.AddMonths(2), IsActive = true },
             new PromoCode { Id = 2, Code = "PRAKTIKA15", Percent = 15, Used = 3, MaxUses = 20, ExpiresAt = now.AddMonths(1), IsActive = true }
         ]);
-        _data.Banner = new SiteBanner
-        {
-            Text = "Есенна грижа — 10% от комплекта до края на седмицата",
-            Href = "/karti",
-            IsActive = true
-        };
+
+        var settings = Settings(db);
+        settings.BannerText = "Есенна грижа — 10% от комплекта до края на седмицата";
+        settings.BannerHref = "/karti";
+        settings.BannerActive = true;
+
         foreach (var email in new[] { "maria@example.com", "elena@example.com", "nikol@example.com", "iva@example.com", "anna@example.com" })
         {
-            _data.Subscribers.Add(new Subscriber
+            db.Subscribers.Add(new Subscriber
             {
-                Id = NextId(_data.Subscribers.Select(item => item.Id)),
+                Id = NextId(db.Subscribers, item => item.Id),
                 Email = email,
-                CreatedAt = now.AddDays(-_data.Subscribers.Count * 3)
+                CreatedAt = now.AddDays(-db.Subscribers.Local.Count * 3)
             });
         }
 
-        _data.Campaigns.Add(new EmailCampaign
+        db.Campaigns.Add(new EmailCampaign
         {
             Id = 1,
             Subject = "Нов комплект карти",
@@ -1035,42 +1071,54 @@ public class AppStore
         });
     }
 
-    private StoreData Load()
+    private SiteSettings Settings(AppDbContext db)
     {
-        if (!File.Exists(_path))
+        var settings = db.SiteSettings.FirstOrDefault(item => item.Id == 1);
+        if (settings is not null) return settings;
+        settings = new SiteSettings
         {
-            return new StoreData();
-        }
+            Id = 1,
+            BannerHref = "/karti",
+            CourierJson = JsonSerializer.Serialize(new CourierSettings(), JsonColumns.Options)
+        };
+        db.SiteSettings.Add(settings);
+        return settings;
+    }
 
-        try
+    private static SiteBanner ReadBanner(SiteSettings settings) => new()
+    {
+        Text = settings.BannerText,
+        Href = settings.BannerHref,
+        IsActive = settings.BannerActive
+    };
+
+    private static CourierSettings ReadCourier(SiteSettings settings) =>
+        JsonSerializer.Deserialize<CourierSettings>(settings.CourierJson, JsonColumns.Options) ?? new CourierSettings();
+
+    private T With<T>(Func<AppDbContext, T> action)
+    {
+        lock (_gate)
         {
-            var json = File.ReadAllText(_path);
-            return JsonSerializer.Deserialize<StoreData>(json, JsonOptions) ?? new StoreData();
-        }
-        catch (JsonException)
-        {
-            return new StoreData();
+            using var db = _factory.CreateDbContext();
+            return action(db);
         }
     }
 
-    private void Save()
+    private void With(Action<AppDbContext> action)
     {
-        var json = JsonSerializer.Serialize(_data, JsonOptions);
-        File.WriteAllText(_path, json);
+        lock (_gate)
+        {
+            using var db = _factory.CreateDbContext();
+            action(db);
+        }
     }
 
-    private static int NextId(IEnumerable<int> ids)
+    private static int NextId<TEntity>(DbSet<TEntity> set, Expression<Func<TEntity, int>> id) where TEntity : class
     {
-        var max = 0;
-        foreach (var id in ids)
-        {
-            if (id > max)
-            {
-                max = id;
-            }
-        }
-
-        return max + 1;
+        var stored = set.Select(id).Max(value => (int?)value) ?? 0;
+        var read = id.Compile();
+        var local = set.Local.Select(read).DefaultIfEmpty(0).Max();
+        return Math.Max(stored, local) + 1;
     }
 
     private static Product Clone(Product product) => new()
@@ -1129,12 +1177,6 @@ public class AppStore
 
         return string.IsNullOrWhiteSpace(slug) ? "statia" : slug;
     }
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
 
     private sealed class StoreData
     {

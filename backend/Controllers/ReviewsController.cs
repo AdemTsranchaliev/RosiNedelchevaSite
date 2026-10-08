@@ -91,8 +91,7 @@ public class ReviewsController : ControllerBase
                 return BadRequest(new { message = "Снимките трябва да са jpg, png или webp." });
             }
 
-            var folder = Path.Combine(_environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot"), "uploads");
-            Directory.CreateDirectory(folder);
+            var folder = SiteStorage.UploadsFolder(_environment);
             var name = $"{Guid.NewGuid():N}{extension}";
             await using var stream = System.IO.File.Create(Path.Combine(folder, name));
             await photo.CopyToAsync(stream);

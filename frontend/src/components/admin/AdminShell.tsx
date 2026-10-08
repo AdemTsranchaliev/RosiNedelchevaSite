@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { Monogram } from "@/components/BrandMark";
 import { EmailStudio } from "@/components/admin/EmailStudio";
 import { BannerForm, Codes, Newsletter, Promotions, Reports, type EmailCampaign, type PromoCode, type Promotion, type SiteBanner, type Subscriber } from "@/components/admin/MarketingPanels";
 import { emptyProduct, mediaSrc, normalizeProduct, ProductEditor, uploadMedia, type ShopProduct } from "@/components/admin/ProductEditor";
 import { ReviewsPanel, type ProductReview } from "@/components/admin/ReviewsPanel";
+import { publicPath } from "@/lib/public-path";
 import { api } from "@/lib/session";
 
 type Section =
@@ -37,6 +39,8 @@ type ShopOrder = {
   address: string;
   note: string;
   paymentMethod?: string;
+  paymentStatus?: string | null;
+  paidAt?: string | null;
   deliveryType?: string;
   officeCode?: string | null;
   officeName?: string | null;
@@ -204,6 +208,13 @@ function latestCheck(checks: ReputationCheck[], phone: string) {
   return checks.find((item) => phoneKey(item.phone) === key) ?? null;
 }
 
+function paymentLabel(order: ShopOrder) {
+  if (order.paymentMethod === "cod") return "Наложен платеж";
+  if (order.paymentStatus === "paid") return "С карта · платено";
+  if (order.paymentStatus === "unpaid") return "С карта · чака";
+  return "С карта";
+}
+
 function paymentInfo(order: ShopOrder, shipment: ShipmentView | null) {
   const cod = order.paymentMethod === "cod";
   const paidAt = shipment?.paidAt || shipment?.collectedAt || "";
@@ -212,6 +223,10 @@ function paymentInfo(order: ShopOrder, shipment: ShipmentView | null) {
     return { method: "Наложен платеж", state: `Минало · ${money(amount)}`, when: stamp(paidAt), passed: true };
   }
   if (cod) return { method: "Наложен платеж", state: "Още не е минало", when: "", passed: false };
+  if (order.paymentStatus === "paid") {
+    return { method: "С карта", state: `Платено · ${money(order.total)}`, when: order.paidAt ? stamp(order.paidAt) : "", passed: true };
+  }
+  if (order.paymentStatus === "unpaid") return { method: "С карта", state: "Чака плащане", when: "", passed: false };
   return { method: "С карта", state: "Още не е минало", when: "", passed: false };
 }
 
@@ -335,8 +350,8 @@ export function AdminShell() {
   return (
     <div className="rn-admin min-h-screen text-ink md:grid md:grid-cols-[232px_minmax(0,1fr)]">
       <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-black/10 bg-white px-4 py-3 md:hidden">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-[#1a1614]">RN</p>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <Monogram className="h-9 w-9" />
           <p className="truncate text-sm text-[#5e554e]">{currentLabel}</p>
         </div>
         <button type="button" onClick={() => setMenuOpen(true)} className="h-10 shrink-0 rounded-full bg-[#241f1c] px-4 text-sm text-white">
@@ -352,8 +367,8 @@ export function AdminShell() {
         className={`${menuOpen ? "fixed inset-y-0 left-0 z-50 flex w-[min(100%,18rem)] shadow-xl" : "hidden"} flex-col overflow-y-auto border-r border-black/10 bg-white px-3 py-5 md:sticky md:top-0 md:flex md:h-screen md:w-auto md:shadow-none md:py-6`}
       >
         <div className="flex items-center justify-between px-3">
-          <Link href="/" onClick={() => setMenuOpen(false)} className="text-sm font-medium text-[#1a1614]">
-            RN
+          <Link href="/" onClick={() => setMenuOpen(false)} aria-label="Росица Неделчева — начало">
+            <Monogram className="h-10 w-10" />
           </Link>
           <button type="button" onClick={() => setMenuOpen(false)} className="text-sm text-[#5e554e] md:hidden">
             Затвори
@@ -371,7 +386,7 @@ export function AdminShell() {
                       key={item.id}
                       href={sectionPath[item.id]}
                       onClick={() => setMenuOpen(false)}
-                      className={`flex h-9 w-full items-center justify-between rounded-lg px-2.5 text-left text-sm ${
+                      className={`flex h-11 w-full items-center justify-between rounded-lg px-2.5 text-left text-sm md:h-9 ${
                         active ? "bg-[#ebe4da] font-medium text-[#1a1614]" : "text-[#3a332e] hover:bg-[#f4efe8]"
                       }`}
                     >
@@ -387,7 +402,14 @@ export function AdminShell() {
             </div>
           ))}
         </nav>
-        <button type="button" onClick={logout} className="mt-4 h-9 rounded-lg px-3 text-left text-sm text-[#5e554e] hover:bg-[#f4efe8]">
+        <button
+          type="button"
+          onClick={() => {
+            logout();
+            window.location.assign(publicPath("/vhod/"));
+          }}
+          className="mt-4 h-11 rounded-lg px-3 text-left text-sm text-[#5e554e] hover:bg-[#f4efe8] md:h-9"
+        >
           Изход
         </button>
       </aside>
@@ -441,7 +463,7 @@ function revenueBetween(orders: ShopOrder[], startDaysAgo: number, endDaysAgo: n
   const now = Date.now();
   return orders
     .filter((order) => {
-      if (order.status === "cancelled") return false;
+      if (order.status === "cancelled" || order.paymentStatus === "unpaid") return false;
       const age = (now - new Date(order.createdAt).getTime()) / 86_400_000;
       return age >= endDaysAgo && age < startDaysAgo;
     })
@@ -474,7 +496,7 @@ function Overview({
   promotion: Promotion | null;
   onOpen: (section: Section) => void;
 }) {
-  const paid = orders.filter((order) => order.status !== "cancelled");
+  const paid = orders.filter((order) => order.status !== "cancelled" && order.paymentStatus !== "unpaid");
   const revenue = paid.reduce((sum, order) => sum + order.total, 0);
   const week = revenueBetween(orders, 7, 0);
   const previousWeek = revenueBetween(orders, 14, 7);
@@ -482,7 +504,7 @@ function Overview({
   const units = paid.reduce((sum, order) => sum + order.items.reduce((count, item) => count + item.quantity, 0), 0);
   const average = paid.length ? revenue / paid.length : 0;
   const withCode = paid.filter((order) => order.promoCode).length;
-  const openOrders = orders.filter((item) => item.status === "new" || item.status === "confirmed");
+  const openOrders = orders.filter((item) => (item.status === "new" || item.status === "confirmed") && item.paymentStatus !== "unpaid");
   const latest = [...orders].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 6);
   const cities = [...paid.reduce((map, order) => map.set(order.city, (map.get(order.city) ?? 0) + order.total), new Map<string, number>())]
     .sort((a, b) => b[1] - a[1]);
@@ -554,7 +576,29 @@ function Overview({
               Всички
             </button>
           </div>
-          <div className="overflow-x-auto">
+          <ul className="divide-y divide-slate-100 md:hidden">
+            {latest.map((order) => (
+              <li key={order.id} className="px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-slate-950">{order.customerName}</p>
+                    <p className="text-[11px] text-slate-500">{order.number} · {order.city}</p>
+                  </div>
+                  <p className="shrink-0 tabular-nums font-medium">{money(order.total)}</p>
+                </div>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span className="rounded-md px-2 py-0.5 text-[11px] text-white" style={{ background: statusColor[order.status] ?? "#64748b" }}>
+                    {statusLabel[order.status] ?? order.status}
+                  </span>
+                  <p className="text-[11px] text-slate-500">
+                    {shortDate(order.createdAt)}
+                    {order.promoCode ? ` · ${order.promoCode}` : ""}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="bg-slate-50 text-[11px] text-slate-500">
                 <tr>
@@ -856,14 +900,14 @@ function DeliveryField({
   return (
     <div className={`border-b border-slate-100 px-4 py-3 ${wide ? "sm:col-span-2" : ""}`}>
       <dt className="text-[11px] text-slate-500">{label}</dt>
-      <dd className="mt-1 flex items-center gap-2 text-sm font-medium text-slate-950">
-        {marked ? <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-red-600" title="Непотърсена" /> : null}
+      <dd className="mt-1 flex min-w-0 items-start gap-2 text-sm font-medium text-slate-950">
+        {marked ? <span className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-red-600" title="Непотърсена" /> : null}
         {href ? (
-          <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined} className="underline decoration-slate-300 underline-offset-2">
+          <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined} className="min-w-0 break-all underline decoration-slate-300 underline-offset-2">
             {value}
           </a>
         ) : (
-          value
+          <span className="min-w-0 break-words">{value}</span>
         )}
       </dd>
     </div>
@@ -936,6 +980,10 @@ function Orders({
   const [pending, setPending] = useState<{ status: string; label: string } | null>(null);
   const [reputation, setReputation] = useState<NekorektenView | null>(null);
   const [checkingReputation, setCheckingReputation] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedId]);
 
   useEffect(() => {
     if (!focusId) return;
@@ -1163,7 +1211,18 @@ function Orders({
               ) : null}
             </article>
             <article className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
-              <table className="w-full text-left text-sm">
+              <ul className="divide-y divide-slate-100 md:hidden">
+                {selected.items.map((item) => (
+                  <li key={item.title} className="flex items-start justify-between gap-3 px-4 py-3 text-sm">
+                    <div className="min-w-0">
+                      <p className="break-words">{item.title}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">{item.quantity} бр.</p>
+                    </div>
+                    <p className="shrink-0 tabular-nums">{money(item.price * item.quantity)}</p>
+                  </li>
+                ))}
+              </ul>
+              <table className="hidden w-full text-left text-sm md:table">
                 <thead className="bg-slate-50 text-[11px] text-slate-500">
                   <tr>
                     <th className="px-4 py-2 font-medium">Артикул</th>
@@ -1311,41 +1370,77 @@ function Orders({
   return (
     <div className="mx-auto max-w-6xl">
       <h1 className="text-2xl font-semibold tracking-tight">Поръчки</h1>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-4 flex flex-col gap-2">
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Търсене по номер, име, град"
-          className="h-10 min-w-56 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm"
+          className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm md:h-10"
         />
-        {["all", ...statusFlow].map((status) => (
-          <button
-            key={status}
-            type="button"
-            onClick={() => setFilter(status)}
-            className={`h-10 rounded-lg px-3 text-sm ${filter === status ? "bg-slate-900 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`}
-          >
-            {status === "all" ? "Всички" : statusLabel[status]}
-          </button>
-        ))}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {exceptionStatuses.map((status) => (
-          <button
-            key={status}
-            type="button"
-            onClick={() => setFilter(status)}
-            className={`h-9 rounded-lg px-3 text-sm ${filter === status ? "text-white" : "bg-white ring-1 ring-slate-200"}`}
-            style={filter === status ? { background: statusColor[status] } : { color: statusColor[status] }}
-          >
-            {statusLabel[status]}
-          </button>
-        ))}
+        <div className="flex flex-wrap gap-2">
+          {["all", ...statusFlow].map((status) => (
+            <button
+              key={status}
+              type="button"
+              onClick={() => setFilter(status)}
+              className={`h-10 rounded-lg px-3 text-sm ${filter === status ? "bg-slate-900 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`}
+            >
+              {status === "all" ? "Всички" : statusLabel[status]}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {exceptionStatuses.map((status) => (
+            <button
+              key={status}
+              type="button"
+              onClick={() => setFilter(status)}
+              className={`h-10 rounded-lg px-3 text-sm ${filter === status ? "text-white" : "bg-white ring-1 ring-slate-200"}`}
+              style={filter === status ? { background: statusColor[status] } : { color: statusColor[status] }}
+            >
+              {statusLabel[status]}
+            </button>
+          ))}
+        </div>
       </div>
       {visible.length === 0 ? (
         <p className="mt-6 text-sm text-slate-500">Няма поръчки за този филтър.</p>
       ) : (
         <div className="mt-4 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+          <ul className="divide-y divide-slate-100 md:hidden">
+            {visible.map((order) => {
+              const flagged = unclaimedPeople.has(order.email.toLowerCase()) || (latestCheck(checks, order.phone)?.count ?? 0) > 0;
+              return (
+                <li key={order.id} className="px-4 py-3">
+                  <button type="button" onClick={() => openOrder(order)} className="w-full text-left">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-medium">{order.number}</p>
+                        <p className="text-[11px] text-slate-500">{stamp(order.createdAt)} · {paymentLabel(order)}</p>
+                      </div>
+                      <span className="shrink-0 rounded-md px-2 py-0.5 text-[11px] text-white" style={{ background: statusColor[order.status] }}>
+                        {statusLabel[order.status]}
+                      </span>
+                    </div>
+                    <p className="mt-2 flex items-center gap-2 text-sm">
+                      {flagged ? <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-red-600" title="Непотърсена или Некоректен" /> : null}
+                      <span className="min-w-0 break-words">{order.customerName}</span>
+                    </p>
+                    <p className="text-[11px] text-slate-500">{order.phone}</p>
+                    <p className="mt-1 text-sm text-slate-600">{order.city}</p>
+                    <p className="break-words text-[11px] text-slate-500">{order.address}</p>
+                    <p className="mt-2 text-right tabular-nums font-medium">{money(order.total)}</p>
+                  </button>
+                  {order.labelUrl ? (
+                    <a href={order.labelUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex h-10 items-center rounded-lg bg-slate-900 px-3 text-xs font-medium text-white">
+                      Етикет
+                    </a>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hidden md:block">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="bg-slate-50 text-[11px] text-slate-500">
               <tr>
@@ -1363,7 +1458,7 @@ function Orders({
                   <td className="px-4 py-3">
                     <p className="font-medium">{order.number}</p>
                     <p className="text-[11px] text-slate-500">{stamp(order.createdAt)}</p>
-                    <p className="text-[11px] text-slate-500">{order.paymentMethod === "cod" ? "Наложен платеж" : "С карта"}</p>
+                    <p className="text-[11px] text-slate-500">{paymentLabel(order)}</p>
                   </td>
                   <td className="px-3 py-3">
                     <p className="flex items-center gap-2">
@@ -1397,6 +1492,7 @@ function Orders({
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
@@ -1501,7 +1597,7 @@ function Products({ products, onChange }: { products: Product[]; onChange: () =>
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Търсене по име или описание"
-          className="h-10 min-w-56 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm"
+          className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm sm:h-10 sm:w-auto sm:min-w-56 sm:flex-1"
         />
         {filters.map((item) => (
           <button
@@ -1535,7 +1631,7 @@ function Products({ products, onChange }: { products: Product[]; onChange: () =>
                     <span className="flex h-full items-center justify-center text-[10px] text-slate-400">Няма</span>
                   )}
                 </span>
-                <div className="min-w-48 flex-1">
+                <div className="min-w-0 flex-1">
                   <p className="font-medium text-slate-950">{product.name || "Без име"}</p>
                   <p className="mt-0.5 text-sm text-slate-500">{product.subtitle || "Без подзаглавие"}</p>
                   <p className="mt-1 text-xs text-slate-500">
@@ -1667,14 +1763,14 @@ function Couriers({ orders, onChange }: { orders: ShopOrder[]; onChange: () => P
             </div>
             {order.trackingCode ? (
               order.labelUrl ? (
-                <a href={order.labelUrl} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-lg bg-slate-900 px-4 text-sm font-medium text-white">
+                <a href={order.labelUrl} target="_blank" rel="noreferrer" className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-slate-900 px-4 text-sm font-medium text-white sm:h-10 sm:w-auto">
                   Отвори етикета
                 </a>
               ) : (
                 <span className="text-sm text-slate-500">Има номер</span>
               )
             ) : (
-              <button type="button" disabled={busyId === order.id} onClick={() => create(order.id)} className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#1f6f73] px-4 text-sm text-white disabled:opacity-70">
+              <button type="button" disabled={busyId === order.id} onClick={() => create(order.id)} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#1f6f73] px-4 text-sm text-white disabled:opacity-70 sm:h-10 sm:w-auto">
                 {busyId === order.id ? <Spinner /> : null}
                 {busyId === order.id ? "Създава се товарителница…" : "Създай товарителница"}
               </button>
@@ -1869,8 +1965,8 @@ function Blog({ posts, onChange }: { posts: BlogEntry[]; onChange: () => Promise
       ) : (
         <ul className="mt-5 space-y-3">
           {posts.map((post) => (
-            <li key={post.id} className="flex gap-4 rounded-2xl bg-white p-3 ring-1 ring-slate-200">
-              <button type="button" onClick={() => setDraft(post)} className="h-24 w-32 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+            <li key={post.id} className="flex gap-3 rounded-2xl bg-white p-3 ring-1 ring-slate-200 sm:gap-4">
+              <button type="button" onClick={() => setDraft(post)} className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-24 sm:w-32">
                 {post.image ? <img src={mediaSrc(post.image)} alt="" className="h-full w-full object-cover" /> : null}
               </button>
               <div className="min-w-0 flex-1 py-1">
@@ -1938,13 +2034,13 @@ function Users({ users, orders, checks }: { users: UserRow[]; orders: ShopOrder[
           const missed = unclaimedEmails.has(person.email.toLowerCase());
           const flagged = missed || (check?.count ?? 0) > 0;
           return (
-            <li key={person.key} className={`flex flex-wrap items-center justify-between gap-3 px-5 py-4 ${flagged ? "bg-rose-50 text-rose-950" : ""}`}>
-              <div>
+            <li key={person.key} className={`flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5 ${flagged ? "bg-rose-50 text-rose-950" : ""}`}>
+              <div className="min-w-0 flex-1">
                 <p className="flex items-center gap-2 text-sm font-medium">
                   {flagged ? <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-red-600" /> : null}
-                  {person.name}
+                  <span className="min-w-0 break-words">{person.name}</span>
                 </p>
-                <p className={`mt-1 text-sm font-light ${flagged ? "text-rose-800" : "text-slate-500"}`}>
+                <p className={`mt-1 break-all text-sm font-light ${flagged ? "text-rose-800" : "text-slate-500"}`}>
                   {person.email}{person.phone ? ` · ${person.phone}` : ""}
                 </p>
                 {missed || check ? (

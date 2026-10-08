@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Great_Vibes, Manrope } from "next/font/google";
+import Script from "next/script";
+import { Analytics } from "@/components/Analytics";
 import { AuthProvider } from "@/components/AuthProvider";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CartProvider } from "@/components/CartProvider";
 import { CookieConsent } from "@/components/CookieConsent";
 import { SiteShell } from "@/components/SiteShell";
+import { consentBootstrap, trackingConfig } from "@/lib/tracking";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -32,6 +35,7 @@ export const metadata: Metadata = {
   },
   description:
     "Терапевтични карти „Справяне с тревожността“ — инструмент за самопомощ, самоосъзнаване и вътрешна устойчивост.",
+  ...(trackingConfig.gsc ? { verification: { google: trackingConfig.gsc } } : {}),
 };
 
 export default function RootLayout({
@@ -46,6 +50,12 @@ export default function RootLayout({
       className={`${display.variable} ${body.variable} ${script.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans text-ink">
+        {trackingConfig.gtmId || trackingConfig.gaId || trackingConfig.pixelId || trackingConfig.clarityId ? (
+          <Script id="consent-defaults" strategy="beforeInteractive">
+            {consentBootstrap}
+          </Script>
+        ) : null}
+        <Analytics />
         <AuthProvider>
           <CartProvider>
             <SiteShell>{children}</SiteShell>

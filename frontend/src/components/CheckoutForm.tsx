@@ -6,8 +6,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { formatPrice, product } from "@/lib/content";
-import { nextOrderNumber, saveOrder, type OrderCustomer } from "@/lib/order";
+import { onConsentChange, readTrackingConsent } from "@/lib/consent";
+import { demoMode } from "@/lib/demo";
+import { nextOrderNumber, saveOrder, savePendingOrder, type OrderCustomer } from "@/lib/order";
 import { api } from "@/lib/session";
+import { marketingAttribution, newEventId, toTrackedItem, trackBeginCheckout } from "@/lib/tracking";
 import { useCart, type CartItem } from "./CartProvider";
 
 const fieldClass =
@@ -78,12 +81,27 @@ export function CheckoutForm() {
   const [officeRetry, setOfficeRetry] = useState(0);
   const [officeQuery, setOfficeQuery] = useState("");
   const [cityHits, setCityHits] = useState<CityHit[]>([]);
+  const [cityStatus, setCityStatus] = useState<"idle" | "loading" | "ready">("idle");
+  const [settledCity, setSettledCity] = useState("");
+  const settledCityRef = useRef("");
   const [streetHits, setStreetHits] = useState<string[]>([]);
+  const [streetStatus, setStreetStatus] = useState<"idle" | "loading" | "ready">("idle");
   const [shipping, setShipping] = useState<number | null>(null);
   const [shippingNote, setShippingNote] = useState("");
   const [shippingStatus, setShippingStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [accepted, setAccepted] = useState(false);
   const [termsError, setTermsError] = useState("");
+  const checkoutTracked = useRef(false);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("payment") === "cancelled") {
+      setError("Плащането е прекъснато. Нищо не е удържано — можете да опитате отново.");
+      url.searchParams.delete("payment");
+      const query = url.searchParams.toString();
+      window.history.replaceState(null, "", `${url.pathname}${query ? `?${query}` : ""}${url.hash}`);
+    }
+  }, []);
 
   useEffect(() => {
     const saved = readDraft();
@@ -108,6 +126,19 @@ export function CheckoutForm() {
     if (!hydrated) return;
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
   }, [draft, hydrated]);
+
+  useEffect(() => {
+    if (!ready || items.length === 0) return;
+    const send = () => {
+      if (checkoutTracked.current) return;
+      const consent = readTrackingConsent();
+      if (!consent?.analytics && !consent?.marketing) return;
+      checkoutTracked.current = true;
+      trackBeginCheckout(items.map(toTrackedItem), payable ?? total);
+    };
+    send();
+    return onConsentChange(send);
+  }, [ready, items, payable, total]);
 
   useEffect(() => {
     if (!ready || items.length === 0) return;
@@ -141,13 +172,12 @@ export function CheckoutForm() {
   }, [ready, total, appliedCode, items]);
 
   useEffect(() => {
-    if (draft.delivery !== "office") return;
-    const city = draft.city.trim();
-    if (city.length < 2) {
+    if (draft.delivery !== "office" || draft.city.trim() !== settledCity || settledCity.length < 2) {
       setOffices([]);
       setOfficesStatus("idle");
       return;
     }
+    const city = settledCity;
 
     let cancelled = false;
     setOffices([]);
@@ -177,23 +207,41 @@ export function CheckoutForm() {
       cancelled = true;
       window.clearTimeout(handle);
     };
-  }, [draft.delivery, draft.city, officeRetry]);
+  }, [draft.delivery, draft.city, settledCity, officeRetry]);
 
   useEffect(() => {
     const query = draft.city.trim();
     if (query.length < 2) {
+      settledCityRef.current = "";
+      setSettledCity("");
       setCityHits([]);
+      setCityStatus("idle");
       return;
     }
+    if (query === settledCityRef.current) {
+      setCityStatus("ready");
+      return;
+    }
+    setCityStatus("loading");
     setCityHits([]);
     let cancelled = false;
     const handle = window.setTimeout(() => {
       api<CityHit[]>(`/api/courier/cities?q=${encodeURIComponent(query)}`)
         .then((list) => {
-          if (!cancelled) setCityHits(list);
+          if (cancelled) return;
+          const match = list.some((city) => city.name === query) ? query : "";
+          settledCityRef.current = match;
+          setSettledCity(match);
+          setCityHits(list);
+          setCityStatus("ready");
+          if (!match) setDraft((prev) => (prev.officeCode ? { ...prev, officeCode: "" } : prev));
         })
         .catch(() => {
-          if (!cancelled) setCityHits([]);
+          if (cancelled) return;
+          settledCityRef.current = "";
+          setSettledCity("");
+          setCityHits([]);
+          setCityStatus("ready");
         });
     }, 250);
     return () => {
@@ -203,39 +251,47 @@ export function CheckoutForm() {
   }, [draft.city]);
 
   useEffect(() => {
-    if (draft.delivery !== "address" || /\d/.test(draft.address)) {
+    if (draft.delivery !== "address" || draft.city.trim() !== settledCity || /\d/.test(draft.address)) {
       setStreetHits([]);
+      setStreetStatus("idle");
       return;
     }
-    const city = draft.city.trim();
     const query = draft.address.trim();
-    if (city.length < 2 || query.length < 2) {
+    if (settledCity.length < 2 || query.length < 2) {
       setStreetHits([]);
+      setStreetStatus("idle");
       return;
     }
+    setStreetStatus("loading");
     setStreetHits([]);
     let cancelled = false;
     const handle = window.setTimeout(() => {
-      api<string[]>(`/api/courier/streets?city=${encodeURIComponent(city)}&q=${encodeURIComponent(query)}`)
+      api<string[]>(`/api/courier/streets?city=${encodeURIComponent(settledCity)}&q=${encodeURIComponent(query)}`)
         .then((list) => {
-          if (!cancelled) setStreetHits(list);
+          if (cancelled) return;
+          setStreetHits(list);
+          setStreetStatus("ready");
         })
         .catch(() => {
-          if (!cancelled) setStreetHits([]);
+          if (cancelled) return;
+          setStreetHits([]);
+          setStreetStatus("ready");
         });
     }, 250);
     return () => {
       cancelled = true;
       window.clearTimeout(handle);
     };
-  }, [draft.delivery, draft.city, draft.address]);
+  }, [draft.delivery, draft.address, settledCity]);
 
   useEffect(() => {
     const city = draft.city.trim();
     const readyDestination =
-      draft.delivery === "office"
-        ? Boolean(draft.officeCode)
-        : city.length >= 2 && /\d/.test(draft.address);
+      city !== settledCity || settledCity.length < 2
+        ? false
+        : draft.delivery === "office"
+          ? Boolean(draft.officeCode)
+          : /\d/.test(draft.address);
     if (!readyDestination) {
       setShipping(null);
       setShippingNote("");
@@ -275,7 +331,7 @@ export function CheckoutForm() {
       cancelled = true;
       window.clearTimeout(handle);
     };
-  }, [draft.city, draft.delivery, draft.officeCode, draft.address, draft.payment, payable, total]);
+  }, [draft.city, draft.delivery, draft.officeCode, draft.address, draft.payment, payable, total, settledCity]);
 
   function patch(partial: Partial<Draft>) {
     setDraft((prev) => ({ ...prev, ...partial }));
@@ -315,6 +371,7 @@ export function CheckoutForm() {
     }
 
     const number = nextOrderNumber();
+    const eventId = newEventId();
     const goods = payable ?? total;
     if (shipping === null) {
       setError(shippingNote || "Изберете адрес или пункт, за да изчислим доставката.");
@@ -325,7 +382,7 @@ export function CheckoutForm() {
     setError("");
     setErrors({});
     try {
-      await api("/api/orders", {
+      const created = await api<{ checkoutUrl?: string | null; number?: string }>("/api/orders", {
         method: "POST",
         body: JSON.stringify({
           number,
@@ -343,8 +400,29 @@ export function CheckoutForm() {
           total: amount,
           promoCode: appliedCode || null,
           items: orderLines(items),
+          attribution: marketingAttribution(eventId),
         }),
       });
+      if (draft.payment === "card") {
+        if (!created.checkoutUrl) {
+          if (!demoMode) throw new Error("Плащането с карта не се отвори.");
+        } else {
+          savePendingOrder({
+            number: created.number || number,
+            createdAt: new Date().toISOString(),
+            items,
+            total: amount,
+            customer: { ...customer, address: place },
+            payment: "card",
+            delivery: draft.delivery,
+            discount,
+            shipping,
+            eventId,
+          });
+          window.location.assign(created.checkoutUrl);
+          return;
+        }
+      }
     } catch (cause) {
       setSending(false);
       setError(cause instanceof Error ? cause.message : "Поръчката не се записа. Опитайте отново.");
@@ -365,6 +443,7 @@ export function CheckoutForm() {
       delivery: draft.delivery,
       discount,
       shipping,
+      eventId,
     });
     clear();
     router.push("/porachka/uspeh");
@@ -401,7 +480,14 @@ export function CheckoutForm() {
 
   const goods = payable ?? total;
   const amount = goods + (shipping ?? 0);
+  const cityChosen = settledCity.length >= 2 && draft.city.trim() === settledCity;
   const shipLabel = shippingStatus === "loading" ? "…" : shipping !== null ? formatPrice(shipping) : undefined;
+  const payingByCard = draft.payment === "card";
+  const actionLabel = sending
+    ? payingByCard
+      ? "Към плащане…"
+      : "Изпращане…"
+    : `${payingByCard ? "Плати" : "Завърши"} · ${formatPrice(amount)}`;
 
   return (
     <div className="bg-paper">
@@ -519,24 +605,36 @@ export function CheckoutForm() {
                 placeholder="Започнете да пишете"
                 value={draft.city}
                 error={errors.city}
-                onChange={(city) => patch({ city })}
-                suggestions={cityHits.some((city) => city.name === draft.city.trim())
+                status={cityStatus}
+                loadingText="Търсим града…"
+                showEmpty={cityStatus === "ready" && draft.city.trim().length >= 2 && !cityChosen && cityHits.length === 0}
+                onChange={(city) => patch(city.trim() === settledCityRef.current ? { city } : { city, officeCode: "" })}
+                suggestions={cityChosen
                   ? []
                   : cityHits.map((city) => ({
                       key: city.name,
                       title: city.name,
                       detail: [city.region !== city.name ? city.region : "", city.postCode].filter(Boolean).join(" · "),
                     }))}
-                onPick={(city) => patch({ city })}
+                onPick={(city) => {
+                  settledCityRef.current = city;
+                  setSettledCity(city);
+                  setCityStatus("ready");
+                  patch({ city });
+                }}
               />
               {draft.delivery === "address" ? (
                 <ComboField
                   label="Адрес"
                   name="address"
                   autoComplete="street-address"
-                  placeholder="Улица и номер"
+                  placeholder={cityChosen ? "Улица и номер" : "Първо изберете град"}
                   value={draft.address}
                   error={errors.address}
+                  disabled={!cityChosen}
+                  status={streetStatus}
+                  loadingText="Търсим адреса…"
+                  showEmpty={streetStatus === "ready" && draft.address.trim().length >= 2 && !/\d/.test(draft.address) && streetHits.length === 0}
                   onChange={(address) => patch({ address })}
                   suggestions={streetHits
                     .filter((street) => street !== draft.address.trim())
@@ -545,7 +643,7 @@ export function CheckoutForm() {
                 />
               ) : (
                 <OfficePicker
-                  city={draft.city}
+                  cityChosen={cityChosen}
                   offices={offices}
                   status={officesStatus}
                   query={officeQuery}
@@ -572,7 +670,7 @@ export function CheckoutForm() {
                 checked={draft.payment === "card"}
                 onChange={() => patch({ payment: "card" })}
                 title="С карта"
-                detail="Уреждаме го по телефона"
+                detail="Продължавате към сигурно плащане"
               />
               <div className="border-t border-line">
                 <Choice
@@ -668,12 +766,16 @@ export function CheckoutForm() {
           <button
             type="submit"
             disabled={sending || shipping === null}
-            className="mt-8 hidden h-12 w-full items-center justify-center rounded-lg bg-clay text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink disabled:opacity-60 sm:w-auto sm:px-10 lg:flex"
+            aria-busy={sending || undefined}
+            className="mt-8 hidden h-12 w-full items-center justify-center gap-2 rounded-lg bg-clay text-[11px] font-medium uppercase tracking-[0.2em] text-paper transition hover:bg-ink disabled:opacity-60 sm:w-auto sm:px-10 lg:flex"
           >
-            {sending ? "Изпращане…" : `Завърши · ${formatPrice(amount)}`}
+            {sending ? <SpinnerIcon /> : null}
+            {actionLabel}
           </button>
           <p className="mt-3 hidden text-[12px] font-light text-ink-soft lg:block">
-            Без плащане в тази стъпка. Доставката е по тарифата на Еконт.
+            {payingByCard
+              ? "След тази стъпка плащате с карта. Доставката е по тарифата на Еконт."
+              : "Плащате на куриера. Доставката е по тарифата на Еконт."}
           </p>
         </form>
 
@@ -702,9 +804,11 @@ export function CheckoutForm() {
           type="submit"
           form="checkout"
           disabled={sending || shipping === null}
-          className="flex h-12 w-full items-center justify-center rounded-lg bg-clay px-4 text-[13px] font-medium uppercase tracking-[0.14em] text-paper transition hover:bg-ink disabled:opacity-60"
+          aria-busy={sending || undefined}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-clay px-4 text-[13px] font-medium uppercase tracking-[0.14em] text-paper transition hover:bg-ink disabled:opacity-60"
         >
-          {sending ? "Изпращане…" : `Завърши · ${formatPrice(amount)}`}
+          {sending ? <SpinnerIcon /> : null}
+          {actionLabel}
         </button>
       </div>
     </div>
@@ -840,7 +944,7 @@ function SummaryItems() {
 }
 
 function OfficePicker({
-  city,
+  cityChosen,
   offices,
   status,
   query,
@@ -850,7 +954,7 @@ function OfficePicker({
   onSelect,
   onRetry,
 }: {
-  city: string;
+  cityChosen: boolean;
   offices: Office[];
   status: "idle" | "loading" | "ready" | "error";
   query: string;
@@ -892,22 +996,27 @@ function OfficePicker({
         </div>
       ) : (
         <>
-          <input
-            value={query}
-            onChange={(event) => onQuery(event.target.value)}
-            onFocus={() => {
-              if (blurTimer.current) window.clearTimeout(blurTimer.current);
-              setMenu(true);
-            }}
-            onBlur={() => {
-              blurTimer.current = window.setTimeout(() => setMenu(false), 120);
-            }}
-            placeholder={status === "loading" ? "Зареждаме пунктовете…" : "Търси офис, еконтомат или драйв"}
-            disabled={status !== "ready"}
-            aria-invalid={error ? true : undefined}
-            aria-expanded={menu}
-            className={`${fieldClass} ${error ? "border-accent" : "border-line"} disabled:opacity-60`}
-          />
+          <div className="relative">
+            <input
+              value={query}
+              onChange={(event) => onQuery(event.target.value)}
+              onFocus={() => {
+                if (blurTimer.current) window.clearTimeout(blurTimer.current);
+                setMenu(true);
+              }}
+              onBlur={() => {
+                blurTimer.current = window.setTimeout(() => setMenu(false), 120);
+              }}
+              placeholder={
+                !cityChosen ? "Първо изберете град" : status === "loading" ? "Зареждаме пунктовете…" : "Търси офис, еконтомат или драйв"
+              }
+              disabled={!cityChosen || status !== "ready"}
+              aria-invalid={error ? true : undefined}
+              aria-busy={status === "loading" || undefined}
+              aria-expanded={menu}
+              className={`${fieldClass} ${error ? "border-accent" : "border-line"} disabled:cursor-not-allowed disabled:opacity-60 ${status === "loading" ? "pr-10" : ""}`}
+            />
+            {status === "loading" ? <FieldSpinner label="Зареждаме пунктовете…" /> : null}
           {menu && status === "ready" ? (
             <div className="absolute left-0 right-0 top-full z-[45] mt-1 overflow-hidden rounded-xl border border-line bg-paper shadow-[0_18px_40px_-24px_rgba(78,69,62,0.55)]">
               {present.length > 1 ? (
@@ -958,6 +1067,12 @@ function OfficePicker({
               ) : null}
             </div>
           ) : null}
+          </div>
+          {status === "loading" ? (
+            <p className="mt-1 text-[12px] text-ink-soft" role="status">
+              Зареждаме пунктовете…
+            </p>
+          ) : null}
         </>
       )}
       {error ? <span className="mt-1 block text-[12px] text-ink">{error}</span> : null}
@@ -973,10 +1088,28 @@ function OfficePicker({
       {status === "ready" && offices.length === 0 ? (
         <span className="mt-1 block text-[12px] text-ink-soft">Няма пункт на Еконт за този град.</span>
       ) : null}
-      {city.trim().length < 2 ? (
-        <span className="mt-1 block text-[12px] font-light text-ink-soft">Напишете града, за да заредим пунктовете.</span>
+      {!cityChosen && status !== "loading" ? (
+        <span className="mt-1 block text-[12px] font-light text-ink-soft">Първо изберете град от списъка.</span>
       ) : null}
     </div>
+  );
+}
+
+function SpinnerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 animate-spin" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.4" opacity="0.25" />
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function FieldSpinner({ label }: { label: string }) {
+  return (
+    <span className="pointer-events-none absolute bottom-4 right-3 text-mute" role="status">
+      <SpinnerIcon />
+      <span className="sr-only">{label}</span>
+    </span>
   );
 }
 
@@ -987,6 +1120,10 @@ function ComboField({
   placeholder,
   value,
   error,
+  disabled = false,
+  status = "idle",
+  loadingText = "Търсим…",
+  showEmpty = false,
   suggestions,
   onChange,
   onPick,
@@ -997,54 +1134,91 @@ function ComboField({
   placeholder?: string;
   value: string;
   error?: string;
+  disabled?: boolean;
+  status?: "idle" | "loading" | "ready";
+  loadingText?: string;
+  showEmpty?: boolean;
   suggestions: { key: string; title: string; detail?: string }[];
   onChange: (value: string) => void;
   onPick: (key: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const blurTimer = useRef<number | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const loading = status === "loading";
+  const hasMenu = loading || suggestions.length > 0 || showEmpty;
   function showMenu() {
     if (blurTimer.current) window.clearTimeout(blurTimer.current);
     setOpen(true);
   }
+  useEffect(() => {
+    if (document.activeElement === inputRef.current && hasMenu) setOpen(true);
+  }, [hasMenu, suggestions, value]);
   return (
     <div className="relative" id={`field-${name}`}>
       <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-mute">{label}</span>
-      <input
-        name={name}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        value={value}
-        aria-invalid={error ? true : undefined}
-        aria-expanded={open && suggestions.length > 0}
-        onFocus={showMenu}
-        onBlur={() => {
-          blurTimer.current = window.setTimeout(() => setOpen(false), 120);
-        }}
-        onChange={(event) => onChange(event.target.value)}
-        className={`${fieldClass} ${error ? "border-accent" : "border-line"}`}
-      />
+      <div className="relative">
+        <input
+          ref={inputRef}
+          name={name}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          value={value}
+          disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-busy={loading || undefined}
+          aria-expanded={open && hasMenu}
+          onPointerDown={showMenu}
+          onFocus={showMenu}
+          onBlur={() => {
+            blurTimer.current = window.setTimeout(() => {
+              if (document.activeElement === inputRef.current) return;
+              setOpen(false);
+            }, 120);
+          }}
+          onChange={(event) => onChange(event.target.value)}
+          className={`${fieldClass} ${error ? "border-accent" : "border-line"} disabled:cursor-not-allowed disabled:opacity-60 ${loading ? "pr-10" : ""}`}
+        />
+        {loading ? <FieldSpinner label={loadingText} /> : null}
+        {open && loading ? (
+          <p className="absolute left-0 right-0 top-full z-[45] mt-1 flex items-center gap-2 rounded-xl border border-line bg-paper px-3 py-3 text-sm text-ink-soft shadow-[0_18px_40px_-24px_rgba(78,69,62,0.55)]" role="status">
+            <SpinnerIcon />
+            {loadingText}
+          </p>
+        ) : null}
+        {open && !loading && suggestions.length > 0 ? (
+          <ul className="absolute left-0 right-0 top-full z-[45] mt-1 max-h-[min(15rem,40svh)] overflow-auto rounded-xl border border-line bg-paper py-1 shadow-[0_18px_40px_-24px_rgba(78,69,62,0.55)]">
+            {suggestions.map((item) => (
+              <li key={item.key}>
+                <button
+                  type="button"
+                  className="w-full px-3 py-2.5 text-left hover:bg-paper-2"
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    onPick(item.key);
+                    setOpen(false);
+                  }}
+                >
+                  <span className="block text-sm text-ink">{item.title}</span>
+                  {item.detail ? <span className="mt-0.5 block text-[12px] font-light text-ink-soft">{item.detail}</span> : null}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {open && !loading && showEmpty ? (
+          <p className="absolute left-0 right-0 top-full z-[45] mt-1 rounded-xl border border-line bg-paper px-3 py-3 text-sm text-ink-soft shadow-[0_18px_40px_-24px_rgba(78,69,62,0.55)]">
+            Няма съвпадение.
+          </p>
+        ) : null}
+      </div>
       {error ? <span className="mt-1 block text-[12px] text-ink">{error}</span> : null}
-      {open && suggestions.length > 0 ? (
-        <ul className="absolute left-0 right-0 top-full z-[45] mt-1 max-h-[min(15rem,40svh)] overflow-auto rounded-xl border border-line bg-paper py-1 shadow-[0_18px_40px_-24px_rgba(78,69,62,0.55)]">
-          {suggestions.map((item) => (
-            <li key={item.key}>
-              <button
-                type="button"
-                className="w-full px-3 py-2.5 text-left hover:bg-paper-2"
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  onPick(item.key);
-                  setOpen(false);
-                }}
-              >
-                <span className="block text-sm text-ink">{item.title}</span>
-                {item.detail ? <span className="mt-0.5 block text-[12px] font-light text-ink-soft">{item.detail}</span> : null}
-              </button>
-            </li>
-          ))}
-        </ul>
+      {loading && !open ? (
+        <p className="mt-1 text-[12px] text-ink-soft" role="status">
+          {loadingText}
+        </p>
       ) : null}
+      {disabled ? <span className="mt-1 block text-[12px] font-light text-ink-soft">Първо изберете град от списъка.</span> : null}
     </div>
   );
 }

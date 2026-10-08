@@ -3,11 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { CookiePreferences } from "@/components/CookiePreferences";
+import {
+  readTrackingConsent,
+  writeTrackingConsent,
+  type TrackingConsent,
+} from "@/lib/consent";
+import { useConsentState } from "@/lib/use-consent";
 
-const STORAGE_KEY = "rn-cookie-consent";
 const OPEN_EVENT = "rn-open-cookie-consent";
 
-type CookieChoice = "all" | "essential";
 type View = "choice" | "settings";
 
 export function openCookieSettings() {
@@ -16,37 +21,49 @@ export function openCookieSettings() {
 
 export function CookieConsent() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const choice = useConsentState();
+  const [forced, setForced] = useState(false);
   const [view, setView] = useState<View>("choice");
   const admin = pathname.startsWith("/admin");
   const checkout = pathname.replace(/\/$/, "") === "/porachka";
-
-  useEffect(() => {
-    if (admin) return;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved !== "all" && saved !== "essential") setOpen(true);
-    } catch {
-      setOpen(true);
-    }
-  }, [admin]);
+  const open = !admin && (forced || choice === null);
 
   useEffect(() => {
     const show = () => {
-      setView("choice");
-      setOpen(true);
+      setView("settings");
+      setForced(true);
     };
     window.addEventListener(OPEN_EVENT, show);
     return () => window.removeEventListener(OPEN_EVENT, show);
   }, []);
 
-  function choose(value: CookieChoice) {
+  function choose(value: TrackingConsent) {
+    const previous = choice !== "pending" ? choice : readTrackingConsent();
     try {
-      localStorage.setItem(STORAGE_KEY, value);
+      writeTrackingConsent(value);
     } catch {
       // The choice still closes the card if storage is blocked.
     }
-    setOpen(false);
+    setForced(false);
+    setView("choice");
+    if (
+      previous &&
+      (previous.analytics !== value.analytics || previous.marketing !== value.marketing)
+    ) {
+      window.location.reload();
+    }
+  }
+
+  function openSettings() {
+    setView("settings");
+  }
+
+  function dismiss() {
+    if (choice === null) {
+      choose({ analytics: false, marketing: false });
+      return;
+    }
+    setForced(false);
     setView("choice");
   }
 
@@ -57,7 +74,9 @@ export function CookieConsent() {
       role="dialog"
       aria-labelledby="cookie-title"
       aria-describedby="cookie-text"
-      className={`cookie-card fixed inset-x-0 z-[55] border-t border-line bg-paper shadow-[0_-16px_40px_-28px_rgba(78,69,62,0.5)] sm:inset-x-auto sm:right-6 sm:w-[24rem] sm:border sm:shadow-[0_22px_50px_-24px_rgba(78,69,62,0.55)] ${
+      className={`cookie-card fixed inset-x-0 z-[55] border-t border-line bg-paper shadow-[0_-16px_40px_-28px_rgba(78,69,62,0.5)] sm:inset-x-auto sm:right-6 sm:border sm:shadow-[0_22px_50px_-24px_rgba(78,69,62,0.55)] ${
+        view === "settings" ? "sm:w-[34rem]" : "sm:w-[24rem]"
+      } ${
         checkout
           ? "bottom-[calc(0.75rem+3rem+max(0.75rem,env(safe-area-inset-bottom,0px))+1px)] sm:bottom-6"
           : "bottom-0 pb-[env(safe-area-inset-bottom,0px)] sm:bottom-6 sm:pb-0"
@@ -71,7 +90,7 @@ export function CookieConsent() {
             </p>
             <button
               type="button"
-              onClick={() => choose("essential")}
+              onClick={() => choose({ analytics: false, marketing: false })}
               aria-label="Затвори и остави само необходимите"
               className="-mr-2 -mt-1 grid h-11 w-11 place-items-center text-mute transition hover:text-ink"
             >
@@ -79,7 +98,7 @@ export function CookieConsent() {
             </button>
           </div>
           <p id="cookie-text" className="mt-2 text-sm font-light leading-relaxed text-ink-soft sm:mt-3">
-            Ползваме ги, за да пазим количката и входа. Рекламни бисквитки няма.{" "}
+            Количката и входът работят и без тях. Със съгласие включваме статистика и измерване на реклами във Facebook и Instagram.{" "}
             <Link href="/biskvitki" className="text-ink underline decoration-accent/60 underline-offset-4">
               Политика
             </Link>
@@ -87,14 +106,14 @@ export function CookieConsent() {
           <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5">
             <button
               type="button"
-              onClick={() => choose("essential")}
+              onClick={() => choose({ analytics: false, marketing: false })}
               className="inline-flex h-11 items-center justify-center border border-line text-[11px] font-medium uppercase tracking-[0.14em] text-ink transition hover:border-ink"
             >
               Отхвърли
             </button>
             <button
               type="button"
-              onClick={() => choose("all")}
+              onClick={() => choose({ analytics: true, marketing: true })}
               className="inline-flex h-11 items-center justify-center bg-clay text-[11px] font-medium uppercase tracking-[0.14em] text-paper transition hover:bg-ink"
             >
               Приеми
@@ -102,14 +121,14 @@ export function CookieConsent() {
           </div>
           <button
             type="button"
-            onClick={() => setView("settings")}
+            onClick={openSettings}
             className="mt-1 flex h-11 w-full items-center justify-center text-[11px] uppercase tracking-[0.16em] text-mute transition hover:text-ink sm:mt-3 sm:h-9"
           >
             Настройки
           </button>
         </div>
       ) : (
-        <div className="px-4 pt-4 pb-4 sm:p-5">
+        <div className="max-h-[min(85dvh,44rem)] overflow-y-auto px-4 pt-4 pb-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
@@ -120,8 +139,8 @@ export function CookieConsent() {
             </button>
             <button
               type="button"
-              onClick={() => choose("essential")}
-              aria-label="Затвори и остави само необходимите"
+              onClick={dismiss}
+              aria-label="Затвори настройките"
               className="-mr-2 -mt-1 grid h-11 w-11 place-items-center text-mute transition hover:text-ink"
             >
               <CloseIcon />
@@ -130,26 +149,9 @@ export function CookieConsent() {
           <p id="cookie-title" className="mt-4 text-[11px] font-medium uppercase tracking-[0.2em] text-accent">
             Настройки
           </p>
-          <p id="cookie-text" className="mt-3 text-sm font-light leading-relaxed text-ink-soft">
-            Само необходимите бисквитки са включени. Аналитични и рекламни не се използват.
-          </p>
-          <div className="mt-4 flex items-center justify-between gap-4 border border-line px-3.5 py-3">
-            <div>
-              <p className="text-[13px] text-ink">Необходими</p>
-              <p className="mt-0.5 text-xs font-light text-mute">Количка и вход</p>
-            </div>
-            <span className="relative h-[22px] w-10 shrink-0 rounded-full bg-clay" aria-hidden>
-              <span className="absolute top-0.5 right-0.5 h-[18px] w-[18px] rounded-full bg-paper" />
-            </span>
-            <span className="sr-only">Винаги включени</span>
+          <div id="cookie-text" className="mt-3">
+            <CookiePreferences compact />
           </div>
-          <button
-            type="button"
-            onClick={() => choose("essential")}
-            className="mt-4 inline-flex h-11 w-full items-center justify-center bg-clay text-[11px] font-medium uppercase tracking-[0.14em] text-paper transition hover:bg-ink"
-          >
-            Запази
-          </button>
         </div>
       )}
     </div>

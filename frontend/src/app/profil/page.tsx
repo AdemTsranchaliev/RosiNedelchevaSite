@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { publicPath } from "@/lib/public-path";
 import { api } from "@/lib/session";
 
 type OrderLine = { title: string; price: number; quantity: number };
@@ -11,6 +12,7 @@ type ShopOrder = {
   number: string;
   total: number;
   status: string;
+  paymentStatus?: string | null;
   createdAt: string;
   items: OrderLine[];
 };
@@ -94,14 +96,14 @@ export default function ProfilePage() {
                 <div className="text-right">
                   <p className="text-sm">{order.total.toFixed(2).replace(".", ",")} €</p>
                   <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-mute">
-                    {statusLabel[order.status] ?? order.status}
+                    {order.paymentStatus === "unpaid" ? "Чака плащане" : statusLabel[order.status] ?? order.status}
                   </p>
                   {invites
                     .filter((invite) => invite.orderNumber === order.number && !invite.used)
                     .map((invite) => (
-                      <Link key={invite.token} href={`/revyu/${invite.token}`} className="mt-2 block text-[11px] uppercase tracking-[0.16em] text-accent">
+                      <a key={invite.token} href={publicPath(`/revyu/${invite.token}/`)} className="mt-2 block text-[11px] uppercase tracking-[0.16em] text-accent">
                         Напиши ревю
-                      </Link>
+                      </a>
                     ))}
                 </div>
               </li>

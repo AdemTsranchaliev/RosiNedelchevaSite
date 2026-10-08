@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { faqs, product } from "@/lib/content";
+import { faqs, siteImages } from "@/lib/content";
 
 export function Faq() {
   const [open, setOpen] = useState<number | null>(null);
@@ -14,15 +14,15 @@ export function Faq() {
           <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-accent">Въпроси</p>
           <h2 className="mt-4 font-display text-3xl tracking-tight md:text-5xl">Често задавани въпроси</h2>
           <p className="mt-4 max-w-xs text-[15px] font-light leading-relaxed text-ink-soft">
-            За комплекта, ползването и доставката.
+            За картите, ползването и аудиозаписа.
           </p>
-          <figure className="relative mt-8 hidden aspect-[2/1] overflow-hidden bg-paper-2 ring-1 ring-ink/10 lg:block">
+          <figure className="relative mt-8 aspect-[3/2] overflow-hidden bg-paper-2 ring-1 ring-ink/10">
             <Image
-              src={product.imageCards}
-              alt="Шестте раздела на картите"
+              src={siteImages.wide}
+              alt="Росица Неделчева в кабинета"
               fill
               className="object-cover object-center"
-              sizes="420px"
+              sizes="(max-width: 1024px) 100vw, 420px"
             />
           </figure>
         </div>
@@ -62,9 +62,16 @@ export function Faq() {
                 </button>
                 <div id={panelId} className={`faq-panel ${selected ? "is-open" : ""}`}>
                   <div>
-                    <p className="faq-answer max-w-xl pb-6 pr-12 text-[15px] font-light leading-relaxed text-ink-soft">
-                      {item.a}
-                    </p>
+                    <div className="faq-answer max-w-xl space-y-3 pb-6 pr-4 text-[15px] font-light leading-relaxed text-ink-soft sm:pr-12">
+                      <p>{item.a}</p>
+                      {item.points ? (
+                        <ul className="space-y-2">
+                          {item.points.map((point) => (
+                            <li key={point}>{point}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>

@@ -10,14 +10,16 @@ namespace RosiNedelcheva.Api.Controllers;
 public class MessagesController : ControllerBase
 {
     private readonly AppStore _store;
+    private readonly ShopMail _shop;
 
-    public MessagesController(AppStore store)
+    public MessagesController(AppStore store, ShopMail shop)
     {
         _store = store;
+        _shop = shop;
     }
 
     [HttpPost]
-    public ActionResult<ContactMessage> Create([FromBody] ContactMessage message)
+    public async Task<ActionResult<ContactMessage>> Create([FromBody] ContactMessage message)
     {
         if (string.IsNullOrWhiteSpace(message.Name) ||
             string.IsNullOrWhiteSpace(message.Email) ||
@@ -27,7 +29,9 @@ public class MessagesController : ControllerBase
             return BadRequest(new { message = "Попълнете име, имейл и съобщение." });
         }
 
-        return Ok(_store.AddMessage(message));
+        var saved = _store.AddMessage(message);
+        await _shop.Contact(saved);
+        return Ok(saved);
     }
 
     [Authorize(Roles = "Admin")]

@@ -29,12 +29,11 @@ export function NewsletterForm() {
     <section className="border-t border-line bg-paper-2" aria-labelledby="newsletter-title">
       <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-14 md:px-8 md:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,26rem)] lg:gap-16">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-accent">Бюлетин</p>
-          <h2 id="newsletter-title" className="mt-3 max-w-md font-display text-[2rem] leading-[1.08] tracking-tight text-ink md:text-4xl">
-            Писма за картите и практиката
+          <h2 id="newsletter-title" className="max-w-md font-display text-[2rem] leading-[1.08] tracking-tight text-ink md:text-4xl">
+            Бюлетин
           </h2>
           <p className="mt-4 max-w-sm text-sm font-light leading-relaxed text-ink-soft">
-            Нови текстове и новости от студиото — рядко, спокойно, без шум.
+            Новини за картите и практиката.
           </p>
         </div>
 
@@ -42,7 +41,7 @@ export function NewsletterForm() {
           <div className="border-l border-accent/50 pl-5">
             <p className="font-display text-2xl tracking-tight text-ink">Записани сте.</p>
             <p className="mt-2 text-sm font-light leading-relaxed text-ink-soft">
-              Ще пишем само когато има какво да се каже.
+              Ще получавате бюлетина на този имейл.
             </p>
           </div>
         ) : (

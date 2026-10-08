@@ -138,3 +138,17 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Azure deploy credentials and build output
+.deploy/
+
+# .NET build output
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+.idea/
+
+# macOS
+.DS_Store

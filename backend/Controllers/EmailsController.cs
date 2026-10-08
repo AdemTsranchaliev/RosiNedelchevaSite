@@ -24,7 +24,7 @@ public class EmailsController : ControllerBase
     public ActionResult Catalog() => Ok(new
     {
         configured = _mail.IsConfigured,
-        from = _configuration["Mail:From"] ?? "info@ertherapybg.com",
+        from = _configuration["Mail:From"] ?? "DoNotReply@rosinedelcheva.com",
         templates = _templates.Catalog()
     });
 
@@ -58,7 +58,7 @@ public class EmailsController : ControllerBase
 
         if (!_mail.IsConfigured)
         {
-            return BadRequest(new { message = "SMTP не е настроен. Прегледът е готов, но писмото не може да излезе." });
+            return BadRequest(new { message = "Имейлът още не е свързан. Прегледът е готов, но писмото не може да излезе." });
         }
 
         try

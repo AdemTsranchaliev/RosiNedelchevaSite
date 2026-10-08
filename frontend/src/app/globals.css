@@ -49,6 +49,21 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+/* While the pointer is down the browser focuses the field and scrolls it into view.
+   Smooth scrolling on that moment overshoots and shifts the whole page. */
+html:active {
+  scroll-behavior: auto;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="hidden"]):not([type="image"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 
 html[data-banner="on"] .site-header {
@@ -127,6 +142,20 @@ body {
 
 .cookie-card {
   animation: cookie-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media print {
+  .site-header,
+  footer,
+  .cookie-card,
+  .no-print {
+    display: none !important;
+  }
+
+  .legal-page {
+    padding-top: 0 !important;
+    background: white;
+  }
 }
 
 .rn-admin {

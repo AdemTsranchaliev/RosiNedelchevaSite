@@ -10,10 +10,12 @@ namespace RosiNedelcheva.Api.Controllers;
 public class MarketingController : ControllerBase
 {
     private readonly AppStore _store;
+    private readonly ShopMail _shop;
 
-    public MarketingController(AppStore store)
+    public MarketingController(AppStore store, ShopMail shop)
     {
         _store = store;
+        _shop = shop;
     }
 
     [HttpGet("offers")]
@@ -39,7 +41,7 @@ public class MarketingController : ControllerBase
     }
 
     [HttpPost("newsletter")]
-    public ActionResult<Subscriber> Subscribe([FromBody] SubscribeRequest request)
+    public async Task<ActionResult<Subscriber>> Subscribe([FromBody] SubscribeRequest request)
     {
         var email = request.Email?.Trim() ?? "";
         if (!email.Contains('@') || !email.Contains('.'))
@@ -47,7 +49,14 @@ public class MarketingController : ControllerBase
             return BadRequest(new { message = "Въведете валиден имейл." });
         }
 
-        return Ok(_store.AddSubscriber(email));
+        var existing = _store.Subscribers().Any(item => string.Equals(item.Email, email, StringComparison.OrdinalIgnoreCase));
+        var subscriber = _store.AddSubscriber(email);
+        if (!existing)
+        {
+            await _shop.Newsletter(subscriber.Email);
+        }
+
+        return Ok(subscriber);
     }
 
     [Authorize(Roles = "Admin")]

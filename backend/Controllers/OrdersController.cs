@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +16,22 @@ public class OrdersController : ControllerBase
     private readonly EcontService _econt;
     private readonly NekorektenService _nekorekten;
     private readonly MailService _mail;
+    private readonly ShopMail _shop;
     private readonly EmailTemplates _templates;
+    private readonly MetaConversionsService _meta;
+    private readonly CardPaymentService _cards;
     private readonly ILogger<OrdersController> _logger;
 
-    public OrdersController(AppStore store, EcontService econt, NekorektenService nekorekten, MailService mail, EmailTemplates templates, ILogger<OrdersController> logger)
+    public OrdersController(AppStore store, EcontService econt, NekorektenService nekorekten, MailService mail, ShopMail shop, EmailTemplates templates, MetaConversionsService meta, CardPaymentService cards, ILogger<OrdersController> logger)
     {
         _store = store;
         _econt = econt;
         _nekorekten = nekorekten;
         _mail = mail;
+        _shop = shop;
         _templates = templates;
+        _meta = meta;
+        _cards = cards;
         _logger = logger;
     }
 
@@ -68,16 +75,109 @@ public class OrdersController : ControllerBase
 
         order.Shipping = shipping.Amount;
         order.Total = quote.Total + shipping.Amount;
-        if (quote.Code is not null)
-        {
-            _store.ConsumeCode(quote.Code);
-        }
         if (string.IsNullOrWhiteSpace(order.Number))
         {
             order.Number = $"RN-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 10000)}";
         }
 
-        return Ok(_store.AddOrder(order));
+        var card = string.Equals(order.PaymentMethod, "card", StringComparison.OrdinalIgnoreCase);
+        var attribution = order.Attribution;
+        if (card)
+        {
+            if (!_cards.IsConfigured)
+            {
+                return BadRequest(new { message = "Плащането с карта не е настроено." });
+            }
+
+            if (order.Total <= 0)
+            {
+                return BadRequest(new { message = "Сумата за плащане с карта трябва да е по-голяма от нула." });
+            }
+
+            order.PaymentStatus = "unpaid";
+            if (attribution is not null)
+            {
+                attribution.ClientIp = ClientIp();
+                attribution.UserAgent = Request.Headers.UserAgent.ToString();
+                order.Attribution = attribution;
+            }
+        }
+        else
+        {
+            order.Attribution = null;
+            if (quote.Code is not null)
+            {
+                _store.ConsumeCode(quote.Code);
+            }
+        }
+
+        var saved = _store.AddOrder(order);
+        if (!card)
+        {
+            await _shop.OrderPlaced(saved);
+            if (attribution?.MarketingConsent == true)
+            {
+                _ = _meta.SendPurchaseAsync(saved, attribution, ClientIp(), Request.Headers.UserAgent.ToString());
+            }
+
+            return Ok(new { checkoutUrl = (string?)null, number = saved.Number });
+        }
+
+        try
+        {
+            var checkoutUrl = await _cards.Begin(saved);
+            return Ok(new { checkoutUrl, number = saved.Number });
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Card checkout did not open for order {Number}", saved.Number);
+            saved.PaymentStatus = null;
+            _store.UpdateOrderStatus(saved.Id, "cancelled", "Плащането с карта не се отвори.", null);
+            var message = exception is InvalidOperationException ? exception.Message : "Плащането с карта не се отвори. Опитайте отново.";
+            return BadRequest(new { message });
+        }
+    }
+
+    [HttpGet("checkout")]
+    public async Task<ActionResult<CheckoutReceipt>> Checkout([FromQuery(Name = "session_id")] string? sessionId)
+    {
+        if (string.IsNullOrWhiteSpace(sessionId) || sessionId.Length is < 8 or > 255 || !sessionId.StartsWith("cs_", StringComparison.Ordinal) || sessionId.Any(ch => !(char.IsAsciiLetterOrDigit(ch) || ch == '_')))
+        {
+            return BadRequest(new { message = "Липсва плащане за потвърждение." });
+        }
+
+        ShopOrder? order;
+        try
+        {
+            order = await _cards.Confirm(sessionId);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
+
+        if (order is null)
+        {
+            return NotFound(new { message = "Поръчката не е намерена." });
+        }
+
+        if (order.PaymentStatus != "paid")
+        {
+            return Ok(new CheckoutReceipt { Paid = false, Number = order.Number });
+        }
+
+        return Ok(Receipt(order));
+    }
+
+    private string? ClientIp()
+    {
+        var forwarded = Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',')[0].Trim();
+        if (!string.IsNullOrWhiteSpace(forwarded) && IPAddress.TryParse(forwarded, out _))
+        {
+            return forwarded;
+        }
+
+        return HttpContext.Connection.RemoteIpAddress?.ToString();
     }
 
     [Authorize]
@@ -120,6 +220,8 @@ public class OrdersController : ControllerBase
         {
             return NotFound();
         }
+
+        await _shop.OrderStatus(order, status);
 
         if (status == "completed" && _mail.IsConfigured)
         {
@@ -179,6 +281,23 @@ public class OrdersController : ControllerBase
         }
     }
 
+    private static CheckoutReceipt Receipt(ShopOrder order) => new()
+    {
+        Paid = true,
+        Number = order.Number,
+        Total = order.Total,
+        Shipping = order.Shipping,
+        DiscountPercent = order.DiscountPercent,
+        CustomerName = order.CustomerName,
+        Phone = order.Phone,
+        Email = order.Email,
+        City = order.City,
+        Address = order.Address,
+        DeliveryType = order.DeliveryType,
+        CreatedAt = order.CreatedAt,
+        Items = order.Items
+    };
+
     private int? CurrentUserId()
     {
         var value = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -191,4 +310,21 @@ public class StatusRequest
     public string? Status { get; set; }
     public string? Note { get; set; }
     public string? TrackingCode { get; set; }
+}
+
+public class CheckoutReceipt
+{
+    public bool Paid { get; set; }
+    public string Number { get; set; } = "";
+    public decimal Total { get; set; }
+    public decimal Shipping { get; set; }
+    public int DiscountPercent { get; set; }
+    public string CustomerName { get; set; } = "";
+    public string Phone { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string City { get; set; } = "";
+    public string Address { get; set; } = "";
+    public string DeliveryType { get; set; } = "address";
+    public DateTime CreatedAt { get; set; }
+    public List<OrderLine> Items { get; set; } = [];
 }

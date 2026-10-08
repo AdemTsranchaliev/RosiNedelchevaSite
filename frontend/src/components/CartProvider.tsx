@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { product } from "@/lib/content";
+import { trackAddToCart } from "@/lib/tracking";
 
 export type CartItem = {
   id: string;
@@ -81,6 +82,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       ];
     });
     setIsOpen(true);
+    trackAddToCart({
+      id: product.id,
+      name: product.title,
+      price: product.price,
+      quantity,
+    });
   }, []);
 
   const setQuantity = useCallback((id: string, quantity: number) => {

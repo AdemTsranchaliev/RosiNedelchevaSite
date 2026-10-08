@@ -89,8 +89,8 @@ const products = [
     description: "Терапевтични карти за самопомощ, самоосъзнаване и вътрешна устойчивост.",
     details: "Създадени са от практиката на Росица Неделчева. Помагат тревожността да се разбира постепенно.",
     price: 79,
-    imageUrl: publicPath("/images/product-box.jpg"),
-    images: [publicPath("/images/product-box.jpg"), publicPath("/images/cards-overview.jpg"), publicPath("/images/site/rosi-portrait.jpg"), publicPath("/images/site/rosi-wide.jpg")],
+    imageUrl: publicPath("/images/site/rosi-hero.jpg"),
+    images: [publicPath("/images/site/rosi-hero.jpg"), publicPath("/images/site/rosi-desk.jpg"), publicPath("/images/site/rosi-office.jpg"), publicPath("/images/cards-fan.jpg")],
     videoUrl: null,
     highlights: ["100 карти", "6 раздела с въпроси, насоки и техники", "За хора с тревожност и за психолози/терапевти", "Създадени от практикуващ психолог и психотерапевт"],
     specs: [
@@ -115,7 +115,7 @@ const reviews: Review[] = [
     city: "София",
     rating: 5,
     body: "Ползвам ги вечер, когато мислите се завъртят. Въпросите са тихи и конкретни.",
-    images: [publicPath("/images/cards/section-1-card-1.jpg"), publicPath("/images/cards-overview.jpg")],
+    images: [publicPath("/images/cards/section-1-card-1.jpg"), publicPath("/images/cards-sections.jpg")],
     status: "published",
     createdAt: iso(6),
   },
@@ -143,7 +143,7 @@ const reviews: Review[] = [
     city: "Варна",
     rating: 4,
     body: "Хареса ми, че няма правилен отговор. Чакам одобрение на още едно ревю със снимка.",
-    images: [publicPath("/images/product-box.jpg")],
+    images: [publicPath("/images/site/rosi-hero.jpg")],
     status: "pending",
     createdAt: iso(2),
   },
@@ -166,8 +166,8 @@ const store = {
       excerpt: "Тревожността не е само „мислене твърде много“.",
       date: "2026-03-12",
       readMinutes: 5,
-      image: publicPath("/images/site/rosi-wide.jpg"),
-      imageAlt: "Росица Неделчева до купчина книги в кабинета",
+      image: publicPath("/images/site/rosi-office.jpg"),
+      imageAlt: "Росица Неделчева в кабинета, до книгите",
       body: "Тревожността е естествена човешка реакция.",
       isPublished: true,
     },
@@ -178,7 +178,7 @@ const store = {
       excerpt: "Когато тревожността ни насочва към това, което не е наред, ресурсите ни връщат към опората.",
       date: "2026-02-20",
       readMinutes: 4,
-      image: publicPath("/images/site/rosi-portrait-2.jpg"),
+      image: publicPath("/images/site/rosi-smile.jpg"),
       imageAlt: "Портрет на Росица Неделчева",
       body: "Ресурсите не означават, че трудността изчезва.",
       isPublished: true,
@@ -560,7 +560,7 @@ export async function demoCall(path: string, init: RequestInit = {}): Promise<un
     return order;
   }
   if (route === "/api/emails") {
-    return { configured: false, from: "info@ertherapybg.com", templates: emailCatalog };
+    return { configured: false, from: "rosiinedelcheva@gmail.com", templates: emailCatalog };
   }
   const emailMatch = route.match(/^\/api\/emails\/([^/]+)$/);
   if (emailMatch) {

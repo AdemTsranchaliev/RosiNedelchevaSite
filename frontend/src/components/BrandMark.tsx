@@ -1,51 +1,14 @@
+import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/lib/content";
+import { publicPath } from "@/lib/public-path";
 
-const leaves = [132, 154, 176, 198].map((deg) => {
-  const rad = (deg * Math.PI) / 180;
-  return {
-    deg,
-    x: 40 + Math.cos(rad) * 28.2,
-    y: 38 + Math.sin(rad) * 28.2,
-  };
-});
+const logo = publicPath("/images/site/logo-rn.png");
 
 export function Monogram({ className = "h-12 w-12" }: { className?: string }) {
   return (
-    <span className={`relative inline-block text-accent ${className}`} aria-hidden>
-      <svg viewBox="0 0 80 80" className="h-full w-full" fill="none">
-        <circle cx="40" cy="38" r="22.5" stroke="currentColor" strokeWidth="0.7" />
-        <path
-          d={`M ${leaves[0].x} ${leaves[0].y} C 22 56, 16 48, ${leaves[3].x} ${leaves[3].y}`}
-          stroke="currentColor"
-          strokeWidth="0.55"
-          strokeLinecap="round"
-        />
-        {leaves.map((leaf) => (
-          <g
-            key={leaf.deg}
-            transform={`translate(${leaf.x.toFixed(2)} ${leaf.y.toFixed(2)}) rotate(${leaf.deg - 90})`}
-            stroke="currentColor"
-            strokeWidth="0.55"
-            strokeLinecap="round"
-          >
-            <ellipse cx="0" cy="-1" rx="2.3" ry="5" />
-            <path d="M0 3.2V-5" />
-          </g>
-        ))}
-        <text
-          x="40"
-          y="49"
-          textAnchor="middle"
-          fill="currentColor"
-          fontSize="31"
-          letterSpacing="-0.8"
-          className="font-script"
-          style={{ fontFamily: "var(--font-script-face), cursive" }}
-        >
-          RN
-        </text>
-      </svg>
+    <span className={`relative inline-block shrink-0 ${className}`} aria-hidden>
+      <Image src={logo} alt="" fill className="object-contain" sizes="96px" />
     </span>
   );
 }

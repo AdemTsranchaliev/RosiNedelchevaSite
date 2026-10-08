@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProductBuyPanel } from "@/components/ProductBuyPanel";
+import { onConsentChange, readTrackingConsent } from "@/lib/consent";
 import { formatPrice, product, sections } from "@/lib/content";
+import { trackViewItem } from "@/lib/tracking";
 import { useCart } from "./CartProvider";
 
 const fan = [
@@ -27,10 +29,28 @@ export function ProductShowcase() {
   const [active, setActive] = useState(0);
   const [hover, setHover] = useState<number | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const viewed = useRef(false);
   const shown = sections[hover ?? active];
   const current = sections[active];
   const sample = sampleOf(current);
   const caution = cautionOf(current);
+
+  useEffect(() => {
+    const send = () => {
+      if (viewed.current) return;
+      const consent = readTrackingConsent();
+      if (!consent?.analytics && !consent?.marketing) return;
+      viewed.current = true;
+      trackViewItem({
+        id: product.id,
+        name: product.title,
+        price: product.price,
+        quantity: 1,
+      });
+    };
+    send();
+    return onConsentChange(send);
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -57,7 +77,7 @@ export function ProductShowcase() {
               <div className="relative h-64 w-full sm:h-80 lg:h-[22rem]">
                 <Image
                   src={product.imageBox}
-                  alt="Кутия — Справяне с тревожността"
+                  alt="Росица Неделчева с терапевтичните карти"
                   fill
                   priority
                   className="object-cover object-center"

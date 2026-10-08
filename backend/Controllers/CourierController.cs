@@ -112,6 +112,11 @@ public class CourierController : ControllerBase
             return Ok(order);
         }
 
+        if (string.Equals(order.PaymentMethod, "card", StringComparison.OrdinalIgnoreCase) && order.PaymentStatus == "unpaid")
+        {
+            return BadRequest(new { message = "Поръчката още не е платена с карта." });
+        }
+
         try
         {
             var waybill = await _econt.CreateLabel(_store.Courier(), order);
