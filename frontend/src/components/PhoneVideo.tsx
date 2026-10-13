@@ -82,7 +82,7 @@ export function PhoneVideo() {
           <figure className="absolute -bottom-8 -left-4 w-[8.5rem] -rotate-6 shadow-[0_22px_36px_-22px_rgba(12,8,6,0.9)] ring-[5px] ring-paper sm:-left-8 sm:w-40">
             <div className="relative aspect-[2/3] bg-paper">
               <Image
-                src={publicPath("/images/cards/section-1-card-1.jpg")}
+                src={publicPath("/images/cards/section-1-card-1.webp")}
                 alt="Карта: Ако тревожността можеше да говори, какво би искала да ти каже?"
                 fill
                 className="object-cover"

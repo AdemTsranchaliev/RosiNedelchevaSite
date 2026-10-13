@@ -80,7 +80,7 @@ export function ProductShowcase() {
                   alt="Росица Неделчева с терапевтичните карти"
                   fill
                   priority
-                  className="object-cover object-center"
+                  className="object-cover object-[center_42%]"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>

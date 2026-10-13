@@ -16,7 +16,7 @@ export default function AboutPage() {
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
           <div className="relative aspect-[3/4] overflow-hidden bg-paper-2">
             <Image
-              src={siteImages.portrait}
+              src={siteImages.about}
               alt="Росица Неделчева"
               fill
               priority
@@ -50,10 +50,10 @@ export default function AboutPage() {
 
       <section className="relative h-[40vh] min-h-[240px] overflow-hidden md:h-[48vh]">
         <Image
-          src={siteImages.wide}
+          src={siteImages.cardsDetail}
           alt=""
           fill
-          className="object-cover object-[center_30%]"
+          className="object-cover object-center"
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-clay/40" />

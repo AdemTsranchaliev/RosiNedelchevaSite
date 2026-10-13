@@ -21,12 +21,12 @@ const card = (file: string) => publicPath(`/images/cards/${file}`);
 
 /** Кориците и 20-те карти от файла за печат. */
 export const sectionCovers: SectionCover[] = [
-  { sectionId: 1, frontImage: card("section-1-front.jpg") },
-  { sectionId: 2, frontImage: card("section-2-front.jpg") },
-  { sectionId: 3, frontImage: card("section-3-front.jpg") },
-  { sectionId: 4, frontImage: card("section-4-front.jpg") },
-  { sectionId: 5, frontImage: card("section-5-front.jpg") },
-  { sectionId: 6, frontImage: card("section-6-front.jpg") },
+  { sectionId: 1, frontImage: card("section-1-front.webp") },
+  { sectionId: 2, frontImage: card("section-2-front.webp") },
+  { sectionId: 3, frontImage: card("section-3-front.webp") },
+  { sectionId: 4, frontImage: card("section-4-front.webp") },
+  { sectionId: 5, frontImage: card("section-5-front.webp") },
+  { sectionId: 6, frontImage: card("section-6-front.webp") },
 ];
 
 export const deckCards: DeckCard[] = [
@@ -38,7 +38,7 @@ export const deckCards: DeckCard[] = [
       "Вместо да бъде само източник на дискомфорт, тревожността понякога може да носи важна информация за нашите нужди, страхове или вътрешни конфликти.",
     invitation:
       "Каква нужда, страх или послание е възможно да се опитва да ти покаже?",
-    backImage: card("section-1-card-1.jpg"),
+    backImage: card("section-1-card-1.webp"),
   },
   {
     id: "1-2",
@@ -47,7 +47,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Умът често се опитва да предвиди бъдещето, за да ни предпази. Понякога това увеличава напрежението.",
     invitation: "Каква е вероятността този сценарий действително да се случи?",
-    backImage: card("section-1-card-2.jpg"),
+    backImage: card("section-1-card-2.webp"),
   },
   {
     id: "2-1",
@@ -56,7 +56,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Сравненията могат да засилят чувството за недостатъчност и напрежение.",
     invitation: "Какво се случва с теб след подобни сравнения?",
-    backImage: card("section-2-card-1.jpg"),
+    backImage: card("section-2-card-1.webp"),
   },
   {
     id: "2-2",
@@ -66,7 +66,7 @@ export const deckCards: DeckCard[] = [
       "Перфекционизмът може да създаде усещане, че никога не е достатъчно добре.",
     invitation:
       "Какво би се променило, ако си позволиш да бъдеш достатъчно добър/добра?",
-    backImage: card("section-2-card-2.jpg"),
+    backImage: card("section-2-card-2.webp"),
   },
   {
     id: "2-3",
@@ -75,7 +75,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Размишлението може да бъде полезно, но понякога се превръща в безкраен кръг от тревожни мисли.",
     invitation: "Как би разбрал/а, че вече имаш достатъчно информация?",
-    backImage: card("section-2-card-3.jpg"),
+    backImage: card("section-2-card-3.webp"),
   },
   {
     id: "2-4",
@@ -84,7 +84,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Когато сме тревожни, умът естествено търси потенциални опасности.",
     invitation: "Колко често този сценарий действително се е случвал в миналото?",
-    backImage: card("section-2-card-4.jpg"),
+    backImage: card("section-2-card-4.webp"),
   },
   {
     id: "2-5",
@@ -94,7 +94,7 @@ export const deckCards: DeckCard[] = [
       "Понякога отлагането намалява напрежението за кратко, но може да го увеличи по-късно.",
     invitation:
       "Коя е най-малката възможна стъпка, която можеш да направиш още днес?",
-    backImage: card("section-2-card-5.jpg"),
+    backImage: card("section-2-card-5.webp"),
   },
   {
     id: "2-6",
@@ -104,7 +104,7 @@ export const deckCards: DeckCard[] = [
       "Страхът от грешки често увеличава напрежението и самокритиката.",
     invitation:
       "Какво би казал/а на близък човек, ако той направи същата грешка?",
-    backImage: card("section-2-card-6.jpg"),
+    backImage: card("section-2-card-6.webp"),
   },
   {
     id: "2-7",
@@ -113,7 +113,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Свръхотговорността може да създаде усещане, че всичко зависи от теб.",
     invitation: "За какво носиш отговорност и за какво не?",
-    backImage: card("section-2-card-7.jpg"),
+    backImage: card("section-2-card-7.webp"),
   },
   {
     id: "2-8",
@@ -121,7 +121,7 @@ export const deckCards: DeckCard[] = [
     prompt: "Какво се опитваш да контролираш в момента?",
     insight: "Контролът често е опит да намалим несигурността.",
     invitation: "Кое е в твоя контрол и кое не е?",
-    backImage: card("section-2-card-8.jpg"),
+    backImage: card("section-2-card-8.webp"),
   },
   {
     id: "3-1",
@@ -130,7 +130,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Понякога тревожността е свързана не толкова със събитието, колкото с това как ще бъдем възприети.",
     invitation: "Кое от двете ти изглежда по-трудно за понасяне?",
-    backImage: card("section-3-card-1.jpg"),
+    backImage: card("section-3-card-1.webp"),
   },
   {
     id: "3-2",
@@ -139,7 +139,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Вътрешният критик често е свързан с послания, които сме чували многократно през живота си.",
     invitation: "На кого ти напомня този глас?",
-    backImage: card("section-3-card-2.jpg"),
+    backImage: card("section-3-card-2.webp"),
   },
   {
     id: "4-1",
@@ -148,7 +148,7 @@ export const deckCards: DeckCard[] = [
       "Какво би избрал/а, ако тревожността не взимаше решенията вместо теб?",
     insight: "Понякога тревожността започва да определя поведението ни.",
     invitation: "Какво всъщност искаш ти?",
-    backImage: card("section-4-card-1.jpg"),
+    backImage: card("section-4-card-1.webp"),
   },
   {
     id: "4-2",
@@ -157,7 +157,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Промяната рядко се случва наведнъж. Тя често започва с малки и последователни действия.",
     invitation: "Коя е твоята следваща стъпка?",
-    backImage: card("section-4-card-2.jpg"),
+    backImage: card("section-4-card-2.webp"),
   },
   {
     id: "4-3",
@@ -167,7 +167,7 @@ export const deckCards: DeckCard[] = [
       "Когато сме тревожни, понякога е трудно да различим фактите от интерпретациите си.",
     invitation:
       "Кои части от ситуацията са сигурни факти и кои са твои предположения?",
-    backImage: card("section-4-card-3.jpg"),
+    backImage: card("section-4-card-3.webp"),
   },
   {
     id: "4-4",
@@ -176,7 +176,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Понякога сме много по-състрадателни към другите, отколкото към себе си.",
     invitation: "Какво би искал/а да чуеш от себе си точно сега?",
-    backImage: card("section-4-card-4.jpg"),
+    backImage: card("section-4-card-4.webp"),
   },
   {
     id: "4-5",
@@ -184,7 +184,7 @@ export const deckCards: DeckCard[] = [
     prompt: "Какво е в твоя контрол точно сега?",
     insight: "Не всичко зависи от нас.",
     invitation: "Коя е следващата реалистична стъпка, която зависи от теб?",
-    backImage: card("section-4-card-5.jpg"),
+    backImage: card("section-4-card-5.webp"),
   },
   {
     id: "5-1",
@@ -193,7 +193,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Почивката е важна част от възстановяването, а не награда, която трябва да заслужим.",
     invitation: "Какво ти помага истински да се възстановиш?",
-    backImage: card("section-5-card-1.jpg"),
+    backImage: card("section-5-card-1.webp"),
   },
   {
     id: "5-2",
@@ -201,7 +201,7 @@ export const deckCards: DeckCard[] = [
     prompt: "Как поставяш граници?",
     insight: "Границите могат да бъдат форма на грижа към себе си.",
     invitation: "Къде в живота си имаш нужда от по-ясни граници?",
-    backImage: card("section-5-card-2.jpg"),
+    backImage: card("section-5-card-2.webp"),
   },
   {
     id: "6-1",
@@ -210,7 +210,7 @@ export const deckCards: DeckCard[] = [
     insight:
       "Когато сме тревожни, понякога дори малкото действие помага да възстановим усещането за посока.",
     invitation: "Коя е най-малката полезна стъпка, която можеш да направиш сега?",
-    backImage: card("section-6-card-1.jpg"),
+    backImage: card("section-6-card-1.webp"),
   },
 ];
 

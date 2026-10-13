@@ -89,8 +89,8 @@ const products = [
     description: "Терапевтични карти за самопомощ, самоосъзнаване и вътрешна устойчивост.",
     details: "Създадени са от практиката на Росица Неделчева. Помагат тревожността да се разбира постепенно.",
     price: 79,
-    imageUrl: publicPath("/images/site/rosi-hero.jpg"),
-    images: [publicPath("/images/site/rosi-hero.jpg"), publicPath("/images/site/rosi-desk.jpg"), publicPath("/images/site/rosi-office.jpg"), publicPath("/images/cards-fan.jpg")],
+    imageUrl: publicPath("/images/site/rosi-hero.webp"),
+    images: [publicPath("/images/site/rosi-hero.webp"), publicPath("/images/site/rosi-cards-desk.webp"), publicPath("/images/site/rosi-cards-detail.webp"), publicPath("/images/cards-fan.webp")],
     videoUrl: null,
     highlights: ["100 карти", "6 раздела с въпроси, насоки и техники", "За хора с тревожност и за психолози/терапевти", "Създадени от практикуващ психолог и психотерапевт"],
     specs: [
@@ -115,7 +115,7 @@ const reviews: Review[] = [
     city: "София",
     rating: 5,
     body: "Ползвам ги вечер, когато мислите се завъртят. Въпросите са тихи и конкретни.",
-    images: [publicPath("/images/cards/section-1-card-1.jpg"), publicPath("/images/cards-sections.jpg")],
+    images: [publicPath("/images/cards/section-1-card-1.webp"), publicPath("/images/cards-sections.webp")],
     status: "published",
     createdAt: iso(6),
   },
@@ -129,7 +129,7 @@ const reviews: Review[] = [
     city: "Пловдив",
     rating: 5,
     body: "Взех ги и за кабинета. Клиентите се задържат по-лесно върху една карта, вместо върху целия разговор.",
-    images: [publicPath("/images/cards/section-2-card-1.jpg")],
+    images: [publicPath("/images/cards/section-2-card-1.webp")],
     status: "published",
     createdAt: iso(11),
   },
@@ -143,7 +143,7 @@ const reviews: Review[] = [
     city: "Варна",
     rating: 4,
     body: "Хареса ми, че няма правилен отговор. Чакам одобрение на още едно ревю със снимка.",
-    images: [publicPath("/images/site/rosi-hero.jpg")],
+    images: [publicPath("/images/site/rosi-hero.webp")],
     status: "pending",
     createdAt: iso(2),
   },
@@ -166,8 +166,8 @@ const store = {
       excerpt: "Тревожността не е само „мислене твърде много“.",
       date: "2026-03-12",
       readMinutes: 5,
-      image: publicPath("/images/site/rosi-office.jpg"),
-      imageAlt: "Росица Неделчева в кабинета, до книгите",
+      image: publicPath("/images/site/rosi-cards-shelf.webp"),
+      imageAlt: "Росица Неделчева с терапевтичните карти",
       body: "Тревожността е естествена човешка реакция.",
       isPublished: true,
     },
@@ -178,7 +178,7 @@ const store = {
       excerpt: "Когато тревожността ни насочва към това, което не е наред, ресурсите ни връщат към опората.",
       date: "2026-02-20",
       readMinutes: 4,
-      image: publicPath("/images/site/rosi-smile.jpg"),
+      image: publicPath("/images/site/rosi-smile.webp"),
       imageAlt: "Портрет на Росица Неделчева",
       body: "Ресурсите не означават, че трудността изчезва.",
       isPublished: true,
@@ -568,7 +568,7 @@ export async function demoCall(path: string, init: RequestInit = {}): Promise<un
     return { ...info, subject: info.name, html: `<p style="font-family:Georgia,serif">${info.description}</p>` };
   }
   if (route.endsWith("/test")) throw new Error("SMTP не е настроен. Прегледът е готов, но писмото не може да излезе.");
-  if (route === "/api/uploads") return { url: "/images/product-box.jpg", kind: "image" };
+  if (route === "/api/uploads") return { url: "/images/product-box.webp", kind: "image" };
 
   throw new Error("Тази заявка не е част от демото.");
 }

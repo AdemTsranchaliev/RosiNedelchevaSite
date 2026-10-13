@@ -8,7 +8,10 @@ const basePath = githubPages ? `/${repository}` : "";
 const nextConfig: NextConfig = {
   ...(staticExport ? { output: "export" as const } : {}),
   images: {
-    unoptimized: staticExport,
+    loader: "custom",
+    loaderFile: "./src/lib/image-loader.ts",
+    deviceSizes: [1200, 1600],
+    imageSizes: [480, 960],
   },
   basePath,
   assetPrefix: basePath || undefined,

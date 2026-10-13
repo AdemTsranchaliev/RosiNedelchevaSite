@@ -16,6 +16,16 @@ const gallery = [
     fit: "object-cover",
   },
   {
+    src: siteImages.cardsDesk,
+    alt: "Росица Неделчева подрежда картите на бюрото",
+    fit: "object-cover",
+  },
+  {
+    src: siteImages.cardsDetail,
+    alt: "Детайл от терапевтичните карти",
+    fit: "object-cover",
+  },
+  {
     src: product.imageFan,
     alt: "Картите, подредени на ветрило",
     fit: "object-cover",
@@ -145,7 +155,7 @@ export function ProductGallery() {
         </p>
       </div>
 
-      <div className="mt-2.5 grid grid-cols-3 gap-2" role="tablist" aria-label="Снимки">
+      <div className="mt-2.5 grid grid-cols-5 gap-1.5 sm:gap-2" role="tablist" aria-label="Снимки">
         {gallery.map((image, index) => (
           <button
             key={image.src}

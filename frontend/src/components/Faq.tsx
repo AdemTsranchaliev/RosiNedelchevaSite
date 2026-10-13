@@ -18,7 +18,7 @@ export function Faq() {
           </p>
           <figure className="relative mt-8 aspect-[3/2] overflow-hidden bg-paper-2 ring-1 ring-ink/10">
             <Image
-              src={siteImages.wide}
+              src={siteImages.faq}
               alt="Росица Неделчева в кабинета"
               fill
               className="object-cover object-center"

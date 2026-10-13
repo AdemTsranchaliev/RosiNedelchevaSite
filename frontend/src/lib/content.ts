@@ -71,13 +71,13 @@ export const product = {
     { lead: "Кутия", detail: "целият комплект" },
     { lead: "Език", detail: "български" },
   ],
-  imageBox: publicPath("/images/site/rosi-hero.jpg"),
-  imagePackage: publicPath("/images/product-box.jpg"),
-  imageCards: publicPath("/images/cards-sections.jpg"),
-  imageFan: publicPath("/images/cards-fan.jpg"),
-  imageLifestyle: publicPath("/images/site/rosi-office.jpg"),
-  imageSpread: publicPath("/images/cards-sections.jpg"),
-  imageCalm: publicPath("/images/site/rosi-desk.jpg"),
+  imageBox: publicPath("/images/site/rosi-cards-desk.webp"),
+  imagePackage: publicPath("/images/product-box.webp"),
+  imageCards: publicPath("/images/cards-sections.webp"),
+  imageFan: publicPath("/images/cards-fan.webp"),
+  imageLifestyle: publicPath("/images/site/rosi-cards-shelf.webp"),
+  imageSpread: publicPath("/images/cards-sections.webp"),
+  imageCalm: publicPath("/images/site/rosi-about.webp"),
 };
 
 export function formatPrice(value: number) {
@@ -85,11 +85,16 @@ export function formatPrice(value: number) {
 }
 
 export const siteImages = {
-  hero: publicPath("/images/site/rosi-hero.jpg"),
-  portrait: publicPath("/images/site/rosi-desk.jpg"),
-  portraitAlt: publicPath("/images/site/rosi-smile.jpg"),
-  wide: publicPath("/images/site/rosi-office.jpg"),
-  withCards: publicPath("/images/site/rosi-with-cards.jpg"),
+  hero: publicPath("/images/site/rosi-hero.webp"),
+  portrait: publicPath("/images/site/rosi-desk.webp"),
+  portraitAlt: publicPath("/images/site/rosi-smile.webp"),
+  faq: publicPath("/images/site/rosi-faq.webp"),
+  withCards: publicPath("/images/site/rosi-with-cards.webp"),
+  about: publicPath("/images/site/rosi-about.webp"),
+  session: publicPath("/images/site/rosi-session.webp"),
+  cardsDesk: publicPath("/images/site/rosi-cards-desk.webp"),
+  cardsDetail: publicPath("/images/site/rosi-cards-detail.webp"),
+  cardsShelf: publicPath("/images/site/rosi-cards-shelf.webp"),
 };
 
 export const siteIcons = {
@@ -125,8 +130,8 @@ export const sections = [
       "Как тревожността се проявява в мислите, емоциите, тялото и поведението. Осъзнаването е първата стъпка към промяната.",
     guide:
       "Тези карти помагат да разпознаваш по-ясно как тревожността се проявява в мислите, емоциите, тялото и поведението. Осъзнаването е първата стъпка към промяната — когато виждаш преживяването по-ясно, можеш по-добре да избираш как да реагираш.",
-    cover: publicPath("/images/cards/section-1-front.jpg"),
-    sample: publicPath("/images/cards/section-1-card-1.jpg"),
+    cover: publicPath("/images/cards/section-1-front.webp"),
+    sample: publicPath("/images/cards/section-1-card-1.webp"),
   },
   {
     id: 2,
@@ -136,8 +141,8 @@ export const sections = [
       "Мисли, навици и поведения, които носят краткотрайно облекчение, но могат неусетно да поддържат тревожността жива.",
     guide:
       "Тревожността невинаги се поддържа от самата ситуация. Понякога мисли, навици и поведения, които носят краткотрайно облекчение, я поддържат жива. Картите помагат да разпознаеш кои от тези механизми участват при теб.",
-    cover: publicPath("/images/cards/section-2-front.jpg"),
-    sample: publicPath("/images/cards/section-2-card-1.jpg"),
+    cover: publicPath("/images/cards/section-2-front.webp"),
+    sample: publicPath("/images/cards/section-2-card-1.webp"),
   },
   {
     id: 3,
@@ -149,8 +154,8 @@ export const sections = [
       "Картите изследват по-дълбоки преживявания, модели и убеждения, които могат да бъдат свързани с тревожността. Някои въпроси може да събудят силни емоции, спомени или вътрешен дискомфорт.",
     caution:
       "Ако преживяването стане твърде интензивно, направи пауза. Използвай самоподкрепа, близък човек или специалист.",
-    cover: publicPath("/images/cards/section-3-front.jpg"),
-    sample: publicPath("/images/cards/section-3-card-1.jpg"),
+    cover: publicPath("/images/cards/section-3-front.webp"),
+    sample: publicPath("/images/cards/section-3-card-1.webp"),
   },
   {
     id: 4,
@@ -160,8 +165,8 @@ export const sections = [
       "Разширяване на перспективата отвъд рисковете и най-неприятните сценарии — към нови възможности за избор.",
     guide:
       "Тревожността стеснява погледа към рисковете, заплахите и най-неприятните сценарии. Тези карти отварят по-гъвкав начин да видиш ситуацията и нови възможности за избор и действие.",
-    cover: publicPath("/images/cards/section-4-front.jpg"),
-    sample: publicPath("/images/cards/section-4-card-1.jpg"),
+    cover: publicPath("/images/cards/section-4-front.webp"),
+    sample: publicPath("/images/cards/section-4-card-1.webp"),
   },
   {
     id: 5,
@@ -171,8 +176,8 @@ export const sections = [
       "Свързване с ресурсите, които вече съществуват — в тялото, взаимоотношенията, навиците и вътрешните качества.",
     guide:
       "Тревожността насочва вниманието към това, което не е наред. Картите връщат към ресурсите, които вече са в живота ти — в тялото, взаимоотношенията, навиците и вътрешните качества.",
-    cover: publicPath("/images/cards/section-5-front.jpg"),
-    sample: publicPath("/images/cards/section-5-card-1.jpg"),
+    cover: publicPath("/images/cards/section-5-front.webp"),
+    sample: publicPath("/images/cards/section-5-card-1.webp"),
   },
   {
     id: 6,
@@ -184,8 +189,8 @@ export const sections = [
       "За моменти на повишена тревожност, напрежение или претоварване. Не е нужно да минеш през всички техники. Избери една, опитай я за кратко и наблюдавай как ти влияе.",
     caution:
       "Ако се появи дискомфорт или усещанията се засилят, прекрати техниката и се върни към нещо познато и успокояващо. При силна физическа болка, тежък задух, припадък или други необичайни симптоми — медицинска помощ.",
-    cover: publicPath("/images/cards/section-6-front.jpg"),
-    sample: publicPath("/images/cards/section-6-card-1.jpg"),
+    cover: publicPath("/images/cards/section-6-front.webp"),
+    sample: publicPath("/images/cards/section-6-card-1.webp"),
   },
 ];
 
@@ -305,9 +310,9 @@ export const blogPosts: BlogPost[] = [
       "Тревожността не е само „мислене твърде много“. Как се проявява в тялото, емоциите и поведението.",
     date: "2026-03-12",
     readMinutes: 5,
-    image: publicPath("/images/site/rosi-office.jpg"),
-    imageAlt: "Росица Неделчева в кабинета, до книгите",
-    imagePosition: "center 40%",
+    image: publicPath("/images/site/rosi-cards-shelf.webp"),
+    imageAlt: "Росица Неделчева с терапевтичните карти",
+    imagePosition: "center 42%",
     content: [
       {
         type: "text",
@@ -319,7 +324,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         type: "image",
-        src: publicPath("/images/cards-sections.jpg"),
+        src: publicPath("/images/cards-sections.webp"),
         alt: "Шестте раздела на терапевтичните карти",
         caption: "Шестте раздела — от разпознаване до моментна регулация.",
         fit: "contain",
@@ -337,7 +342,7 @@ export const blogPosts: BlogPost[] = [
       "Когато тревожността ни насочва към това, което не е наред, ресурсите ни връщат към опората.",
     date: "2026-02-20",
     readMinutes: 4,
-    image: publicPath("/images/site/rosi-smile.jpg"),
+    image: publicPath("/images/site/rosi-smile.webp"),
     imageAlt: "Портрет на Росица Неделчева",
     imagePosition: "center 20%",
     content: [
@@ -362,9 +367,9 @@ export const blogPosts: BlogPost[] = [
       "Самопомощта е ценна, но не замества терапията. Признаци, при които си струва да се обърнем към специалист.",
     date: "2026-01-18",
     readMinutes: 6,
-    image: publicPath("/images/site/rosi-desk.jpg"),
-    imageAlt: "Росица Неделчева",
-    imagePosition: "center 18%",
+    image: publicPath("/images/site/rosi-session.webp"),
+    imageAlt: "Росица Неделчева по време на сесия",
+    imagePosition: "center",
     content: [
       {
         type: "text",
