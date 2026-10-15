@@ -24,9 +24,15 @@ export function CookieConsent() {
   const choice = useConsentState();
   const [forced, setForced] = useState(false);
   const [view, setView] = useState<View>("choice");
+  const [ready, setReady] = useState(false);
   const admin = pathname.startsWith("/admin");
   const checkout = pathname.replace(/\/$/, "") === "/porachka";
-  const open = !admin && (forced || choice === null);
+  const open = !admin && (forced || (ready && choice === null));
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setReady(true), 1600);
+    return () => window.clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     const show = () => {

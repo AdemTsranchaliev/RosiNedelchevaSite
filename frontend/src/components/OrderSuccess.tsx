@@ -259,7 +259,7 @@ function receiptOrder(receipt: CheckoutReceipt): PlacedOrder {
       title: item.title,
       price: item.price,
       quantity: item.quantity,
-      image: product.imageBox,
+      image: product.imagePackage,
     })),
     total: receipt.total,
     shipping: receipt.shipping,

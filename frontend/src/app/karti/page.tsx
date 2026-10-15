@@ -5,12 +5,18 @@ import { Faq } from "@/components/Faq";
 import { IconHandsHeart, IconLeaf, IconSun } from "@/components/Icons";
 import { ProductReviews } from "@/components/ProductReviews";
 import { ProductShowcase } from "@/components/ProductShowcase";
+import { JsonLd } from "@/components/JsonLd";
 import { audience, importantWarnings, product, sections, site, siteImages } from "@/lib/content";
+import { breadcrumbSchema, faqSchema, pageMetadata, productSchema } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: product.title,
-  description: product.subtitle,
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Терапевтични карти за тревожност",
+  description:
+    "Поръчай комплекта от 100 карти в 6 раздела, създаден от психолог Росица Неделчева. За самопомощ и за работа в терапевтичната практика.",
+  path: "/karti",
+  image: "/images/site/rosi-cards-desk.webp",
+  imageAlt: "Росица Неделчева с терапевтичните карти",
+});
 
 const madeOf = [
   {
@@ -36,6 +42,19 @@ const madeOf = [
 export default function ProductPage() {
   return (
     <div className="bg-paper pb-24 text-ink lg:pb-0">
+      <JsonLd
+        id="product-jsonld"
+        data={productSchema()}
+      />
+      <JsonLd
+        data={[
+          faqSchema(),
+          breadcrumbSchema([
+            { name: "Начало", path: "/" },
+            { name: "Карти", path: "/karti" },
+          ]),
+        ]}
+      />
       <ProductShowcase />
 
       <section className="px-5 py-16 md:px-8 md:py-24">

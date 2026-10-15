@@ -7,7 +7,19 @@ import { PhoneVideo } from "@/components/PhoneVideo";
 import { ProductBuyPanel } from "@/components/ProductBuyPanel";
 import { ProductGallery } from "@/components/ProductGallery";
 import { sectionIcons } from "@/components/Icons";
+import { JsonLd } from "@/components/JsonLd";
 import { about, product, sections, site, siteImages } from "@/lib/content";
+import { faqSchema, pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
+  title: "Справяне с тревожността | Росица Неделчева",
+  description:
+    "Терапевтични карти „Справяне с тревожността“ — инструмент за самопомощ, самоосъзнаване и вътрешна устойчивост.",
+  path: "/",
+  image: "/images/site/rosi-hero.webp",
+  imageAlt: "Росица Неделчева с терапевтичните карти",
+  absoluteTitle: true,
+});
 
 const heroFacts = [
   { lead: "100", text: "карти в 6 раздела" },
@@ -56,6 +68,7 @@ function CardFan() {
 export default function HomePage() {
   return (
     <>
+      <JsonLd data={faqSchema()} />
       <section className="bg-card-gold pt-16 text-ink md:pt-[4.25rem]">
         <div className="grid lg:min-h-[calc(100svh-4.25rem)] lg:grid-cols-2">
           <div className="order-2 flex flex-col justify-center px-5 pb-10 pt-1 sm:px-12 sm:py-14 lg:order-1 lg:px-16 lg:py-16 xl:px-20">
@@ -111,8 +124,12 @@ export default function HomePage() {
                 alt="Росица Неделчева с терапевтичните карти"
                 fill
                 priority
-                className="animate-reveal object-cover object-center [-webkit-mask-image:linear-gradient(to_bottom,#000_52%,transparent)] [mask-image:linear-gradient(to_bottom,#000_52%,transparent)] lg:[-webkit-mask-image:none] lg:[mask-image:none]"
+                className="object-cover object-center"
                 sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-card-gold lg:hidden"
               />
             </div>
           </div>

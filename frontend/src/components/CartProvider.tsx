@@ -48,7 +48,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as CartItem[];
-        if (Array.isArray(parsed)) setItems(parsed);
+        if (Array.isArray(parsed)) {
+          setItems(parsed.map((item) => ({ ...item, image: product.imagePackage })));
+        }
       }
     } catch {
       /* ignore a broken cart */
@@ -67,7 +69,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: item.quantity + quantity, image: product.imagePackage }
             : item,
         );
       }
@@ -77,7 +79,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           title: product.title,
           price: product.price,
           quantity,
-          image: product.imageBox,
+          image: product.imagePackage,
         },
       ];
     });

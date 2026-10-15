@@ -81,24 +81,36 @@ export function ProductReviews({ productId = 1 }: { productId?: number }) {
       .then((next) => {
         setSummary(next);
         if (next.count > 0) {
-          const scriptId = "product-review-schema";
-          document.getElementById(scriptId)?.remove();
-          const script = document.createElement("script");
-          script.id = scriptId;
-          script.type = "application/ld+json";
-          script.text = JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Product",
-            name: "Справяне с тревожността",
-            aggregateRating: {
+          const node = document.getElementById("product-jsonld");
+          if (!node?.textContent) return;
+          try {
+            const data = JSON.parse(node.textContent) as {
+              aggregateRating?: unknown;
+              review?: unknown;
+            };
+            data.aggregateRating = {
               "@type": "AggregateRating",
               ratingValue: next.average,
               reviewCount: next.count,
               bestRating: 5,
               worstRating: 1,
-            },
-          });
-          document.head.appendChild(script);
+            };
+            data.review = next.reviews.slice(0, 5).map((review) => ({
+              "@type": "Review",
+              author: { "@type": "Person", name: review.authorName },
+              datePublished: review.createdAt.slice(0, 10),
+              reviewBody: review.body,
+              reviewRating: {
+                "@type": "Rating",
+                ratingValue: review.rating,
+                bestRating: 5,
+                worstRating: 1,
+              },
+            }));
+            node.textContent = JSON.stringify(data);
+          } catch {
+            /* The static product schema stays in the page. */
+          }
         }
       })
       .catch(() => setSummary(null));

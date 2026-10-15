@@ -1,14 +1,13 @@
-import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/lib/content";
 import { publicPath } from "@/lib/public-path";
 
-const logo = publicPath("/images/site/logo-rn.png");
+const logo = publicPath("/images/site/logo-rn.webp");
 
 export function Monogram({ className = "h-12 w-12" }: { className?: string }) {
   return (
     <span className={`relative inline-block shrink-0 ${className}`} aria-hidden>
-      <Image src={logo} alt="" fill className="object-contain" sizes="96px" />
+      <img src={logo} alt="" width={320} height={293} className="h-full w-full object-contain" decoding="async" />
     </span>
   );
 }

@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { ContactForm } from "@/components/ContactForm";
+import { JsonLd } from "@/components/JsonLd";
 import { site, siteImages, socials } from "@/lib/content";
+import { breadcrumbSchema, contactPageSchema, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Контакти",
   description:
     "Свържете се с Росица Неделчева — телефон, имейл, Instagram и Facebook, или оставете запитване за картите и терапията.",
-};
+  path: "/kontakti",
+  image: "/images/site/rosi-desk.webp",
+  imageAlt: "Росица Неделчева",
+});
 
 function SocialIcon({ id }: { id: string }) {
   if (id === "instagram") {
@@ -72,6 +77,15 @@ const channels = [
 export default function ContactPage() {
   return (
     <div className="bg-paper pt-20">
+      <JsonLd
+        data={[
+          contactPageSchema(),
+          breadcrumbSchema([
+            { name: "Начало", path: "/" },
+            { name: "Контакти", path: "/kontakti" },
+          ]),
+        ]}
+      />
       <section className="px-5 py-14 md:px-8 md:py-20">
         <div className="mx-auto max-w-6xl">
           <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-mute">Контакти</p>

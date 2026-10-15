@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import { KitAudio } from "@/components/KitAudio";
 import { product, site } from "@/lib/content";
+import { privateMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Аудио",
-  description: `Аудио към комплекта „${product.title}“.`,
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = privateMetadata("Аудио", `Аудио към комплекта „${product.title}“.`);
 
 const notes = [
   { lead: "01", text: "Намери тихо място и слушай записа докрай." },

@@ -12,6 +12,7 @@ import { seller, site } from "@/lib/content";
 export const metadata = legalMetadata(
   "Политика за поверителност",
   "Как „ЕР ТЕРАПИ“ ЕООД обработва личните данни при поръчка, профил, запитване и посещение на сайта.",
+  "/poveritelnost",
 );
 
 const toc = [

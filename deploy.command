@@ -82,7 +82,7 @@ echo "Строя интерфейса..."
   if [[ ! -d node_modules || package-lock.json -nt node_modules ]]; then
     npm ci
   fi
-  STATIC_EXPORT=true NEXT_PUBLIC_API_URL= NEXT_PUBLIC_DEMO= npx next build --webpack
+  STATIC_EXPORT=true NEXT_PUBLIC_API_URL= NEXT_PUBLIC_DEMO= NEXT_PUBLIC_GTM_ID=GTM-WZT3CPTV NEXT_PUBLIC_TAGS_IN_GTM=true npx next build --webpack
 )
 
 echo "Строя API-то..."

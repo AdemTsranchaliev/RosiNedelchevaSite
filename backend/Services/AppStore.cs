@@ -854,6 +854,58 @@ public class AppStore
             data.Reviews.Count);
     }
 
+    private static readonly Dictionary<string, string> LegacyImages = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["/images/product-box.jpg"] = "/images/product-box.webp",
+        ["/images/cards-overview.jpg"] = "/images/cards-sections-1200.webp",
+        ["/images/cards/section-1-card-1.jpg"] = "/images/cards/section-1-card-1.webp",
+        ["/images/cards/section-2-card-1.jpg"] = "/images/cards/section-2-card-1.webp",
+        ["/images/cards/section-4-card-1.jpg"] = "/images/cards/section-4-card-1.webp",
+        ["/images/site/rosi-hero.jpg"] = "/images/site/rosi-hero-1200.webp",
+        ["/images/site/rosi-portrait.jpg"] = "/images/site/rosi-about-1200.webp",
+        ["/images/site/rosi-portrait-2.jpg"] = "/images/site/rosi-smile-1200.webp",
+        ["/images/site/rosi-wide.jpg"] = "/images/site/rosi-desk-1600.webp",
+    };
+
+    private static string MapLegacyImage(string path) =>
+        LegacyImages.TryGetValue(path, out var mapped) ? mapped : path;
+
+    private static bool RepairLegacyImages(AppDbContext db)
+    {
+        var changed = false;
+
+        foreach (var product in db.Products.ToList())
+        {
+            var images = (product.Images ?? []).Select(MapLegacyImage).ToList();
+            var imageUrl = string.IsNullOrWhiteSpace(product.ImageUrl) ? product.ImageUrl : MapLegacyImage(product.ImageUrl);
+            if (product.ImageUrl != imageUrl || product.Images is null || !images.SequenceEqual(product.Images))
+            {
+                product.Images = images;
+                product.ImageUrl = imageUrl;
+                changed = true;
+            }
+        }
+
+        foreach (var post in db.BlogPosts.ToList())
+        {
+            if (string.IsNullOrWhiteSpace(post.Image)) continue;
+            var image = MapLegacyImage(post.Image);
+            if (image == post.Image) continue;
+            post.Image = image;
+            changed = true;
+        }
+
+        foreach (var review in db.Reviews.ToList())
+        {
+            var images = (review.Images ?? []).Select(MapLegacyImage).ToList();
+            if (review.Images is not null && images.SequenceEqual(review.Images)) continue;
+            review.Images = images;
+            changed = true;
+        }
+
+        return changed;
+    }
+
     private void EnsureSeed(AppDbContext db)
     {
         var changed = false;
@@ -865,7 +917,7 @@ public class AppStore
                 Name = "Справяне с тревожността",
                 Description = "Терапевтични карти за самопомощ, самоосъзнаване и вътрешна устойчивост.",
                 Price = 79m,
-                ImageUrl = "/images/product-box.jpg",
+                ImageUrl = "/images/product-box.webp",
                 Images = [],
                 Highlights = [],
                 Specs = [],
@@ -903,7 +955,7 @@ public class AppStore
                     Excerpt = "Тревожността не е само „мислене твърде много“. Как се проявява в тялото, емоциите и поведението.",
                     Date = "2026-03-12",
                     ReadMinutes = 5,
-                    Image = "/images/site/rosi-wide.jpg",
+                    Image = "/images/site/rosi-desk-1600.webp",
                     ImageAlt = "Росица Неделчева до купчина книги в кабинета",
                     Body = "Тревожността е естествена човешка реакция. Понякога ни предпазва, а понякога започва да заема твърде много пространство в ежедневието.\n\nРазпознаването ѝ в мислите, емоциите, тялото и поведението е първата стъпка към по-грижовна и осъзната реакция.\n\nКартите „Справяне с тревожността“ са създадени именно като инструмент за това постепенно опознаване — без бързане и без „правилни“ отговори.",
                     IsPublished = true
@@ -916,7 +968,7 @@ public class AppStore
                     Excerpt = "Когато тревожността ни насочва към това, което не е наред, ресурсите ни връщат към опората.",
                     Date = "2026-02-20",
                     ReadMinutes = 4,
-                    Image = "/images/site/rosi-portrait-2.jpg",
+                    Image = "/images/site/rosi-smile-1200.webp",
                     ImageAlt = "Портрет на Росица Неделчева",
                     Body = "Ресурсите не означават, че трудността изчезва. Те ни помагат да преминаваме през нея с повече устойчивост и грижа към себе си.\n\nМогат да бъдат в тялото, във взаимоотношенията, в ежедневните навици и във вътрешните качества.\n\nПонякога малката стъпка — една карта, едно наблюдение, една пауза — е достатъчно начало.",
                     IsPublished = true
@@ -929,7 +981,7 @@ public class AppStore
                     Excerpt = "Самопомощта е ценна, но не замества терапията. Признаци, при които си струва да се обърнем към специалист.",
                     Date = "2026-01-18",
                     ReadMinutes = 6,
-                    Image = "/images/site/rosi-portrait.jpg",
+                    Image = "/images/site/rosi-about-1200.webp",
                     ImageAlt = "Росица Неделчева",
                     Body = "Инструментите за самопомощ могат да подкрепят осъзнатостта и ежедневната грижа, но не заместват психотерапия, медицинска консултация или психиатрично лечение.\n\nАко тревожността е постоянна, пречи на съня, работата или взаимоотношенията, или ако има панически атаки и силен дистрес — потърсете професионална подкрепа.\n\nГрижата за себе си включва и знанието кога да помолим за помощ.",
                     IsPublished = true
@@ -950,10 +1002,10 @@ public class AppStore
             product.Details = "Създадени са от практиката на Росица Неделчева. Помагат тревожността да се разбира постепенно.";
             product.Images =
             [
-                "/images/product-box.jpg",
-                "/images/cards-overview.jpg",
-                "/images/site/rosi-portrait.jpg",
-                "/images/site/rosi-wide.jpg"
+                "/images/product-box.webp",
+                "/images/cards-sections-1200.webp",
+                "/images/site/rosi-about-1200.webp",
+                "/images/site/rosi-desk-1600.webp"
             ];
             product.ImageUrl = product.Images[0];
             product.Highlights =
@@ -985,6 +1037,8 @@ public class AppStore
             EnsureReviewInvites(db, order);
             if (db.ReviewInvites.Count() != before) changed = true;
         }
+
+        if (RepairLegacyImages(db)) changed = true;
 
         Settings(db);
         if (changed || db.ChangeTracker.HasChanges())

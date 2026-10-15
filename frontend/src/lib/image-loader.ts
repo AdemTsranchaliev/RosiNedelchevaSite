@@ -1,3 +1,5 @@
+import { currentMediaPath } from "@/lib/public-path";
+
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 /** Photos that exist as 480, 960, 1200 and 1600 pixel files. */
@@ -16,7 +18,7 @@ const RESPONSIVE = new Set([
 ]);
 
 function logicalPath(src: string) {
-  const clean = src.split("?")[0];
+  const clean = currentMediaPath(src).split("?")[0];
   if (BASE && clean.startsWith(`${BASE}/`)) return clean.slice(BASE.length);
   return clean;
 }
@@ -37,5 +39,5 @@ export default function imageLoader({ src, width }: { src: string; width: number
   if (path.startsWith("/images/cards/") && path.endsWith(".webp") && width <= 480) {
     return `${BASE}${path.replace(/\.webp$/, "-480.webp")}`;
   }
-  return src.includes("?") ? src : `${src}?w=${width}`;
+  return `${BASE}${path}`;
 }

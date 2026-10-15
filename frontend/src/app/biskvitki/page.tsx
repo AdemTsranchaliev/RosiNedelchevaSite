@@ -11,6 +11,7 @@ import { cookieCategories } from "@/lib/cookies";
 export const metadata = legalMetadata(
   "Политика за бисквитки",
   "Какви бисквитки и записи използва сайтът на „ЕР ТЕРАПИ“ ЕООД и как се управляват.",
+  "/biskvitki",
 );
 
 const toc = [

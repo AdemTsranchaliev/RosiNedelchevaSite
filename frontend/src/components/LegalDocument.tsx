@@ -3,9 +3,10 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { CookieSettingsButton } from "@/components/CookieConsent";
 import { legalLinks, legalUpdated, seller, site } from "@/lib/content";
+import { pageMetadata } from "@/lib/seo";
 
-export function legalMetadata(title: string, description: string): Metadata {
-  return { title, description };
+export function legalMetadata(title: string, description: string, path: string): Metadata {
+  return pageMetadata({ title, description, path, noIndex: true });
 }
 
 export function LegalDocument({

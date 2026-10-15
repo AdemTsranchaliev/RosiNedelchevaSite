@@ -1,16 +1,39 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { publicPath } from "@/lib/public-path";
+
+const videoSrc = publicPath("/videos/kak-se-polzvat.mp4");
+const posterSrc = publicPath("/videos/kak-se-polzvat.jpg");
 
 export function PhoneVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
   const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const node = frameRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setNear(true);
+        observer.disconnect();
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   async function play() {
     const video = videoRef.current;
     if (!video) return;
+    if (!video.getAttribute("src")) {
+      video.src = videoSrc;
+    }
     video.muted = false;
     try {
       await video.play();
@@ -49,14 +72,13 @@ export function PhoneVideo() {
         </div>
 
         <div className="relative order-1 mx-auto w-full max-w-[20rem] md:order-2">
-          <div className="relative aspect-[9/16] overflow-hidden bg-ink/40">
+          <div ref={frameRef} className="relative aspect-[9/16] overflow-hidden bg-ink/40">
             <video
               ref={videoRef}
               className="h-full w-full object-cover"
-              src={publicPath("/videos/kak-se-polzvat.mp4")}
-              poster={publicPath("/videos/kak-se-polzvat.jpg")}
+              poster={near ? posterSrc : undefined}
               playsInline
-              preload="metadata"
+              preload="none"
               aria-label="Росица Неделчева"
               onEnded={() => setPlaying(false)}
               onPause={() => setPlaying(false)}

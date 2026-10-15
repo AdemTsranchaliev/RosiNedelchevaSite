@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
 import { about, site, siteImages } from "@/lib/content";
+import { aboutPageSchema, breadcrumbSchema, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "За мен",
   description:
     "Росица Неделчева — психолог и психотерапевт. Индивидуални сесии, групова терапия, лекции и ритрийти.",
-};
+  path: "/za-men",
+  image: "/images/site/rosi-about.webp",
+  imageAlt: "Росица Неделчева",
+});
 
 export default function AboutPage() {
   return (
     <div className="bg-paper pt-20">
+      <JsonLd
+        data={[
+          aboutPageSchema(),
+          breadcrumbSchema([
+            { name: "Начало", path: "/" },
+            { name: "За мен", path: "/za-men" },
+          ]),
+        ]}
+      />
       <section className="px-5 py-16 md:px-8 md:py-24">
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
           <div className="relative aspect-[3/4] overflow-hidden bg-paper-2">

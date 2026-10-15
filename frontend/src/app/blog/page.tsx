@@ -1,18 +1,31 @@
 import type { Metadata } from "next";
 import { BlogCard } from "@/components/BlogCard";
+import { JsonLd } from "@/components/JsonLd";
 import { blogPosts } from "@/lib/content";
+import { blogSchema, breadcrumbSchema, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Блог",
-  description:
-    "Статии за тревожност, самопомощ и психотерапия от Росица Неделчева.",
-};
+  description: "Статии за тревожност, самопомощ и психотерапия от Росица Неделчева.",
+  path: "/blog",
+  image: blogPosts[0]?.image,
+  imageAlt: blogPosts[0]?.imageAlt,
+});
 
 export default function BlogPage() {
   const [featured, ...rest] = blogPosts;
 
   return (
     <div className="bg-paper pt-20">
+      <JsonLd
+        data={[
+          blogSchema(),
+          breadcrumbSchema([
+            { name: "Начало", path: "/" },
+            { name: "Блог", path: "/blog" },
+          ]),
+        ]}
+      />
       <section className="px-5 py-16 md:px-8 md:py-24">
         <div className="mx-auto max-w-6xl">
           <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-accent">Блог</p>

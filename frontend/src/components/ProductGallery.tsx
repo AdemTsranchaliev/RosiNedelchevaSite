@@ -123,7 +123,6 @@ export function ProductGallery() {
                   src={image.src}
                   alt={index === active ? image.alt : ""}
                   fill
-                  priority={index === 0}
                   draggable={false}
                   className={`pointer-events-none ${image.fit}`}
                   sizes="(max-width: 1024px) 92vw, 46vw"

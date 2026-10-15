@@ -13,6 +13,7 @@ import { seller } from "@/lib/content";
 export const metadata = legalMetadata(
   "Доставка и връщане",
   "Доставка с Еконт в България и условия за отказ и връщане на терапевтичните карти.",
+  "/dostavka",
 );
 
 const toc = [

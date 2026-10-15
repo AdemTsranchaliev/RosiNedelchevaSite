@@ -12,6 +12,7 @@ import { product, seller } from "@/lib/content";
 export const metadata = legalMetadata(
   "Общи условия",
   "Общи условия за ползване на сайта и за покупка на терапевтичните карти от „ЕР ТЕРАПИ“ ЕООД.",
+  "/obshti-uslovia",
 );
 
 const toc = [

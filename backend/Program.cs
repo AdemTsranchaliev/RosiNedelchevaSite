@@ -1,8 +1,11 @@
+using System.IO.Compression;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +13,15 @@ using RosiNedelcheva.Api.Data;
 using RosiNedelcheva.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+builder.Services.Configure<BrotliCompressionProviderOptions>(options => options.Level = CompressionLevel.Fastest);
+builder.Services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.Fastest);
 
 builder.Services.AddControllers();
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
@@ -95,6 +107,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
+app.UseResponseCompression();
 app.UseCors("Frontend");
 app.Use(async (context, next) =>
 {
@@ -108,12 +121,13 @@ app.Use(async (context, next) =>
     await next();
 });
 app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = CacheStaticAsset });
 var uploads = SiteStorage.UploadsFolder(app.Environment);
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploads),
-    RequestPath = "/uploads"
+    RequestPath = "/uploads",
+    OnPrepareResponse = CacheStaticAsset
 });
 app.UseAuthentication();
 if (app.Environment.IsDevelopment())
@@ -205,6 +219,34 @@ app.MapFallback(async context =>
 });
 
 app.Run();
+
+static void CacheStaticAsset(StaticFileResponseContext context)
+{
+    var path = context.Context.Request.Path.Value ?? "";
+    var headers = context.Context.Response.GetTypedHeaders();
+    var extension = Path.GetExtension(path);
+    if (extension.Equals(".html", StringComparison.OrdinalIgnoreCase))
+    {
+        headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+        {
+            NoCache = true
+        };
+        return;
+    }
+
+    var hashed = path.Contains("/_next/static/", StringComparison.Ordinal);
+    var cache = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+    {
+        Public = true,
+        MaxAge = hashed ? TimeSpan.FromDays(365) : TimeSpan.FromDays(30)
+    };
+    if (hashed)
+    {
+        cache.Extensions.Add(new Microsoft.Net.Http.Headers.NameValueHeaderValue("immutable"));
+    }
+
+    headers.CacheControl = cache;
+}
 
 static string? PageIndex(HttpRequest request, IWebHostEnvironment environment)
 {

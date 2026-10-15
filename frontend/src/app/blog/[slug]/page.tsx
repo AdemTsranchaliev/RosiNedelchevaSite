@@ -3,7 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatBlogDate } from "@/components/BlogCard";
+import { JsonLd } from "@/components/JsonLd";
 import { blogPosts, type BlogPost } from "@/lib/content";
+import { articleSchema, breadcrumbSchema, pageMetadata } from "@/lib/seo";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -17,11 +19,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = blogPosts.find((item) => item.slug === slug);
   if (!post) return { title: "Статия" };
-  return {
+  return pageMetadata({
     title: post.title,
     description: post.excerpt,
-    openGraph: { images: [{ url: post.image, alt: post.imageAlt }] },
-  };
+    path: `/blog/${post.slug}`,
+    image: post.image,
+    imageAlt: post.imageAlt,
+    type: "article",
+    publishedTime: post.date,
+  });
 }
 
 export default async function BlogPostPage({ params }: Props) {
@@ -35,6 +41,16 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <div className="bg-paper pt-20">
+      <JsonLd
+        data={[
+          articleSchema(post),
+          breadcrumbSchema([
+            { name: "Начало", path: "/" },
+            { name: "Блог", path: "/blog" },
+            { name: post.title, path: `/blog/${post.slug}` },
+          ]),
+        ]}
+      />
       <article className="px-5 py-16 md:px-8 md:py-20">
         <div className="mx-auto max-w-5xl">
           <Link
@@ -46,7 +62,9 @@ export default async function BlogPostPage({ params }: Props) {
 
           <header className="mt-10 max-w-2xl">
             <p className="text-[11px] uppercase tracking-[0.16em] text-mute">
-              {formatBlogDate(post.date)} · {post.readMinutes} мин четене
+              <time dateTime={post.date}>{formatBlogDate(post.date)}</time>
+              {" · "}
+              {post.readMinutes} мин четене
             </p>
             <h1 className="mt-4 font-display text-4xl leading-[1.05] tracking-tight md:text-5xl">
               {post.title}
