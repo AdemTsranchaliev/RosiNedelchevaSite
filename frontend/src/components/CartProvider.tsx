@@ -49,7 +49,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (raw) {
         const parsed = JSON.parse(raw) as CartItem[];
         if (Array.isArray(parsed)) {
-          setItems(parsed.map((item) => ({ ...item, image: product.imagePackage })));
+          setItems(
+            parsed.map((item) => ({
+              ...item,
+              image: product.imagePackage,
+              price: item.id === product.id ? product.price : item.price,
+            })),
+          );
         }
       }
     } catch {
@@ -69,7 +75,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity, image: product.imagePackage }
+            ? { ...item, quantity: item.quantity + quantity, image: product.imagePackage, price: product.price }
             : item,
         );
       }

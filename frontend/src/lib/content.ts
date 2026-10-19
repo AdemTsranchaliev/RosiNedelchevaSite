@@ -53,7 +53,7 @@ export const product = {
   subtitle: "Инструмент за самопомощ, самоосъзнаване и вътрешна устойчивост",
   short:
     "Терапевтични карти за хора с тревожност и за специалисти, които работят с темата.",
-  price: 79,
+  price: 39.99,
   currency: "€",
   compareAtPrice: null as number | null,
   priceNote: "Вкл. ДДС · Доставка в България",

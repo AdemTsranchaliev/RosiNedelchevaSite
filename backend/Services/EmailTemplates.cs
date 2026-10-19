@@ -174,10 +174,10 @@ public class EmailTemplates
         City = "София",
         Address = "ул. Оборище 12",
         Note = "Моля, обадете се преди доставка.",
-        Total = 71.10m,
+        Total = 35.99m,
         PromoCode = "GRIZHA10",
         DiscountPercent = 10,
-        Items = [new OrderLine { Title = "Справяне с тревожността", Price = 79m, Quantity = 1 }],
+        Items = [new OrderLine { Title = "Справяне с тревожността", Price = 39.99m, Quantity = 1 }],
         History = [new OrderEvent { Status = "returned", Note = "Клиентът не е намерил пратката на адреса." }]
     };
 

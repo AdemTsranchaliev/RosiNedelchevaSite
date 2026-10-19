@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatPrice, product as shopProduct } from "@/lib/content";
 import { api } from "@/lib/session";
 
 export type Promotion = {
@@ -682,7 +683,7 @@ export function Codes({ items, onChange }: { items: PromoCode[]; onChange: () =>
   const live = ordered.filter((item) => codePhase(item) === "live");
 
   if (draft) {
-    const price = 79;
+    const price = shopProduct.price;
     const next = Math.round(price * (100 - draft.percent)) / 100;
     const left = Math.max(0, draft.maxUses - draft.used);
     return (
@@ -724,7 +725,7 @@ export function Codes({ items, onChange }: { items: PromoCode[]; onChange: () =>
           <div className="grid gap-2 sm:grid-cols-2">
             <p className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
               <CodeIcon name="percent" className="h-4 w-4 text-[#1f6f73]" />
-              79,00 € → <span className="font-medium text-slate-950">{next.toFixed(2).replace(".", ",")} €</span>
+              {formatPrice(price)} → <span className="font-medium text-slate-950">{formatPrice(next)}</span>
             </p>
             <p className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
               <CodeIcon name="users" className="h-4 w-4 text-[#1f6f73]" />

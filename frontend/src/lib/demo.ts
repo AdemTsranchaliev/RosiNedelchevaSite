@@ -48,38 +48,7 @@ function iso(daysAgo: number, hours = 0) {
   return new Date(now - daysAgo * day - hours * 60 * 60 * 1000).toISOString();
 }
 
-const names = ["Мария Иванова", "Елена Петрова", "Никол Георгиева", "Ива Стоянова", "Теодора Димитрова", "Анна Колева"];
-const cities = ["София", "Пловдив", "Варна", "Бургас", "Стара Загора"];
-const statuses = ["completed", "completed", "shipped", "confirmed", "new", "cancelled"];
-
-const orders: Order[] = Array.from({ length: 22 }, (_, index) => {
-  const status = statuses[index % statuses.length];
-  const quantity = index % 5 === 0 ? 2 : 1;
-  const createdAt = iso(index % 28, index);
-  return {
-    id: index + 1,
-    number: `RN-DEMO-${1000 + index}`,
-    customerName: names[index % names.length],
-    phone: "0891234567",
-    email: `klient${index + 1}@example.com`,
-    city: cities[index % cities.length],
-    address: "ул. Примерна 12",
-    note: "",
-    paymentMethod: index % 2 === 0 ? "card" : "cod",
-    deliveryType: "address",
-    officeCode: null,
-    officeName: null,
-    total: status === "cancelled" ? 79 * quantity : 71.1 * quantity,
-    discountPercent: status === "cancelled" ? 0 : 10,
-    promoCode: index % 3 === 0 ? "GRIZHA10" : null,
-    status,
-    trackingCode: status === "shipped" || status === "completed" ? `EC1000${index}BG` : null,
-    labelUrl: null,
-    createdAt,
-    items: [{ productId: 1, title: "Справяне с тревожността", price: 79, quantity }],
-    history: [{ status, note: "", at: createdAt }],
-  };
-});
+const orders: Order[] = [];
 
 const products = [
   {
@@ -88,7 +57,7 @@ const products = [
     subtitle: "Инструмент за самопомощ, самоосъзнаване и вътрешна устойчивост",
     description: "Терапевтични карти за самопомощ, самоосъзнаване и вътрешна устойчивост.",
     details: "Създадени са от практиката на Росица Неделчева. Помагат тревожността да се разбира постепенно.",
-    price: 79,
+    price: 39.99,
     imageUrl: publicPath("/images/site/rosi-hero.webp"),
     images: [publicPath("/images/site/rosi-hero.webp"), publicPath("/images/site/rosi-cards-desk.webp"), publicPath("/images/site/rosi-cards-detail.webp"), publicPath("/images/cards-fan.webp")],
     videoUrl: null,
@@ -104,50 +73,7 @@ const products = [
   },
 ];
 
-const reviews: Review[] = [
-  {
-    id: 1,
-    productId: 1,
-    orderId: 1,
-    orderNumber: "RN-DEMO-1000",
-    email: "klient1@example.com",
-    authorName: "Мария",
-    city: "София",
-    rating: 5,
-    body: "Ползвам ги вечер, когато мислите се завъртят. Въпросите са тихи и конкретни.",
-    images: [publicPath("/images/cards/section-1-card-1.webp"), publicPath("/images/cards-sections.webp")],
-    status: "published",
-    createdAt: iso(6),
-  },
-  {
-    id: 2,
-    productId: 1,
-    orderId: 2,
-    orderNumber: "RN-DEMO-1001",
-    email: "klient2@example.com",
-    authorName: "Елена",
-    city: "Пловдив",
-    rating: 5,
-    body: "Взех ги и за кабинета. Клиентите се задържат по-лесно върху една карта, вместо върху целия разговор.",
-    images: [publicPath("/images/cards/section-2-card-1.webp")],
-    status: "published",
-    createdAt: iso(11),
-  },
-  {
-    id: 3,
-    productId: 1,
-    orderId: 7,
-    orderNumber: "RN-DEMO-1006",
-    email: "klient7@example.com",
-    authorName: "Никол",
-    city: "Варна",
-    rating: 4,
-    body: "Хареса ми, че няма правилен отговор. Чакам одобрение на още едно ревю със снимка.",
-    images: [publicPath("/images/site/rosi-hero.webp")],
-    status: "pending",
-    createdAt: iso(2),
-  },
-];
+const reviews: Review[] = [];
 
 const store = {
   orders,
@@ -155,8 +81,6 @@ const store = {
   reviews,
   users: [
     { id: 1, name: "Росица Неделчева", email: "admin@ertherapybg.com", role: "Admin", createdAt: iso(40) },
-    { id: 2, name: "Мария Иванова", email: "maria@example.com", role: "Customer", createdAt: iso(18) },
-    { id: 3, name: "Елена Петрова", email: "elena@example.com", role: "Customer", createdAt: iso(9) },
   ],
   blog: [
     {
@@ -184,38 +108,20 @@ const store = {
       isPublished: true,
     },
   ],
-  promotions: [
-    {
-      id: 1,
-      name: "Есенна грижа",
-      description: "10% от комплекта за две седмици.",
-      percent: 10,
-      productIds: [] as number[],
-      startsAt: iso(-3),
-      endsAt: iso(-11),
-      isActive: true,
-    },
-  ],
-  codes: [
-    { id: 1, code: "GRIZHA10", percent: 10, used: 8, maxUses: 50, expiresAt: iso(-60), isActive: true },
-    { id: 2, code: "PRAKTIKA15", percent: 15, used: 3, maxUses: 20, expiresAt: iso(-30), isActive: true },
-  ],
-  banner: { text: "Есенна грижа — 10% от комплекта до края на седмицата", href: "/karti", isActive: true },
-  subscribers: ["maria@example.com", "elena@example.com", "nikol@example.com", "iva@example.com", "anna@example.com"].map((email, index) => ({
-    id: index + 1,
-    email,
-    createdAt: iso(index * 3),
-  })),
-  campaigns: [
-    {
-      id: 1,
-      subject: "Нов комплект карти",
-      body: "Здравейте,\n\nкомплектът „Справяне с тревожността“ вече е наличен.",
-      recipients: 5,
-      status: "sent",
-      createdAt: iso(12),
-    },
-  ],
+  promotions: [] as {
+    id: number;
+    name: string;
+    description: string;
+    percent: number;
+    productIds: number[];
+    startsAt: string;
+    endsAt: string;
+    isActive: boolean;
+  }[],
+  codes: [] as { id: number; code: string; percent: number; used: number; maxUses: number; expiresAt: string; isActive: boolean }[],
+  banner: { text: "", href: "/karti", isActive: false },
+  subscribers: [] as { id: number; email: string; createdAt: string }[],
+  campaigns: [] as { id: number; subject: string; body: string; recipients: number; status: string; createdAt: string }[],
   courier: {
     useDemo: true,
     username: "",
@@ -477,7 +383,7 @@ export async function demoCall(path: string, init: RequestInit = {}): Promise<un
   if (route === "/api/reviews" && method === "GET") return publishedReviews(Number(url.searchParams.get("productId") ?? 1));
   const inviteMatch = route.match(/^\/api\/reviews\/invite\/(.+)$/);
   if (inviteMatch) {
-    return { productName: "Справяне с тревожността", authorName: "Мария", city: "София", used: false };
+    return { productName: "Справяне с тревожността", authorName: "", city: "", used: false };
   }
   if (route === "/api/reviews" && method === "POST") {
     const form = init.body instanceof FormData ? init.body : null;
@@ -491,8 +397,8 @@ export async function demoCall(path: string, init: RequestInit = {}): Promise<un
       id: nextId(store.reviews),
       productId: 1,
       orderId: 0,
-      orderNumber: "RN-DEMO",
-      email: "klient@example.com",
+      orderNumber: "",
+      email: "",
       authorName: String(form?.get("authorName") ?? body.authorName ?? "Клиент"),
       city: "София",
       rating: Number(form?.get("rating") ?? body.rating ?? 5),

@@ -916,7 +916,7 @@ public class AppStore
                 Id = 1,
                 Name = "Справяне с тревожността",
                 Description = "Терапевтични карти за самопомощ, самоосъзнаване и вътрешна устойчивост.",
-                Price = 79m,
+                Price = 39.99m,
                 ImageUrl = "/images/product-box.webp",
                 Images = [],
                 Highlights = [],
@@ -925,6 +925,13 @@ public class AppStore
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             });
+            changed = true;
+        }
+
+        var cards = db.Products.FirstOrDefault(product => product.Id == 1);
+        if (cards is not null && cards.Price == 79m)
+        {
+            cards.Price = 39.99m;
             changed = true;
         }
 
@@ -1025,12 +1032,6 @@ public class AppStore
             changed = true;
         }
 
-        if (!db.Orders.Any())
-        {
-            SeedDemo(db);
-            changed = true;
-        }
-
         foreach (var order in db.Orders.Where(item => item.Status == "completed").ToList())
         {
             var before = db.ReviewInvites.Count();
@@ -1045,84 +1046,6 @@ public class AppStore
         {
             db.SaveChanges();
         }
-    }
-
-    private void SeedDemo(AppDbContext db)
-    {
-        var names = new[] { "Мария Иванова", "Елена Петрова", "Никол Георгиева", "Ива Стоянова", "Теодора Димитрова", "Анна Колева" };
-        var cities = new[] { "София", "Пловдив", "Варна", "Бургас", "Стара Загора" };
-        var statuses = new[] { "completed", "completed", "shipped", "confirmed", "new", "cancelled" };
-        var now = DateTime.UtcNow;
-        for (var index = 0; index < 22; index++)
-        {
-            var status = statuses[index % statuses.Length];
-            var quantity = index % 5 == 0 ? 2 : 1;
-            db.Orders.Add(new ShopOrder
-            {
-                Id = index + 1,
-                Number = $"RN-DEMO-{1000 + index}",
-                CustomerName = names[index % names.Length],
-                Phone = "0891234567",
-                Email = $"klient{index + 1}@example.com",
-                City = cities[index % cities.Length],
-                Address = "ул. Примерна 12",
-                Total = status == "cancelled" ? 79m * quantity : 71.10m * quantity,
-                DiscountPercent = status == "cancelled" ? 0 : 10,
-                PromoCode = index % 3 == 0 ? "GRIZHA10" : null,
-                Status = status,
-                CreatedAt = now.AddDays(-(index % 28)).AddHours(-index),
-                Items = [new OrderLine { ProductId = 1, Title = "Справяне с тревожността", Price = 79m, Quantity = quantity }],
-                History = []
-            });
-        }
-
-        db.Messages.AddRange(
-        [
-            new ContactMessage { Id = 1, Name = "Мария Иванова", Email = "maria@example.com", Topic = "Картите", Message = "Подходящи ли са за работа в група?", IsRead = false, CreatedAt = now.AddDays(-2) },
-            new ContactMessage { Id = 2, Name = "Петър Николов", Email = "petar@example.com", Topic = "Сесия", Message = "Имате ли свободен час онлайн следващата седмица?", IsRead = true, CreatedAt = now.AddDays(-6) }
-        ]);
-
-        db.Promotions.Add(new Promotion
-        {
-            Id = 1,
-            Name = "Есенна грижа",
-            Description = "10% от комплекта за две седмици.",
-            Percent = 10,
-            StartsAt = now.AddDays(-3),
-            EndsAt = now.AddDays(11),
-            IsActive = true,
-            ProductIds = []
-        });
-        db.PromoCodes.AddRange(
-        [
-            new PromoCode { Id = 1, Code = "GRIZHA10", Percent = 10, Used = 8, MaxUses = 50, ExpiresAt = now.AddMonths(2), IsActive = true },
-            new PromoCode { Id = 2, Code = "PRAKTIKA15", Percent = 15, Used = 3, MaxUses = 20, ExpiresAt = now.AddMonths(1), IsActive = true }
-        ]);
-
-        var settings = Settings(db);
-        settings.BannerText = "Есенна грижа — 10% от комплекта до края на седмицата";
-        settings.BannerHref = "/karti";
-        settings.BannerActive = true;
-
-        foreach (var email in new[] { "maria@example.com", "elena@example.com", "nikol@example.com", "iva@example.com", "anna@example.com" })
-        {
-            db.Subscribers.Add(new Subscriber
-            {
-                Id = NextId(db.Subscribers, item => item.Id),
-                Email = email,
-                CreatedAt = now.AddDays(-db.Subscribers.Local.Count * 3)
-            });
-        }
-
-        db.Campaigns.Add(new EmailCampaign
-        {
-            Id = 1,
-            Subject = "Нов комплект карти",
-            Body = "Здравейте,\n\nкомплектът „Справяне с тревожността“ вече е наличен.",
-            Recipients = 5,
-            Status = "sent",
-            CreatedAt = now.AddDays(-12)
-        });
     }
 
     private SiteSettings Settings(AppDbContext db)
